@@ -203,22 +203,52 @@ class Timestamp:
         elif isinstance(timestamp, str) and not Timestamp.verify(timestamp):
             raise ValueError(f'"{timestamp}" is not a valid timestamp')
         elif isinstance(timestamp, str):
-            timestamp_groups = match('^(([0-9]{1,2}):)?([0-9]{1,2}):([0-9]{1,2})(\.([0-9]{1,9}))?$', timestamp).groups()
-
-            timestamp = [timestamp_groups[i] for i in (1, 2, 3, 4)]
-            timestamp_clean = []
-            for ts in timestamp:
-                if ts is None:
-                    timestamp_clean.append(0)
-                else:
-                    timestamp_clean.append(float(ts))
-            self.hh = int(timestamp_clean[0]) if self._hh is None else self._hh
-            self.mm = int(timestamp_clean[1]) if self._mm is None else self._mm
-            self.ss = int(timestamp_clean[2]) if self._ss is None else self._ss
-            self.nn = int(timestamp_clean[3] * 1000000000) if self._nn is None else self._nn
-
+            self.splitting_timestamp(timestamp)
         elif isinstance(timestamp, int):
             self._hh = int(timestamp / 3600)
             self._mm = int(timestamp % 3600 / 60)
             self._ss = int(timestamp % 3600 % 60)
             self._nn = 0
+
+    def splitting_timestamp(self, timestamp):
+        """
+        The `splitting_timestamp` function splits a timestamp into its individual components and assigns them to instance variables.
+
+        Args:
+        self: The instance of the class.
+
+        Returns:
+        None
+
+        Raises:
+        None
+
+        Examples:
+        ```
+        timestamp = "12:34:56.789"
+        splitting_timestamp(self, timestamp)
+        print(self.hh)  # Output: 12
+        print(self.mm)  # Output: 34
+        print(self.ss)  # Output: 56
+        print(self.nn)  # Output: 789000000
+            Parameters
+            ----------
+            timestamp
+
+            Returns
+            -------
+        '''
+        """
+        timestamp_groups = match('^(([0-9]{1,2}):)?([0-9]{1,2}):([0-9]{1,2})(\.([0-9]{1,9}))?$', timestamp).groups()
+
+        timestamp = [timestamp_groups[i] for i in (1, 2, 3, 4)]
+        timestamp_clean = []
+        for ts in timestamp:
+            if ts is None:
+                timestamp_clean.append(0)
+            else:
+                timestamp_clean.append(float(ts))
+        self.hh = int(timestamp_clean[0]) if self._hh is None else self._hh
+        self.mm = int(timestamp_clean[1]) if self._mm is None else self._mm
+        self.ss = int(timestamp_clean[2]) if self._ss is None else self._ss
+        self.nn = int(timestamp_clean[3] * 1000000000) if self._nn is None else self._nn
