@@ -238,6 +238,17 @@ class MKVTrack:
 
     @language.setter
     def language(self, language):
+        """Sets the language of the MKVTrack.
+
+        Args:
+            language: The language to be set for the MKVTrack.
+
+        Returns:
+            None
+
+        Raises:
+            ValueError: If the provided language is not a valid ISO639-2 language code.
+        """
         if language is None or is_iso639_2(language):
             self._language = language
         else:
@@ -245,6 +256,16 @@ class MKVTrack:
 
     @property
     def pts(self):
+        """Returns the value of the `pts` property.
+        The Presentation Timestamp (PTS) in multimedia files indicates the exact time when a frame or audio sample
+        should be presented to the user, ensuring accurate synchronization between audio and video streams.
+
+        Args:
+            self: The instance of the class.
+
+        Returns:
+            The value of the `pts` property.
+        """
         return self._pts
 
     @property
@@ -257,6 +278,17 @@ class MKVTrack:
 
     @sync.setter
     def sync(self, sync):
+        """Sets the value of the `sync` property.
+
+        Args:
+            sync: The value to be set for the `sync` property.
+
+        Returns:
+            None
+
+        Raises:
+            None
+        """
         self._sync = sync
 
     @property
