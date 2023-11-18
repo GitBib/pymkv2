@@ -36,7 +36,7 @@ Combine two MKVs. This example takes two existing MKVs and combines their tracks
 """
 
 import json
-from os import devnull
+import logging
 from os.path import expanduser, isfile
 import subprocess as sp
 
@@ -288,12 +288,24 @@ class MKVFile:
             By default the mkvmerge output will be shown unless silent is True.
         """
         output_path = expanduser(output_path)
-        if silent:
-            sp.run(self.command(output_path, subprocess=True), stdout=open(devnull, 'wb'), check=True)
-        else:
-            command = self.command(output_path)
-            print('Running with command:\n"' + command + '"')
-            sp.run(self.command(output_path, subprocess=True), check=True, capture_output=True)
+        args = self.command(output_path, subprocess=True)
+
+        stdout = sp.DEVNULL if silent else None
+        stderr = sp.PIPE
+
+        proc = sp.Popen(args, stdout=stdout, stderr=stderr)
+        _, err = proc.communicate()
+
+        if proc.returncode:
+            error_message = f"Command failed with non-zero exit status {proc.returncode}"
+            if err:
+                error_details = err.decode()
+                error_message += f"\nError Output:\n{error_details}"
+                logging.error(error_details)
+            logging.error("Non-zero exit status when running %s (%s)", args, proc.returncode)
+            raise ValueError(error_message)
+
+        return proc.returncode
 
     def add_file(self, file):
         """Add an MKV file into the :class:`~pymkv.MKVFile` object.
@@ -323,7 +335,7 @@ class MKVFile:
             raise TypeError('track is not str or MKVFile')
         self.order_tracks_by_file_id()
 
-    def add_track(self, track, new_file: bool=True):
+    def add_track(self, track, new_file: bool = True):
         """Add a track to the :class:`~pymkv.MKVFile`.
 
         Parameters

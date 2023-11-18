@@ -1,5 +1,12 @@
 name: Docs
-on: [push, pull_request, workflow_dispatch]
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+  workflow_dispatch:
 permissions:
     contents: write
 jobs:
@@ -8,6 +15,8 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-python@v3
+        with:
+          python-version: '3.11'
       - name: Install dependencies
         run: |
           pip install -r docs/requirements.txt
