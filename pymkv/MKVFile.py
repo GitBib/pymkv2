@@ -286,6 +286,14 @@ class MKVFile:
             The path to be used as the output file in the mkvmerge command.
         silent : bool, optional
             By default the mkvmerge output will be shown unless silent is True.
+
+        Raises
+        ------
+        ValueError
+            Raised if the external mkvmerge command fails with a non-zero exit status.
+            This includes scenarios such as invalid command arguments, errors in
+            processing the :class:`~pymkv.MKVFile`, or issues with output file writing. The error
+            message provides details about the failure based on the output of the command.
         """
         output_path = expanduser(output_path)
         args = self.command(output_path, subprocess=True)
