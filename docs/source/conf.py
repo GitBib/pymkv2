@@ -18,11 +18,11 @@ sys.path.insert(0, os.path.abspath('../..'))
 # -- Project information -----------------------------------------------------
 
 project = 'pymkv'
-copyright = '2023, Sheldon Woodward & GitBib'
+copyright = '2024, Sheldon Woodward & GitBib'
 author = 'Sheldon Woodward & GitBib'
 
 # The full version, including alpha/beta/rc tags
-release = '2.0.0-beta'
+release = '2.0.1'
 
 
 # -- General configuration ---------------------------------------------------
