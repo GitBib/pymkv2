@@ -1,0 +1,45 @@
+[tool.poetry]
+name = "pymkv"
+version = "2.0.1"
+description = "A Python wrapper for mkvmerge. It provides support for muxing, splitting, linking, chapters, tags, and attachments through the use of mkvmerge."
+authors = [
+    "Sheldon Woodward <me@sheldonw.com>",
+    "GitBib"
+]
+license = "MIT"
+readme = "README.md"
+packages = [
+    { include = "pymkv" }
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Natural Language :: English",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Multimedia :: Video :: Conversion",
+    "Topic :: Utilities"
+]
+keywords = ["wrapper"]
+
+[tool.poetry.dependencies]
+python = ">=3.9,<4.0"
+bitmath = {git = "https://github.com/tbielawa/bitmath.git"}
+iso-639 = {git = "https://github.com/noumar/iso639.git"}
+bcp47 = {git = "https://github.com/highfestiva/bcp47.py.git"}
+
+[tool.poetry.dev-dependencies]
+Sphinx = "^7.3.7"
+sphinx-material = {git = "https://github.com/bashtage/sphinx-material.git"}
+
+[tool.poetry.urls]
+homepage = "https://github.com/GitBib/pymkv"
+
+[build-system]
+requires = ["poetry-core>=1.0.0", "setuptools", "wheel"]
+build-backend = "poetry.core.masonry.api"
