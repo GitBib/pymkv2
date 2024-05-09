@@ -41,5 +41,5 @@ sphinx-material = {git = "https://github.com/bashtage/sphinx-material.git"}
 homepage = "https://github.com/GitBib/pymkv"
 
 [build-system]
-requires = ["poetry-core>=1.0.0"]
+requires = ["poetry-core>=1.0.0", "setuptools", "wheel"]
 build-backend = "poetry.core.masonry.api"
