@@ -20,7 +20,7 @@ You can also clone the repo and run the following command in the project root to
     $ pip install -e .
 
 ## Documentation
-The documentation for pymkv can be found [here](https://gitbib.github.io/pymkv/) or in the project's docstrings.
+The documentation for pymkv can be found [here](https://gitbib.github.io/pymkv2/) or in the project's docstrings.
 
 ### Tests
 ~~After completing documentation for the existing features, unit tests need to be written to "lock in" the existing
