@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "pymkv"
+name = "pymkv2"
 version = "2.0.1"
 description = "A Python wrapper for mkvmerge. It provides support for muxing, splitting, linking, chapters, tags, and attachments through the use of mkvmerge."
 authors = [
@@ -38,7 +38,7 @@ Sphinx = "^7.3.7"
 sphinx-material = {git = "https://github.com/bashtage/sphinx-material.git"}
 
 [tool.poetry.urls]
-homepage = "https://github.com/GitBib/pymkv"
+homepage = "https://github.com/GitBib/pymkv2"
 
 [build-system]
 requires = ["poetry-core>=1.0.0", "setuptools", "wheel"]
