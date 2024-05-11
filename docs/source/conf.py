@@ -65,7 +65,7 @@ html_static_path = ["_static"]
 html_theme_options = {
 
     # Set the name of the project to appear in the navigation.
-    "nav_title": "PyMKV DOCS",
+    "nav_title": "PyMKV2 DOCS",
 
     # Set you GA account ID to enable tracking
     "google_analytics_account": "G-YMTSDQ0M8Z",
