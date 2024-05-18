@@ -1,25 +1,22 @@
-# sheldon woodward
-# 3/18/18
-
-"""ISO639-2 Three Character Language Codes"""
+from __future__ import annotations
 
 from iso639 import languages
 
 
-def is_iso639_2(language):
-    """The `is_iso639_2` function checks if a given language code is a valid ISO 639-2 language code.
+def is_iso639_2(language: str) -> bool:
+    """
+    Parameters
+    ----------
+    language : str
+        The language code to check for ISO 639-2 compatibility.
 
-    Args:
-        language: The language code to be checked.
-
-    Returns:
-        bool: True if the language code is a valid ISO 639-2 language code, False otherwise.
-
-    Raises:
-        None
+    Returns
+    -------
+    bool
+        True if the language code is valid according to ISO 639-2, False otherwise.
     """
     try:
         languages.get(part2b=language)
-        return True
+        return True  # noqa: TRY300
     except KeyError:
         return False
