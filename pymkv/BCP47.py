@@ -1,24 +1,21 @@
-# sheldon woodward
-# 10/21/20
-
-"""BCP47 language region code"""
-
 import bcp47
 
 
-def is_bcp47(language_ietf):
-    """The `is_bcp47` function checks if a given language tag is a valid BCP47 language tag.
-
-    Args:
-        language_ietf: The language tag to be checked.
-
-    Returns:
-        bool: True if the language tag is a valid BCP47 language tag, False otherwise.
-
-    Raises:
-        None
+def is_bcp47(language_ietf: str) -> bool:
     """
-    if language_ietf == "und":
-        return True
-    else:
+    Check if a given language tag is a valid BCP 47 language tag.
+
+    Parameters
+    ----------
+    language_ietf : str
+        The language tag to check.
+
+    Returns
+    -------
+    bool
+        True if the language tag is a valid BCP 47 language tag, False otherwise.
+    """
+    if language_ietf != "und":
         return language_ietf in bcp47.languages.values()
+    else:  # noqa: RET505
+        return True
