@@ -283,7 +283,10 @@ class Timestamp:
             self._nn = 0
 
     def splitting_timestamp(self, timestamp: str) -> None:
-        """
+        """This method splits the given timestamp string into hours, minutes, seconds, and nanoseconds. The timestamp
+        string should be in the format "HH:MM:SS.NNNNNNNNN", where HH represents hours,
+        MM represents minutes, SS represents seconds, and NNNNNNNNN represents nanoseconds.
+
         Parameters
         ----------
         timestamp : str
@@ -292,12 +295,6 @@ class Timestamp:
         Returns
         -------
         None
-
-        Description
-        -----------
-        This method splits the given timestamp string into hours, minutes, seconds, and nanoseconds. The timestamp
-        string should be in the format "HH:MM:SS.NNNNNNNNN", where HH represents hours,
-        MM represents minutes, SS represents seconds, and NNNNNNNNN represents nanoseconds.
 
         Example
         -------
