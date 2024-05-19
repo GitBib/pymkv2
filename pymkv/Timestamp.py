@@ -284,24 +284,29 @@ class Timestamp:
 
     def splitting_timestamp(self, timestamp: str) -> None:
         """
-        The `splitting_timestamp` function splits a timestamp into its individual
-        components and assigns them to instance variables.
-        Args:
-            timestamp: The timestamp string to be parsed and split into components.
-        Returns:
-            None
-        Examples:
-        ```
-        timestamp = "12:34:56.789"
-        splitting_timestamp(self, timestamp)
-        print(self.hh)  # Output: 12
-        print(self.mm)  # Output: 34
-        print(self.ss)  # Output: 56
-        print(self.nn)  # Output: 789000000
         Parameters
         ----------
-        timestamp
-        '''
+        timestamp : str
+            The timestamp string to be split.
+
+        Returns
+        -------
+        None
+
+        Description
+        -----------
+        This method splits the given timestamp string into hours, minutes, seconds, and nanoseconds. The timestamp
+        string should be in the format "HH:MM:SS.NNNNNNNNN", where HH represents hours,
+        MM represents minutes, SS represents seconds, and NNNNNNNNN represents nanoseconds.
+
+        Example
+        -------
+        >>> obj.splitting_timestamp("12:34:56.789012345")
+        # Assuming self._hh, self._mm, self._ss, and self._nn are all None initially
+        The hours (self.hh) will be set to 12.
+        The minutes (self.mm) will be set to 34.
+        The seconds (self.ss) will be set to 56.
+        The nanoseconds (self.nn) will be set to 789012345.
         """
         timestamp_groups = match(r"^(([0-9]{1,2}):)?([0-9]{1,2}):([0-9]{1,2})(\.([0-9]{1,9}))?$", timestamp).groups()
 
