@@ -108,8 +108,12 @@ class MKVFile:
 
         if file_path is not None:
             # add file title
-            file_path = str(Path(file_path).expanduser())
-            info_json = json.loads(sp.check_output([self.mkvmerge_path, "-J", file_path]).decode())  # noqa: S603
+            file_path = checking_file_path(file_path)
+            try:
+                info_json = json.loads(sp.check_output([self.mkvmerge_path, "-J", file_path]).decode())  # noqa: S603
+            except sp.CalledProcessError as e:
+                error_output = e.output.decode()
+                raise sp.CalledProcessError(e.returncode, e.cmd, output=error_output) from e
             if self.title is None and "title" in info_json["container"]["properties"]:
                 self.title = info_json["container"]["properties"]["title"]
 
