@@ -8,7 +8,7 @@ from .MKVAttachment import MKVAttachment
 from .MKVFile import MKVFile
 from .MKVTrack import MKVTrack
 from .Timestamp import Timestamp
-from .Verifications import verify_matroska, verify_mkvmerge, verify_recognized, verify_supported
+from .Verifications import checking_file_path, verify_matroska, verify_mkvmerge, verify_recognized, verify_supported
 
 # set the version number within the package using setuptools-scm
 try:
@@ -26,4 +26,5 @@ __all__ = (
     "verify_mkvmerge",
     "verify_recognized",
     "verify_supported",
+    "checking_file_path",
 )
