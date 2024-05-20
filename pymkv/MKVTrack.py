@@ -49,16 +49,59 @@ from pymkv.Verifications import verify_supported
 
 
 class MKVTrack:
-    """
-    str: The codec used by the track.
-
-    This property returns the codec used by the track. It is set when setting the track ID.
-
-    Returns:
-        The codec used by the track.
-
-    Raises:
-        None
+    """A class that represents a track for an :class:`~pymkv.MKVFile` object.
+    :class:`~pymkv.MKVTrack` objects are video, audio, or subtitles. Tracks can be standalone files or a single track
+    within an MKV file, both can be handled by pymkv. An :class:`~pymkv.MKVTrack` object can be added to an
+    :class:`~pymkv.MKVFile` and will be included when the MKV is muxed.
+    Parameters
+    ----------
+    file_path : str
+        Path to the track file. This can also be an MKV where the `track_id` is the track represented in the MKV.
+    track_id : int, optional
+        The id of the track to be used from the file. `track_id` only needs to be set when importing a track from
+        an MKV. In this case, you can specify `track_id` to indicate which track from the MKV should be used. If not
+        set, it will import the first track. Track 0 is imported by default because mkvmerge sees standalone
+        track files as having one track with track_id set as 0.
+    track_name : str, optional
+        The name that will be given to the track when muxed into a file.
+    language : str, optional
+        The language of the track. It must be an ISO639-2 language code.
+    language_ietf : str, optional
+        The language of the track. It must be a BCP47 language code. Has priority over 'language'.
+    default_track : bool, optional
+        Determines if the track should be the default track of its type when muxed into an MKV file.
+    forced_track : bool, optional
+        Determines if the track should be a forced track when muxed into an MKV file.
+    mkvmerge_path : str, optional
+        The path where pymkv looks for the mkvmerge executable. pymkv relies on the mkvmerge executable to parse
+        files. By default, it is assumed mkvmerge is in your shell's $PATH variable. If it is not, you need to set
+        *mkvmerge_path* to the executable location.
+    Attributes
+    ----------
+    mkvmerge_path : str
+        The path of the mkvmerge executable.
+    track_name : str
+        The name that will be given to the track when muxed into a file.
+    default_track : bool
+        Determines if the track should be the default track of its type when muxed into an MKV file.
+    forced_track : bool
+        Determines if the track should be a forced track when muxed into an MKV file.
+    no_chapters : bool
+        If chapters exist in the track file, don't include them when this :class:`~pymkv.MKVTrack` object is a track
+        in an :class:`~pymkv.MKVFile` mux operation. This option has no effect on standalone track files, only tracks
+        that are already part of an MKV file.
+    no_global_tags : bool
+        If global tags exist in the track file, don't include them when this :class:`~pymkv.MKVTrack` object is a track
+        in an :class:`~pymkv.MKVFile` mux operation. This option has no effect on standalone track files, only tracks
+        that are already part of an MKV file.
+    no_track_tags : bool
+        If track tags exist in the specified track within the track file, don't include them when this
+        :class:`~pymkv.MKVTrack` object is a track in an :class:`~pymkv.MKVFile` mux operation. This option has no
+        effect on standalone track files, only tracks that are already part of an MKV file.
+    no_attachments : bool
+        If attachments exist in the track file, don't include them when this :class:`~pymkv.MKVTrack` object is a track
+        in an :class:`~pymkv.MKVFile` mux operation. This option has no effect on standalone track files, only tracks
+        that are already part of an MKV file.
     """
 
     def __init__(  # noqa: PLR0913
