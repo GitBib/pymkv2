@@ -41,6 +41,7 @@ import json
 import logging
 import subprocess as sp
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 import bitmath
 
@@ -49,6 +50,9 @@ from pymkv.MKVAttachment import MKVAttachment
 from pymkv.MKVTrack import MKVTrack
 from pymkv.Timestamp import Timestamp
 from pymkv.Verifications import checking_file_path, verify_mkvmerge
+
+if TYPE_CHECKING:
+    import os
 
 
 class MKVFile:
@@ -87,7 +91,7 @@ class MKVFile:
 
     def __init__(  # noqa: C901, PLR0912
         self,
-        file_path: str | None = None,
+        file_path: str | os.PathLike | None = None,
         title: str | None = None,
         mkvmerge_path: str | None = "mkvmerge",
     ) -> None:
@@ -305,7 +309,7 @@ class MKVFile:
 
         return command if subprocess else " ".join(command)
 
-    def mux(self, output_path: str, silent: bool = False) -> int:
+    def mux(self, output_path: str | os.PathLike, silent: bool = False) -> int:
         """Mixes the specified :class:`~pymkv.MKVFile`.
 
         Parameters

@@ -106,3 +106,7 @@ venv.bak/
 
 .idea/
 /_build/
+
+# test files
+tests/file.mkv
+tests/file-test.mkv
