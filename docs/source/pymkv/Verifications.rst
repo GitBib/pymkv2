@@ -4,29 +4,24 @@ Verifications
 .. automodule:: pymkv.checking_file_path
     :noindex:
 
-.. autoclass:: pymkv.checking_file_path
-    :members:
+.. autofunction:: pymkv.checking_file_path
 
 .. automodule:: pymkv.verify_matroska
     :noindex:
 
-.. autoclass:: pymkv.verify_matroska
-    :members:
+.. autofunction:: pymkv.verify_matroska
 
 .. automodule:: pymkv.verify_mkvmerge
     :noindex:
 
-.. autoclass:: pymkv.verify_mkvmerge
-    :members:
+.. autofunction:: pymkv.verify_mkvmerge
 
 .. automodule:: pymkv.verify_recognized
     :noindex:
 
-.. autoclass:: pymkv.verify_recognized
-    :members:
+.. autofunction:: pymkv.verify_recognized
 
 .. automodule:: pymkv.verify_supported
     :noindex:
 
-.. autoclass:: pymkv.verify_supported
-    :members:
+.. autofunction:: pymkv.verify_supported
