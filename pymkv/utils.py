@@ -24,10 +24,7 @@ def prepare_mkvmerge_path(mkvmerge_path: str | list[str] | os.PathLike) -> list[
     if isinstance(mkvmerge_path, os.PathLike):
         return [os.fspath(mkvmerge_path)]
     elif isinstance(mkvmerge_path, str):  # noqa: RET505
-        if mkvmerge_path == "mkvmerge":
-            return ["mkvmerge"]
-        else:  # noqa: RET505
-            return shlex.split(mkvmerge_path)
+        return shlex.split(mkvmerge_path)
     elif isinstance(mkvmerge_path, list):
         return mkvmerge_path
     else:
