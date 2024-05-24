@@ -4,29 +4,29 @@ import os
 import shlex
 
 
-def prepare_mkvtoolnix_path(mkvmerge_path: str | list[str] | os.PathLike) -> list[str]:
+def prepare_mkvtoolnix_path(path: str | list[str] | os.PathLike) -> list[str]:
     """
     Parameters
     ----------
-    mkvmerge_path : str | list[str] | os.PathLike
-        The path(s) to the mkvmerge executable or script.
+    path : str | list[str] | os.PathLike
+        The path to prepare for use with MKVToolNix.
 
     Returns
     -------
     list[str]
-        A list containing the prepared mkvmerge path(s).
+        The prepared path as a list of strings.
 
     Raises
     ------
     ValueError
-        If the `mkvmerge_path` parameter is not of type str, list[str], or os.PathLike.
+        If the path type is invalid. Expected str, list of str, or os.PathLike.
     """
-    if isinstance(mkvmerge_path, os.PathLike):
-        return [os.fspath(mkvmerge_path)]
-    elif isinstance(mkvmerge_path, str):  # noqa: RET505
-        return shlex.split(mkvmerge_path)
-    elif isinstance(mkvmerge_path, list):
-        return mkvmerge_path
+    if isinstance(path, os.PathLike):
+        return [os.fspath(path)]
+    elif isinstance(path, str):  # noqa: RET505
+        return shlex.split(path)
+    elif isinstance(path, list):
+        return path
     else:
-        msg = "Invalid mkvmerge_path type. Expected str, List[str], or os.PathLike."
+        msg = "Invalid path type. Expected str, List[str], or os.PathLike."
         raise ValueError(msg)  # noqa: TRY004
