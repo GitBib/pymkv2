@@ -49,7 +49,7 @@ from pymkv.ISO639_2 import is_iso639_2
 from pymkv.MKVAttachment import MKVAttachment
 from pymkv.MKVTrack import MKVTrack
 from pymkv.Timestamp import Timestamp
-from pymkv.utils import prepare_mkvmerge_path
+from pymkv.utils import prepare_mkvtoolnix_path
 from pymkv.Verifications import checking_file_path, verify_mkvmerge
 
 if TYPE_CHECKING:
@@ -96,7 +96,7 @@ class MKVFile:
         title: str | None = None,
         mkvmerge_path: str | list | os.PathLike | None = "mkvmerge",
     ) -> None:
-        self.mkvmerge_path: list[str] = prepare_mkvmerge_path(mkvmerge_path)
+        self.mkvmerge_path: list[str] = prepare_mkvtoolnix_path(mkvmerge_path)
         self.title = title
         self._chapters_file = None
         self._chapter_language = None

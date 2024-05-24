@@ -4,7 +4,7 @@ import os
 import shlex
 
 
-def prepare_mkvmerge_path(mkvmerge_path: str | list[str] | os.PathLike) -> list[str]:
+def prepare_mkvtoolnix_path(mkvmerge_path: str | list[str] | os.PathLike) -> list[str]:
     """
     Parameters
     ----------

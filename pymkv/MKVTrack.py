@@ -46,7 +46,7 @@ from pathlib import Path
 from pymkv.BCP47 import is_bcp47
 from pymkv.ISO639_2 import is_iso639_2
 from pymkv.TypeTrack import get_track_extension
-from pymkv.utils import prepare_mkvmerge_path
+from pymkv.utils import prepare_mkvtoolnix_path
 from pymkv.Verifications import verify_supported
 
 
@@ -134,7 +134,7 @@ class MKVTrack:
         self._track_type = None
 
         # base
-        self.mkvmerge_path = prepare_mkvmerge_path(mkvmerge_path)
+        self.mkvmerge_path = prepare_mkvtoolnix_path(mkvmerge_path)
         self._file_path = None
         self.file_path = file_path
         self._track_id = None
@@ -165,7 +165,7 @@ class MKVTrack:
         self.no_attachments = False
 
         # mkvextract
-        self.mkvextract_path = prepare_mkvmerge_path(mkvextract_path)
+        self.mkvextract_path = prepare_mkvtoolnix_path(mkvextract_path)
         self.extension = get_track_extension(self)
 
     def __repr__(self) -> str:

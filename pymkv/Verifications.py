@@ -6,7 +6,7 @@ import subprocess as sp
 from pathlib import Path
 from re import match
 
-from pymkv.utils import prepare_mkvmerge_path
+from pymkv.utils import prepare_mkvtoolnix_path
 
 
 def checking_file_path(file_path: str) -> str:
@@ -51,7 +51,7 @@ def verify_mkvmerge(mkvmerge_path: str | list | os.PathLike | None = "mkvmerge")
         True, if `mkvmerge_path` is valid and the `mkvmerge` executable is found. False otherwise.
     """
     try:
-        mkvmerge_command = [*prepare_mkvmerge_path(mkvmerge_path), "-V"]
+        mkvmerge_command = [*prepare_mkvtoolnix_path(mkvmerge_path), "-V"]
         output = sp.check_output(mkvmerge_command).decode()  # noqa: S603
     except (sp.CalledProcessError, FileNotFoundError):
         return False
@@ -175,7 +175,7 @@ def verify_supported(file_path: str, mkvmerge_path: str | list | os.PathLike | N
     ValueError
         If the file cannot be opened or an error occurs during the verification process.
     """
-    mkvmerge_path = prepare_mkvmerge_path(mkvmerge_path)
+    mkvmerge_path = prepare_mkvtoolnix_path(mkvmerge_path)
     file_path = verify_file_path_and_mkvmerge(file_path, mkvmerge_path)
     try:
         info_json = json.loads(sp.check_output([*mkvmerge_path, "-J", file_path]).decode())  # noqa: S603
