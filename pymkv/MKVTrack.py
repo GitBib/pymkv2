@@ -38,6 +38,7 @@ Now all these tracks can be added to an :class:`~pymkv.MKVFile` object and muxed
 from __future__ import annotations
 
 import json
+import os
 import subprocess as sp
 from os import devnull
 from pathlib import Path
@@ -45,6 +46,7 @@ from pathlib import Path
 from pymkv.BCP47 import is_bcp47
 from pymkv.ISO639_2 import is_iso639_2
 from pymkv.TypeTrack import get_track_extension
+from pymkv.utils import prepare_mkvmerge_path
 from pymkv.Verifications import verify_supported
 
 
@@ -72,14 +74,20 @@ class MKVTrack:
         Determines if the track should be the default track of its type when muxed into an MKV file.
     forced_track : bool, optional
         Determines if the track should be a forced track when muxed into an MKV file.
-    mkvmerge_path : str, optional
+    mkvmerge_path : str, list, os.PathLike, optional
         The path where pymkv looks for the mkvmerge executable. pymkv relies on the mkvmerge executable to parse
         files. By default, it is assumed mkvmerge is in your shell's $PATH variable. If it is not, you need to set
         *mkvmerge_path* to the executable location.
+    mkvextract_path : str, list, os.PathLike, optional
+        The path where pymkv looks for the mkvextract executable. pymkv relies on the mkvextract executable to extract
+        files. By default, it is assumed mkvextract is in your shell's $PATH variable. If it is not, you need to set
+        *mkvextract_path* to the executable location.
     Attributes
     ----------
-    mkvmerge_path : str
+    mkvmerge_path : list
         The path of the mkvmerge executable.
+    mkvextract_path : list
+        The path of the mkvextract executable.
     track_name : str
         The name that will be given to the track when muxed into a file.
     default_track : bool
@@ -117,8 +125,8 @@ class MKVTrack:
         flag_hearing_impaired: bool | None = False,
         flag_visual_impaired: bool | None = False,
         flag_original: bool | None = False,
-        mkvmerge_path: str | None = "mkvmerge",
-        mkvextract_path: str | None = "mkvextract",
+        mkvmerge_path: str | list | os.PathLike | None = "mkvmerge",
+        mkvextract_path: str | list | os.PathLike | None = "mkvextract",
         sync: int | None = None,
     ) -> None:
         # track info
@@ -126,7 +134,7 @@ class MKVTrack:
         self._track_type = None
 
         # base
-        self.mkvmerge_path = mkvmerge_path
+        self.mkvmerge_path = prepare_mkvmerge_path(mkvmerge_path)
         self._file_path = None
         self.file_path = file_path
         self._track_id = None
@@ -157,7 +165,7 @@ class MKVTrack:
         self.no_attachments = False
 
         # mkvextract
-        self.mkvextract_path = mkvextract_path
+        self.mkvextract_path = prepare_mkvmerge_path(mkvextract_path)
         self.extension = get_track_extension(self)
 
     def __repr__(self) -> str:
@@ -224,7 +232,7 @@ class MKVTrack:
 
     @track_id.setter
     def track_id(self, track_id: int) -> None:
-        info_json = json.loads(sp.check_output([self.mkvmerge_path, "-J", self.file_path]).decode())  # noqa: S603
+        info_json = json.loads(sp.check_output([*self.mkvmerge_path, "-J", self.file_path]).decode())  # noqa: S603
         if not 0 <= track_id < len(info_json["tracks"]):
             msg = "track index out of range"
             raise IndexError(msg)
@@ -391,7 +399,7 @@ class MKVTrack:
             file = Path(self.file_path)
             output_path = Path(output_path, f"{file.name}{extract_info_file}")
         output_path = str(Path(output_path).expanduser())
-        command = [self.mkvextract_path, "tracks", f"{self.file_path}", f"{self.track_id}:{output_path}"]
+        command = [*self.mkvextract_path, "tracks", f"{self.file_path}", f"{self.track_id}:{output_path}"]
         if silent:
             sp.run(command, stdout=open(devnull, "wb"), check=True)  # noqa: S603, PTH123, SIM115
         else:

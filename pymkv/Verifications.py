@@ -6,6 +6,8 @@ import subprocess as sp
 from pathlib import Path
 from re import match
 
+from pymkv.utils import prepare_mkvmerge_path
+
 
 def checking_file_path(file_path: str) -> str:
     """
@@ -36,7 +38,7 @@ def checking_file_path(file_path: str) -> str:
     return str(file_path)
 
 
-def verify_mkvmerge(mkvmerge_path: str | None = "mkvmerge") -> bool:
+def verify_mkvmerge(mkvmerge_path: str | list | os.PathLike | None = "mkvmerge") -> bool:
     """
     Parameters
     ----------
@@ -49,7 +51,7 @@ def verify_mkvmerge(mkvmerge_path: str | None = "mkvmerge") -> bool:
         True, if `mkvmerge_path` is valid and the `mkvmerge` executable is found. False otherwise.
     """
     try:
-        mkvmerge_command = [mkvmerge_path, "-V"]
+        mkvmerge_command = [*prepare_mkvmerge_path(mkvmerge_path), "-V"]
         output = sp.check_output(mkvmerge_command).decode()  # noqa: S603
     except (sp.CalledProcessError, FileNotFoundError):
         return False
@@ -99,7 +101,7 @@ def verify_matroska(file_path: str | os.PathLike, mkvmerge_path: str = "mkvmerge
     return info_json["container"]["type"] == "Matroska"
 
 
-def verify_file_path_and_mkvmerge(file_path: str, mkvmerge_path: str | None = "mkvmerge") -> str:
+def verify_file_path_and_mkvmerge(file_path: str, mkvmerge_path: str | list | os.PathLike | None = "mkvmerge") -> str:
     """
     Parameters
     ----------
@@ -153,7 +155,7 @@ def verify_recognized(file_path: str, mkvmerge_path: str | None = "mkvmerge"):  
     return info_json["container"]["recognized"]
 
 
-def verify_supported(file_path: str, mkvmerge_path: str | None = "mkvmerge"):  # noqa: ANN201
+def verify_supported(file_path: str, mkvmerge_path: str | list | os.PathLike | None = "mkvmerge"):  # noqa: ANN201
     """
     Parameters
     ----------
@@ -173,9 +175,10 @@ def verify_supported(file_path: str, mkvmerge_path: str | None = "mkvmerge"):  #
     ValueError
         If the file cannot be opened or an error occurs during the verification process.
     """
+    mkvmerge_path = prepare_mkvmerge_path(mkvmerge_path)
     file_path = verify_file_path_and_mkvmerge(file_path, mkvmerge_path)
     try:
-        info_json = json.loads(sp.check_output([mkvmerge_path, "-J", file_path]).decode())  # noqa: S603
+        info_json = json.loads(sp.check_output([*mkvmerge_path, "-J", file_path]).decode())  # noqa: S603
     except sp.CalledProcessError as e:
         msg = '"{}" could not be opened'
         raise ValueError(msg) from e

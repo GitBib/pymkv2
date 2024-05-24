@@ -49,6 +49,7 @@ from pymkv.ISO639_2 import is_iso639_2
 from pymkv.MKVAttachment import MKVAttachment
 from pymkv.MKVTrack import MKVTrack
 from pymkv.Timestamp import Timestamp
+from pymkv.utils import prepare_mkvmerge_path
 from pymkv.Verifications import checking_file_path, verify_mkvmerge
 
 if TYPE_CHECKING:
@@ -93,9 +94,9 @@ class MKVFile:
         self,
         file_path: str | os.PathLike | None = None,
         title: str | None = None,
-        mkvmerge_path: str | None = "mkvmerge",
+        mkvmerge_path: str | list | os.PathLike | None = "mkvmerge",
     ) -> None:
-        self.mkvmerge_path = mkvmerge_path
+        self.mkvmerge_path: list[str] = prepare_mkvmerge_path(mkvmerge_path)
         self.title = title
         self._chapters_file = None
         self._chapter_language = None
@@ -114,7 +115,7 @@ class MKVFile:
             # add file title
             file_path = checking_file_path(file_path)
             try:
-                info_json = json.loads(sp.check_output([self.mkvmerge_path, "-J", file_path]).decode())  # noqa: S603
+                info_json = json.loads(sp.check_output([*self.mkvmerge_path, "-J", file_path]).decode())  # noqa: S603
             except sp.CalledProcessError as e:
                 error_output = e.output.decode()
                 raise sp.CalledProcessError(e.returncode, e.cmd, output=error_output) from e
@@ -203,7 +204,7 @@ class MKVFile:
             list of strings with no spaces if `subprocess` is True.
         """
         output_path = str(Path(output_path).expanduser())
-        command = [self.mkvmerge_path, "-o", output_path]
+        command = [*self.mkvmerge_path, "-o", output_path]
         if self.title is not None:
             command.extend(["--title", self.title])
         track_order = []
