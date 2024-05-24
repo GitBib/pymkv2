@@ -5,20 +5,18 @@ import pytest
 from pymkv import MKVFile
 
 
-def test_open_file() -> None:
-    path = Path.cwd() / "tests"
-    mkv = MKVFile(path / "file.mkv")
+def test_open_file(get_path_test_file: Path) -> None:
+    mkv = MKVFile(get_path_test_file)
 
     assert len(mkv.tracks) == 2  # noqa: PLR2004
 
 
-def test_mux_file() -> None:
-    path = Path.cwd() / "tests"
-    mkv = MKVFile(path / "file.mkv")
-    output_file = path / "file-test.mkv"
-    mkv.mux(output_file, silent=True)
+def test_mux_file(get_base_path: Path, get_path_test_file: Path) -> None:
+    mkv = MKVFile(get_path_test_file)
+    output_file = get_base_path / "file-test.mkv"
+    mkv.mux(output_file)
 
-    assert output_file.is_file(), f"File {output_file} does not exist after muxing"
+    assert output_file.is_file()
 
 
 def test_file_not_found() -> None:

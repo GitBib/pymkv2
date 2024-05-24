@@ -7,7 +7,7 @@ TEST_DIR := tests
 .PHONY: test
 
 test: $(TEST_FILE)
-	pytest $(TEST_DIR) --cache-clear
+	pytest $(TEST_DIR)
 
 $(TEST_FILE):
 	@if [ ! -f $(TEST_FILE) ]; then \
