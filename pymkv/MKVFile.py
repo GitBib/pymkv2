@@ -39,9 +39,9 @@ from __future__ import annotations
 
 import json
 import logging
+import os
 import subprocess as sp
 from pathlib import Path
-from typing import TYPE_CHECKING
 
 import bitmath
 
@@ -51,9 +51,6 @@ from pymkv.MKVTrack import MKVTrack
 from pymkv.Timestamp import Timestamp
 from pymkv.utils import prepare_mkvtoolnix_path
 from pymkv.Verifications import checking_file_path, verify_mkvmerge
-
-if TYPE_CHECKING:
-    import os
 
 
 class MKVFile:
@@ -352,12 +349,12 @@ class MKVFile:
 
         return proc.returncode
 
-    def add_file(self, file: MKVFile) -> None:
+    def add_file(self, file: MKVFile | str | os.PathLike) -> None:
         """Add an MKV file into the :class:`~pymkv.MKVFile` object.
 
         Parameters
         ----------
-        file : str, :class:`~pymkv.MKVFile`
+        file : str, :class:`~pymkv.MKVFile`, os.PathLike
             The file to be combined with the :class:`~pymkv.MKVFile` object.
 
         Raises
@@ -365,7 +362,7 @@ class MKVFile:
         TypeError
             Raised if if `file` is not a string-like path to an MKV file or an :class:`~pymkv.MKVFile` object.
         """
-        if isinstance(file, str):
+        if isinstance(file, (str, os.PathLike)):
             self._number_file += 1
             new_tracks = MKVFile(file).tracks
             for track in new_tracks:
