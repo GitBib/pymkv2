@@ -17,6 +17,7 @@ type_files = {
         "V_THEORA": "ogg",
         "V_VP8": "ivf",
         "V_VP9": "ivf",
+        "AVC/H.264/MPEG-4p10": "mp4",
     },
     "audio": {
         "AAC": "aac",
@@ -37,6 +38,7 @@ type_files = {
         "WAVPACK4": "wv",
         "V_MS/VFW/FOURCC, WVC1": "wvc",
         "VC-1": "wvc",
+        "Vorbis": "ogg",
     },
     "subtitles": {
         "PGS": "sup",
