@@ -1,3 +1,8 @@
+from __future__ import annotations
+
+from mimetypes import guess_type
+from pathlib import Path
+
 """:class:`~pymkv.MKVAttachment` classes are used to represent attachment files within an MKV or to be used in an
 MKV.
 
@@ -22,9 +27,6 @@ Now, the MKV can be muxed with both attachments.
 >>> mkv.add_attachment(attachment)
 >>> mkv.mux('path/to/output.mkv')
 """
-
-from os.path import expanduser, isfile
-from mimetypes import guess_type
 
 
 class MKVAttachment:
@@ -55,7 +57,13 @@ class MKVAttachment:
         which will attach to all files.
     """
 
-    def __init__(self, file_path, name=None, description=None, attach_once=False):
+    def __init__(
+        self,
+        file_path: str,
+        name: str | None = None,
+        description: str | None = None,
+        attach_once: bool | None = False,
+    ) -> None:
         self.mime_type = None
         self._file_path = None
         self.file_path = file_path
@@ -63,11 +71,20 @@ class MKVAttachment:
         self.description = description
         self.attach_once = attach_once
 
-    def __repr__(self):
+    def __repr__(self) -> str:
+        """
+        Return a string representation of the object.
+
+        Parameters:
+            self (object): The object for which the string representation is generated.
+
+        Returns:
+            str: The string representation of the object. It is the representation of the object's __dict__ attribute.
+        """
         return repr(self.__dict__)
 
     @property
-    def file_path(self):
+    def file_path(self) -> str:
         """str: The path to the attachment file.
 
         Raises
@@ -78,10 +95,26 @@ class MKVAttachment:
         return self._file_path
 
     @file_path.setter
-    def file_path(self, file_path):
-        file_path = expanduser(file_path)
-        if not isfile(file_path):
-            raise FileNotFoundError(f'"{file_path}" does not exist')
+    def file_path(self, file_path: str) -> None:
+        """
+        Parameters
+        ----------
+        file_path : str
+            The file path to be set.
+
+        Raises
+        ------
+        FileNotFoundError
+            If the specified file does not exist.
+
+        Returns
+        -------
+        None
+        """
+        file_path = Path(file_path).expanduser()
+        if not file_path.is_file():
+            msg = f'"{file_path}" does not exist'
+            raise FileNotFoundError(msg)
         self.mime_type = guess_type(file_path)[0]
         self.name = None
-        self._file_path = file_path
+        self._file_path = str(file_path)

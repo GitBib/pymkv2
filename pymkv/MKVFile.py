@@ -35,18 +35,22 @@ Combine two MKVs. This example takes two existing MKVs and combines their tracks
 >>> mkv1.mux('/path/to/output.mkv')
 """
 
+from __future__ import annotations
+
 import json
 import logging
-from os.path import expanduser, isfile
+import os
 import subprocess as sp
+from pathlib import Path
 
 import bitmath
 
-from pymkv.MKVTrack import MKVTrack
-from pymkv.MKVAttachment import MKVAttachment
-from pymkv.Timestamp import Timestamp
 from pymkv.ISO639_2 import is_iso639_2
-from pymkv.Verifications import verify_matroska, verify_mkvmerge
+from pymkv.MKVAttachment import MKVAttachment
+from pymkv.MKVTrack import MKVTrack
+from pymkv.Timestamp import Timestamp
+from pymkv.utils import prepare_mkvtoolnix_path
+from pymkv.Verifications import checking_file_path, verify_mkvmerge
 
 
 class MKVFile:
@@ -83,8 +87,13 @@ class MKVFile:
         Raised if the path to mkvmerge could not be verified.
     """
 
-    def __init__(self, file_path=None, title=None, mkvmerge_path='mkvmerge'):
-        self.mkvmerge_path = mkvmerge_path
+    def __init__(  # noqa: C901, PLR0912
+        self,
+        file_path: str | os.PathLike | None = None,
+        title: str | None = None,
+        mkvmerge_path: str | list | os.PathLike | None = "mkvmerge",
+    ) -> None:
+        self.mkvmerge_path: list[str] = prepare_mkvtoolnix_path(mkvmerge_path)
         self.title = title
         self._chapters_file = None
         self._chapter_language = None
@@ -96,47 +105,57 @@ class MKVFile:
         self._number_file = 0
 
         if not verify_mkvmerge(mkvmerge_path=mkvmerge_path):
-            raise FileNotFoundError('mkvmerge is not at the specified path, add it there or change'
-                                    'the mkvmerge_path property')
+            msg = "mkvmerge is not at the specified path, add it there or changed mkvmerge_path property"
+            raise FileNotFoundError(msg)
 
         if file_path is not None:
             # add file title
-            file_path = expanduser(file_path)
-            info_json = json.loads(sp.check_output([self.mkvmerge_path, '-J', file_path]).decode())
-            if self.title is None and 'title' in info_json['container']['properties']:
-                self.title = info_json['container']['properties']['title']
+            file_path = checking_file_path(file_path)
+            try:
+                info_json = json.loads(sp.check_output([*self.mkvmerge_path, "-J", file_path]).decode())  # noqa: S603
+            except sp.CalledProcessError as e:
+                error_output = e.output.decode()
+                raise sp.CalledProcessError(e.returncode, e.cmd, output=error_output) from e
+            if self.title is None and "title" in info_json["container"]["properties"]:
+                self.title = info_json["container"]["properties"]["title"]
 
             # add tracks with info
-            for track in info_json['tracks']:
-                new_track = MKVTrack(file_path, track_id=track['id'], mkvmerge_path=self.mkvmerge_path)
-                if 'track_name' in track['properties']:
-                    new_track.track_name = track['properties']['track_name']
-                if 'language' in track['properties']:
-                    new_track.language = track['properties']['language']
-                if 'language_ietf' in track['properties']:
-                    new_track.language_ietf = track['properties']['language_ietf']
-                if 'default_track' in track['properties']:
-                    new_track.default_track = track['properties']['default_track']
-                if 'forced_track' in track['properties']:
-                    new_track.forced_track = track['properties']['forced_track']
-                if 'flag_commentary' in track['properties']:
-                    new_track.flag_commentary = track['properties']['flag_commentary']
-                if 'flag_hearing_impaired' in track['properties']:
-                    new_track.flag_hearing_impaired = track['properties']['flag_hearing_impaired']
-                if 'flag_visual_impaired' in track['properties']:
-                    new_track.flag_visual_impaired = track['properties']['flag_visual_impaired']
-                if 'flag_original' in track['properties']:
-                    new_track.flag_original = track['properties']['flag_original']
+            for track in info_json["tracks"]:
+                new_track = MKVTrack(file_path, track_id=track["id"], mkvmerge_path=self.mkvmerge_path)
+                if "track_name" in track["properties"]:
+                    new_track.track_name = track["properties"]["track_name"]
+                if "language" in track["properties"]:
+                    new_track.language = track["properties"]["language"]
+                if "language_ietf" in track["properties"]:
+                    new_track.language_ietf = track["properties"]["language_ietf"]
+                if "default_track" in track["properties"]:
+                    new_track.default_track = track["properties"]["default_track"]
+                if "forced_track" in track["properties"]:
+                    new_track.forced_track = track["properties"]["forced_track"]
+                if "flag_commentary" in track["properties"]:
+                    new_track.flag_commentary = track["properties"]["flag_commentary"]
+                if "flag_hearing_impaired" in track["properties"]:
+                    new_track.flag_hearing_impaired = track["properties"]["flag_hearing_impaired"]
+                if "flag_visual_impaired" in track["properties"]:
+                    new_track.flag_visual_impaired = track["properties"]["flag_visual_impaired"]
+                if "flag_original" in track["properties"]:
+                    new_track.flag_original = track["properties"]["flag_original"]
                 self.add_track(new_track, new_file=False)
 
         # split options
         self._split_options = []
 
-    def __repr__(self):
+    def __repr__(self) -> str:
+        """
+        Return a string representation of the object.
+
+        :returns: A string representation of the object.
+        :rtype: str
+        """
         return repr(self.__dict__)
 
     @property
-    def chapter_language(self):
+    def chapter_language(self) -> str:
         """str: The language code of the chapters in the :class:`~pymkv.MKVFile` object.
 
         Raises
@@ -147,12 +166,25 @@ class MKVFile:
         return self._chapter_language
 
     @chapter_language.setter
-    def chapter_language(self, language):
+    def chapter_language(self, language: str) -> None:
+        """
+        Parameters
+        ----------
+        language : str
+            The language code for the chapter.
+            Must be an ISO639-2 language code.
+
+        Raises
+        ------
+        ValueError
+            If the provided language code is not a valid ISO639-2 language code.
+        """
         if language is not None and not is_iso639_2(language):
-            raise ValueError('not an ISO639-2 language code')
+            msg = "not an ISO639-2 language code"
+            raise ValueError(msg)
         self._chapter_language = language
 
-    def command(self, output_path, subprocess=False):
+    def command(self, output_path: str, subprocess: bool = False) -> str | list:  # noqa: C901, PLR0912, PLR0915
         """Generates an mkvmerge command based on the configured :class:`~pymkv.MKVFile`.
 
         Parameters
@@ -168,116 +200,114 @@ class MKVFile:
             The full command to mux the :class:`~pymkv.MKVFile` as a string containing spaces. Will be returned as a
             list of strings with no spaces if `subprocess` is True.
         """
-
-        output_path = expanduser(output_path)
-        command = [self.mkvmerge_path, '-o', output_path]
+        output_path = str(Path(output_path).expanduser())
+        command = [*self.mkvmerge_path, "-o", output_path]
         if self.title is not None:
-            command.extend(['--title', self.title])
+            command.extend(["--title", self.title])
         track_order = []
         for track in self.tracks:
             # for track_order
-            track_order.append(f'{track.file_id}:{track.track_id}')
+            track_order.append(f"{track.file_id}:{track.track_id}")
             # flags
             if track.track_name is not None:
-                command.extend(['--track-name', f'{str(track.track_id)}:{track.track_name}'])
+                command.extend(["--track-name", f"{track.track_id!s}:{track.track_name}"])
             if track.language_ietf is not None:
-                command.extend(['--language', f'{str(track.track_id)}:{track.language_ietf}'])
+                command.extend(["--language", f"{track.track_id!s}:{track.language_ietf}"])
             elif track.language is not None:
-                command.extend(['--language', f'{str(track.track_id)}:{track.language}'])
+                command.extend(["--language", f"{track.track_id!s}:{track.language}"])
             if track.sync is not None:
-                command.extend(['--sync', f'{str(track.track_id)}:{track.sync}'])
+                command.extend(["--sync", f"{track.track_id!s}:{track.sync}"])
             if track.tags is not None:
-                command.extend(['--tags', f'{str(track.track_id)}:{track.tags}'])
+                command.extend(["--tags", f"{track.track_id!s}:{track.tags}"])
             if track.default_track:
-                command.extend(['--default-track', f'{str(track.track_id)}:1'])
+                command.extend(["--default-track", f"{track.track_id!s}:1"])
             else:
-                command.extend(['--default-track', f'{str(track.track_id)}:0'])
+                command.extend(["--default-track", f"{track.track_id!s}:0"])
             if track.forced_track:
-                command.extend(['--forced-track', f'{str(track.track_id)}:1'])
+                command.extend(["--forced-track", f"{track.track_id!s}:1"])
             else:
-                command.extend(['--forced-track', f'{str(track.track_id)}:0'])
+                command.extend(["--forced-track", f"{track.track_id!s}:0"])
             if track.flag_hearing_impaired:
-                command.extend(['--hearing-impaired-flag', f'{str(track.track_id)}:1'])
+                command.extend(["--hearing-impaired-flag", f"{track.track_id!s}:1"])
             else:
-                command.extend(['--hearing-impaired-flag', f'{str(track.track_id)}:0'])
+                command.extend(["--hearing-impaired-flag", f"{track.track_id!s}:0"])
             if track.flag_visual_impaired:
-                command.extend(['--visual-impaired-flag', f'{str(track.track_id)}:1'])
+                command.extend(["--visual-impaired-flag", f"{track.track_id!s}:1"])
             else:
-                command.extend(['--visual-impaired-flag', f'{str(track.track_id)}:0'])
+                command.extend(["--visual-impaired-flag", f"{track.track_id!s}:0"])
             if track.flag_original:
-                command.extend(['--original-flag', f'{str(track.track_id)}:1'])
+                command.extend(["--original-flag", f"{track.track_id!s}:1"])
             else:
-                command.extend(['--original-flag', f'{str(track.track_id)}:0'])
+                command.extend(["--original-flag", f"{track.track_id!s}:0"])
             if track.flag_commentary:
-                command.extend(['--commentary-flag', f'{str(track.track_id)}:1'])
+                command.extend(["--commentary-flag", f"{track.track_id!s}:1"])
             else:
-                command.extend(['--commentary-flag', f'{str(track.track_id)}:0'])
+                command.extend(["--commentary-flag", f"{track.track_id!s}:0"])
 
             # remove extra tracks
-            if track.track_type == 'audio':
-                command.append('-D')
-                command.extend(['-a', str(track.track_id), '-S'])
-            elif track.track_type == 'subtitles':
-                command.extend(('-D', '-A', '-s', str(track.track_id)))
-            elif track.track_type == 'video':
-                command.extend(['-d', str(track.track_id), '-A', '-S'])
+            if track.track_type == "audio":
+                command.append("-D")
+                command.extend(["-a", str(track.track_id), "-S"])
+            elif track.track_type == "subtitles":
+                command.extend(("-D", "-A", "-s", str(track.track_id)))
+            elif track.track_type == "video":
+                command.extend(["-d", str(track.track_id), "-A", "-S"])
             else:
-                command.extend(('-D', '-A', '-S'))
+                command.extend(("-D", "-A", "-S"))
             # exclusions
             if track.no_chapters:
-                command.append('--no-chapters')
+                command.append("--no-chapters")
             if track.no_global_tags:
-                command.append('--no-global-tags')
+                command.append("--no-global-tags")
             if track.no_track_tags:
-                command.append('--no-track-tags')
+                command.append("--no-track-tags")
             if track.no_attachments:
-                command.append('--no-attachments')
+                command.append("--no-attachments")
 
-            # add path
             command.append(track.file_path)
 
         # add attachments
         for attachment in self.attachments:
             # info
             if attachment.name is not None:
-                command.extend(['--attachment-name', attachment.name])
+                command.extend(["--attachment-name", attachment.name])
             if attachment.description is not None:
-                command.extend(['--attachment-description', attachment.description])
+                command.extend(["--attachment-description", attachment.description])
             if attachment.mime_type is not None:
-                command.extend(['--attachment-mime-type', attachment.mime_type])
+                command.extend(["--attachment-mime-type", attachment.mime_type])
 
             # add path
             if not attachment.attach_once:
-                command.extend(['--attach-file', attachment.file_path])
+                command.extend(["--attach-file", attachment.file_path])
             else:
-                command.extend(['--attach-file-once', attachment.file_path])
+                command.extend(["--attach-file-once", attachment.file_path])
 
         # chapters
         if self._chapter_language is not None:
-            command.extend(['--chapter-language', self._chapter_language])
+            command.extend(["--chapter-language", self._chapter_language])
         if self._chapters_file is not None:
-            command.extend(['--chapters', self._chapters_file])
+            command.extend(["--chapters", self._chapters_file])
 
         # global tags
         if self._global_tags_file is not None:
-            command.extend(['--global-tags', self._global_tags_file])
+            command.extend(["--global-tags", self._global_tags_file])
 
         # linking
         if self._link_to_previous_file is not None:
-            command.extend(['--link-to-previous', f'={self._link_to_previous_file}'])
+            command.extend(["--link-to-previous", f"={self._link_to_previous_file}"])
         if self._link_to_next_file is not None:
-            command.extend(['--link-to-next', f'={self._link_to_next_file}'])
+            command.extend(["--link-to-next", f"={self._link_to_next_file}"])
 
         # tracks order
         if track_order:
-            command.extend(['--track-order', ','.join(track_order)])
+            command.extend(["--track-order", ",".join(track_order)])
 
         # split options
         command.extend(self._split_options)
 
         return command if subprocess else " ".join(command)
 
-    def mux(self, output_path, silent=False):
+    def mux(self, output_path: str | os.PathLike, silent: bool = False) -> int:
         """Mixes the specified :class:`~pymkv.MKVFile`.
 
         Parameters
@@ -286,6 +316,10 @@ class MKVFile:
             The path to be used as the output file in the mkvmerge command.
         silent : bool, optional
             By default the mkvmerge output will be shown unless silent is True.
+        Returns
+        -------
+        int of Any
+            return code
 
         Raises
         ------
@@ -295,13 +329,13 @@ class MKVFile:
             processing the :class:`~pymkv.MKVFile`, or issues with output file writing. The error
             message provides details about the failure based on the output of the command.
         """
-        output_path = expanduser(output_path)
+        output_path = str(Path(output_path).expanduser())
         args = self.command(output_path, subprocess=True)
 
         stdout = sp.DEVNULL if silent else None
         stderr = sp.PIPE
 
-        proc = sp.Popen(args, stdout=stdout, stderr=stderr)
+        proc = sp.Popen(args, stdout=stdout, stderr=stderr)  # noqa: S603
         _, err = proc.communicate()
 
         if proc.returncode:
@@ -315,12 +349,12 @@ class MKVFile:
 
         return proc.returncode
 
-    def add_file(self, file):
+    def add_file(self, file: MKVFile | str | os.PathLike) -> None:
         """Add an MKV file into the :class:`~pymkv.MKVFile` object.
 
         Parameters
         ----------
-        file : str, :class:`~pymkv.MKVFile`
+        file : str, :class:`~pymkv.MKVFile`, os.PathLike
             The file to be combined with the :class:`~pymkv.MKVFile` object.
 
         Raises
@@ -328,7 +362,7 @@ class MKVFile:
         TypeError
             Raised if if `file` is not a string-like path to an MKV file or an :class:`~pymkv.MKVFile` object.
         """
-        if isinstance(file, str):
+        if isinstance(file, (str, os.PathLike)):
             self._number_file += 1
             new_tracks = MKVFile(file).tracks
             for track in new_tracks:
@@ -340,10 +374,11 @@ class MKVFile:
                 track.file_id = self._number_file
             self.tracks = self.tracks + file.tracks
         else:
-            raise TypeError('track is not str or MKVFile')
+            msg = "track is not str or MKVFile"
+            raise TypeError(msg)
         self.order_tracks_by_file_id()
 
-    def add_track(self, track, new_file: bool = True):
+    def add_track(self, track: str | MKVTrack, new_file: bool = True) -> None:
         """Add a track to the :class:`~pymkv.MKVFile`.
 
         Parameters
@@ -365,16 +400,17 @@ class MKVFile:
         elif isinstance(track, MKVTrack):
             self._extracted_from_add_track(track, new_file)
         else:
-            raise TypeError('track is not str or MKVTrack')
+            msg = "track is not str or MKVTrack"
+            raise TypeError(msg)
         self.order_tracks_by_file_id()
 
-    def _extracted_from_add_track(self, track: MKVTrack, new_file: bool = False):
+    def _extracted_from_add_track(self, track: MKVTrack, new_file: bool = False) -> None:
         if new_file:
             self._number_file += 1
         track.file_id = self._number_file
         self.tracks.append(track)
 
-    def add_attachment(self, attachment):
+    def add_attachment(self, attachment: str | MKVAttachment) -> None:
         """Add an attachment to the :class:`~pymkv.MKVFile`.
 
         Parameters
@@ -385,16 +421,18 @@ class MKVFile:
         Raises
         ------
         TypeError
-            Raised if if `attachment` is not a string-like path to an attachment file or an :class:`~pymkv.MKVAttachment`.
+            Raised if if `attachment` is not a string-like path to an attachment file
+            or an :class:`~pymkv.MKVAttachment`.
         """
         if isinstance(attachment, str):
             self.attachments.append(MKVAttachment(attachment))
         elif isinstance(attachment, MKVAttachment):
             self.attachments.append(attachment)
         else:
-            raise TypeError('attachment is not str of MKVAttachment')
+            msg = "Attachment is not str of MKVAttachment"
+            raise TypeError(msg)
 
-    def get_track(self, track_num=None):
+    def get_track(self, track_num: int | None = None) -> MKVTrack:
         """Get a :class:`~pymkv.MKVTrack` from the :class:`~pymkv.MKVFile` object.
 
         Parameters
@@ -411,7 +449,7 @@ class MKVFile:
         """
         return self.tracks if track_num is None else self.tracks[track_num]
 
-    def move_track_front(self, track_num):
+    def move_track_front(self, track_num: int) -> None:
         """Set a track as the first in the :class:`~pymkv.MKVFile` object.
 
         Parameters
@@ -424,13 +462,13 @@ class MKVFile:
         IndexError
             Raised if `track_num` is is out of range of the track list.
         """
-        if 0 <= track_num < len(self.tracks):
-            self.tracks.insert(0, self.tracks.pop(track_num))
-            self.order_tracks_by_file_id()
-        else:
-            raise IndexError('track index out of range')
+        if not 0 <= track_num < len(self.tracks):
+            msg = "track index out of range"
+            raise IndexError(msg)
+        self.tracks.insert(0, self.tracks.pop(track_num))
+        self.order_tracks_by_file_id()
 
-    def move_track_end(self, track_num):
+    def move_track_end(self, track_num: int) -> None:
         """Set as track as the last in the :class:`~pymkv.MKVFile` object.
 
         Parameters
@@ -443,13 +481,13 @@ class MKVFile:
         IndexError
             Raised if `track_num` is is out of range of the track list.
         """
-        if 0 <= track_num < len(self.tracks):
-            self.tracks.append(self.tracks.pop(track_num))
-            self.order_tracks_by_file_id()
-        else:
-            raise IndexError('track index out of range')
+        if not 0 <= track_num < len(self.tracks):
+            msg = "track index out of range"
+            raise IndexError(msg)
+        self.tracks.append(self.tracks.pop(track_num))
+        self.order_tracks_by_file_id()
 
-    def move_track_forward(self, track_num):
+    def move_track_forward(self, track_num: int) -> None:
         """Move a track forward in the :class:`~pymkv.MKVFile` object.
 
         Parameters
@@ -462,13 +500,13 @@ class MKVFile:
         IndexError
             Raised if `track_num` is is out of range of the track list.
         """
-        if 0 <= track_num < len(self.tracks) - 1:
-            self.tracks[track_num], self.tracks[track_num + 1] = self.tracks[track_num + 1], self.tracks[track_num]
-            self.order_tracks_by_file_id()
-        else:
-            raise IndexError('track index out of range')
+        if not 0 <= track_num < len(self.tracks) - 1:
+            msg = "Track index out of range"
+            raise IndexError(msg)
+        self.tracks[track_num], self.tracks[track_num + 1] = self.tracks[track_num + 1], self.tracks[track_num]
+        self.order_tracks_by_file_id()
 
-    def move_track_backward(self, track_num):
+    def move_track_backward(self, track_num: int) -> None:
         """Move a track backward in the :class:`~pymkv.MKVFile` object.
 
         Parameters
@@ -481,13 +519,13 @@ class MKVFile:
         IndexError
             Raised if `track_num` is is out of range of the track list.
         """
-        if 0 < track_num < len(self.tracks):
-            self.tracks[track_num], self.tracks[track_num - 1] = self.tracks[track_num - 1], self.tracks[track_num]
-            self.order_tracks_by_file_id()
-        else:
-            raise IndexError('track index out of range')
+        if not 0 < track_num < len(self.tracks):
+            msg = "Track index out of range"
+            raise IndexError(msg)
+        self.tracks[track_num], self.tracks[track_num - 1] = self.tracks[track_num - 1], self.tracks[track_num]
+        self.order_tracks_by_file_id()
 
-    def swap_tracks(self, track_num_1, track_num_2):
+    def swap_tracks(self, track_num_1: int, track_num_2: int) -> None:
         """Swap the position of two tracks in the :class:`~pymkv.MKVFile` object.
 
         Parameters
@@ -502,13 +540,15 @@ class MKVFile:
         IndexError
             Raised if `track_num_1` or `track_num_2` are out of range of the track list.
         """
-        if 0 <= track_num_1 < len(self.tracks) and 0 <= track_num_2 < len(self.tracks):
-            self.tracks[track_num_1], self.tracks[track_num_2] = self.tracks[track_num_2], self.tracks[track_num_1]
-            self.order_tracks_by_file_id()
-        else:
-            raise IndexError('track index out of range')
+        if not 0 <= track_num_1 < len(self.tracks) or not 0 <= track_num_2 < len(
+            self.tracks,
+        ):
+            msg = "Track index out of range"
+            raise IndexError(msg)
+        self.tracks[track_num_1], self.tracks[track_num_2] = self.tracks[track_num_2], self.tracks[track_num_1]
+        self.order_tracks_by_file_id()
 
-    def replace_track(self, track_num, track):
+    def replace_track(self, track_num: int, track: MKVTrack) -> None:
         """Replace a track with another track in the :class:`~pymkv.MKVFile` object.
 
         Parameters
@@ -523,13 +563,13 @@ class MKVFile:
         IndexError
             Raised if `track_num` is is out of range of the track list.
         """
-        if 0 <= track_num < len(self.tracks):
-            self.tracks[track_num] = track
-            self.order_tracks_by_file_id()
-        else:
-            raise IndexError('track index out of range')
+        if not 0 <= track_num < len(self.tracks):
+            msg = "track index out of range"
+            raise IndexError(msg)
+        self.tracks[track_num] = track
+        self.order_tracks_by_file_id()
 
-    def remove_track(self, track_num):
+    def remove_track(self, track_num: int) -> None:
         """Remove a track from the :class:`~pymkv.MKVFile` object.
 
         Parameters
@@ -542,17 +582,17 @@ class MKVFile:
         IndexError
             Raised if `track_num` is is out of range of the track list.
         """
-        if 0 <= track_num < len(self.tracks):
-            del self.tracks[track_num]
-            self.order_tracks_by_file_id()
-        else:
-            raise IndexError('track index out of range')
+        if not 0 <= track_num < len(self.tracks):
+            msg = "track index out of range"
+            raise IndexError(msg)
+        del self.tracks[track_num]
+        self.order_tracks_by_file_id()
 
-    def split_none(self):
+    def split_none(self) -> None:
         """Remove all splitting options."""
         self._split_options = []
 
-    def split_size(self, size, link=False):
+    def split_size(self, size: bitmath.Bitmath | int, link: bool | None = False) -> None:
         """Split the output file into parts by size.
 
         Parameters
@@ -568,15 +608,16 @@ class MKVFile:
         TypeError
             Raised if if `size` is not a bitmath object or an integer.
         """
-        if getattr(size, '__module__', None) == bitmath.__name__:
+        if getattr(size, "__module__", None) == bitmath.__name__:
             size = size.bytes
         elif not isinstance(size, int):
-            raise TypeError('size is not a bitmath object or integer')
-        self._split_options = ['--split', f'size:{size}']
+            msg = "size is not a bitmath object or integer"
+            raise TypeError(msg)
+        self._split_options = ["--split", f"size:{size}"]
         if link:
-            self._split_options += '--link'
+            self._split_options += "--link"
 
-    def split_duration(self, duration, link=False):
+    def split_duration(self, duration: str | int, link: bool | None = False) -> None:
         """Split the output file into parts by duration.
 
         Parameters
@@ -587,11 +628,11 @@ class MKVFile:
         link : bool, optional
             Determines if the split files should be linked together after splitting.
         """
-        self._split_options = ['--split', f'duration:{str(Timestamp(duration))}']
+        self._split_options = ["--split", f"duration:{Timestamp(duration)!s}"]
         if link:
-            self._split_options += '--link'
+            self._split_options += "--link"
 
-    def split_timestamps(self, *timestamps, link=False):
+    def split_timestamps(self, *timestamps: str | int | list | tuple, link: bool | None = False) -> None:
         """Split the output file into parts by timestamps.
 
         Parameters
@@ -611,22 +652,25 @@ class MKVFile:
         # check if in timestamps form
         ts_flat = MKVFile.flatten(timestamps)
         if len(ts_flat) == 0:
-            raise ValueError(f'"{timestamps}" are not properly formatted timestamps')
+            msg = f'"{timestamps}" are not properly formatted timestamps'
+            raise ValueError(msg)
         if None in ts_flat:
-            raise ValueError(f'"{timestamps}" are not properly formatted timestamps')
-        for ts_1, ts_2 in zip(ts_flat[:-1], ts_flat[1:]):
+            msg = f'"{timestamps}" are not properly formatted timestamps'
+            raise ValueError(msg)
+        for ts_1, ts_2 in zip(ts_flat[:-1], ts_flat[1:], strict=False):
             if Timestamp(ts_1) >= Timestamp(ts_2):
-                raise ValueError(f'"{timestamps}" are not properly formatted timestamps')
+                msg = f'"{timestamps}" are not properly formatted timestamps'
+                raise ValueError(msg)
 
         # build ts_string from timestamps
-        ts_string = 'timestamps:'
+        ts_string = "timestamps:"
         for ts in ts_flat:
-            ts_string += f'{str(Timestamp(ts))},'
-        self._split_options = ['--split', ts_string[:-1]]
+            ts_string += f"{Timestamp(ts)!s},"
+        self._split_options = ["--split", ts_string[:-1]]
         if link:
-            self._split_options += '--link'
+            self._split_options += "--link"
 
-    def split_frames(self, *frames, link=False):
+    def split_frames(self, *frames: int | list | tuple, link: bool | None = False) -> None:
         """Split the output file into parts by frames.
 
         Parameters
@@ -645,25 +689,28 @@ class MKVFile:
             Raised if improperly formatted frames are passed in for `*frames`.
         """
         # check if in frames form
-        f_flat = MKVFile.flatten(frames)
-        if len(f_flat) == 0:
-            raise ValueError(f'"{frames}" are not properly formatted frames')
-        for f in f_flat:
+        frames_flat = MKVFile.flatten(frames)
+        if len(frames_flat) == 0:
+            msg = f'"{frames}" are not properly formatted frames'
+            raise ValueError(msg)
+        for f in frames_flat:
             if not isinstance(f, int):
-                raise TypeError(f'frame "{f}" not an int')
-        for f_1, f_2 in zip(f_flat[:-1], f_flat[1:]):
+                msg = f'frame "{f}" not an int'
+                raise TypeError(msg)
+        for f_1, f_2 in zip(frames_flat[:-1], frames_flat[1:], strict=False):
             if f_1 >= f_2:
-                raise ValueError(f'"{frames}" are not properly formatted frames')
+                msg = f'"{frames}" are not properly formatted frames'
+                raise ValueError(msg)
 
         # build f_string from frames
-        f_string = 'frames:'
-        for f in f_flat:
-            f_string += f'{str(f)},'
-        self._split_options = ['--split', f_string[:-1]]
+        f_string = "frames:"
+        for f in frames_flat:
+            f_string += f"{f!s},"
+        self._split_options = ["--split", f_string[:-1]]
         if link:
-            self._split_options += '--link'
+            self._split_options += "--link"
 
-    def split_timestamp_parts(self, timestamp_parts, link=False):
+    def split_timestamp_parts(self, timestamp_parts: list | tuple, link: bool | None = False) -> None:  # noqa: C901
         """Split the output in parts by time parts.
 
         Parameters
@@ -684,33 +731,38 @@ class MKVFile:
         """
         ts_flat = MKVFile.flatten(timestamp_parts)
         if len(timestamp_parts) == 0:
-            raise ValueError(f'"{timestamp_parts}" are not properly formatted parts')
+            msg = f'"{timestamp_parts}" are not properly formatted parts'
+            raise ValueError(msg)
 
         if None in ts_flat[1:-1]:
-            raise ValueError(f'"{timestamp_parts}" are not properly formatted parts')
+            msg = f'"{timestamp_parts}" are not properly formatted parts'
+            raise ValueError(msg)
 
-        for ts_1, ts_2 in zip(ts_flat[:-1], ts_flat[1:]):
+        for ts_1, ts_2 in zip(ts_flat[:-1], ts_flat[1:], strict=False):
             if None not in (ts_1, ts_2) and Timestamp(ts_1) >= Timestamp(ts_2):
-                raise ValueError(f'"{timestamp_parts}" are not properly formatted parts')
+                msg = f'"{timestamp_parts}" are not properly formatted parts'
+                raise ValueError(msg)
 
-        ts_string = 'parts:'
+        ts_string = "parts:"
         for ts_set in timestamp_parts:
-            ts_set = MKVFile.flatten(ts_set)
+            ts_set = MKVFile.flatten(ts_set)  # noqa: PLW2901
             if not isinstance(ts_set, (list, tuple)):
-                raise TypeError('set is not of type list or tuple')
-            if len(ts_set) < 2 or len(ts_set) % 2 != 0:
-                raise ValueError(f'"{ts_set}" is not a properly formatted set')
+                msg = "set is not of type list or tuple"
+                raise TypeError(msg)
+            if len(ts_set) < 2 or len(ts_set) % 2 != 0:  # noqa: PLR2004
+                msg = f'"{ts_set}" is not a properly formatted set'
+                raise ValueError(msg)
             for index, ts in enumerate(ts_set):
                 if index % 2 == 0 and index > 0:
-                    ts_string += '+'
+                    ts_string += "+"
                 if ts is not None:
                     ts_string += str(Timestamp(ts))
-                ts_string += '-' if index % 2 == 0 else ','
-        self._split_options = ['--split', ts_string[:-1]]
+                ts_string += "-" if index % 2 == 0 else ","
+        self._split_options = ["--split", ts_string[:-1]]
         if link:
-            self._split_options += '--link'
+            self._split_options += "--link"
 
-    def split_parts_frames(self, frame_parts, link=False):
+    def split_parts_frames(self, frame_parts: list | tuple, link: bool | None = False) -> None:  # noqa: C901
         """Split the output in parts by frames.
 
         Parameters
@@ -732,32 +784,38 @@ class MKVFile:
         """
         f_flat = MKVFile.flatten(frame_parts)
         if len(frame_parts) == 0:
-            raise ValueError(f'"{frame_parts}" are not properly formatted parts')
+            msg = f'"{frame_parts}" are not properly formatted parts'
+            raise ValueError(msg)
         if None in f_flat[1:-1]:
-            raise ValueError(f'"{frame_parts}" are not properly formatted parts')
-        for f_1, f_2 in zip(f_flat[:-1], f_flat[1:]):
+            msg = f'"{frame_parts}" are not properly formatted parts'
+            raise ValueError(msg)
+        for f_1, f_2 in zip(f_flat[:-1], f_flat[1:], strict=False):
             if None not in (f_1, f_2) and f_1 >= f_2:
-                raise ValueError(f'"{frame_parts}" are not properly formatted parts')
-        f_string = 'parts:'
+                msg = f'"{frame_parts}" are not properly formatted parts'
+                raise ValueError(msg)
+        f_string = "parts:"
         for f_set in frame_parts:
-            f_set = MKVFile.flatten(f_set)
+            f_set = MKVFile.flatten(f_set)  # noqa: PLW2901
             if not isinstance(f_set, (list, tuple)):
-                raise TypeError('set is not of type list or tuple')
-            if len(f_set) < 2 or len(f_set) % 2 != 0:
-                raise ValueError(f'"{f_set}" is not a properly formatted set')
+                msg = "set is not of type list or tuple"
+                raise TypeError(msg)
+            if len(f_set) < 2 or len(f_set) % 2 != 0:  # noqa: PLR2004
+                msg = f'"{f_set}" is not a properly formatted set'
+                raise ValueError(msg)
             for index, f in enumerate(f_set):
                 if not isinstance(f, int) and f is not None:
-                    raise TypeError(f'frame "{f}" not an int')
+                    msg = f'frame "{f}" not an int'
+                    raise TypeError(msg)
                 if index % 2 == 0 and index > 0:
-                    f_string += '+'
+                    f_string += "+"
                 if f is not None:
                     f_string += str(f)
-                f_string += '-' if index % 2 == 0 else ','
-        self._split_options = ['--split', f_string[:-1]]
+                f_string += "-" if index % 2 == 0 else ","
+        self._split_options = ["--split", f_string[:-1]]
         if link:
-            self._split_options += '--link'
+            self._split_options += "--link"
 
-    def split_chapters(self, *chapters, link=False):
+    def split_chapters(self, *chapters: int | list | tuple, link: bool | None = False) -> None:
         """Split the output file into parts by chapters.
 
         Parameters
@@ -774,27 +832,30 @@ class MKVFile:
             Raised if any chapters in `*chapters` are not of type int.
         ValueError
             Raised if `*chapters` contains improperly formatted chapters.
-       """
+        """
         c_flat = MKVFile.flatten(chapters)
         if not chapters:
-            self._split_options = ['--split', 'chapters:all']
+            self._split_options = ["--split", "chapters:all"]
             return
         for c in c_flat:
             if not isinstance(c, int):
-                raise TypeError(f'chapter "{c}" not an int')
+                msg = f'chapter "{c}" not an int'
+                raise TypeError(msg)
             if c < 1:
-                raise ValueError(f'"{chapters}" are not properly formatted chapters')
-        for c_1, c_2 in zip(c_flat[:-1], c_flat[1:]):
+                msg = f'"{chapters}" are not properly formatted chapters'
+                raise ValueError(msg)
+        for c_1, c_2 in zip(c_flat[:-1], c_flat[1:], strict=False):
             if c_1 >= c_2:
-                raise ValueError(f'"{chapters}" are not properly formatted chapters')
-        c_string = 'chapters:'
+                msg = f'"{chapters}" are not properly formatted chapters'
+                raise ValueError(msg)
+        c_string = "chapters:"
         for c in c_flat:
-            c_string += f'{str(c)},'
-        self._split_options = ['--split', c_string[:-1]]
+            c_string += f"{c!s},"
+        self._split_options = ["--split", c_string[:-1]]
         if link:
-            self._split_options += '--link'
+            self._split_options += "--link"
 
-    def link_to_previous(self, file_path):
+    def link_to_previous(self, file_path: str) -> None:
         """Link the output file as the predecessor of the `file_path` file.
 
         Parameters
@@ -809,14 +870,9 @@ class MKVFile:
         ValueError
             Raised if file at `file_path` cannot be verified as an MKV.
         """
-        if not isinstance(str, file_path):
-            raise TypeError(f'"{file_path}" is not of type str')
-        file_path = expanduser(file_path)
-        if not verify_matroska(file_path):
-            raise ValueError(f'"{file_path}" is not a matroska file')
-        self._link_to_previous_file = file_path
+        self._link_to_previous_file = checking_file_path(file_path)
 
-    def link_to_next(self, file_path):
+    def link_to_next(self, file_path: str) -> None:
         """Link the output file as the successor of the `file_path` file.
 
         Parameters
@@ -831,19 +887,14 @@ class MKVFile:
         ValueError
             Raised if file at `file_path` cannot be verified as an MKV.
         """
-        if not isinstance(file_path, str):
-            raise TypeError(f'"{file_path}" is not of type str')
-        file_path = expanduser(file_path)
-        if not verify_matroska(file_path):
-            raise ValueError(f'"{file_path}" is not a matroska file')
-        self._link_to_next_file = file_path
+        self._link_to_next_file = checking_file_path(file_path)
 
-    def link_to_none(self):
+    def link_to_none(self) -> None:
         """Remove all linking to previous and next options."""
         self._link_to_previous_file = None
         self._link_to_next_file = None
 
-    def chapters(self, file_path, language=None):
+    def chapters(self, file_path: str, language: str | None = None) -> None:
         """Add a chapters file to the :class:`~pymkv.MKVFile` object.
 
         Parameters
@@ -860,15 +911,10 @@ class MKVFile:
         TypeError
             Raised if `file_path` is not of type str.
         """
-        if not isinstance(file_path, str):
-            raise TypeError(f'"{file_path}" is not of type str')
-        file_path = expanduser(file_path)
-        if not isfile(file_path):
-            raise FileNotFoundError(f'"{file_path}" does not exist')
-        self._chapters_file = file_path
+        self._chapters_file = checking_file_path(file_path)
         self.chapter_language = language
 
-    def global_tags(self, file_path):
+    def global_tags(self, file_path: str) -> None:
         """Add global tags to the :class:`~pymkv.MKVFile` object.
 
         Parameters
@@ -883,14 +929,9 @@ class MKVFile:
         TypeError
             Raised if `file_path` is not of type str.
         """
-        if not isinstance(file_path, str):
-            raise TypeError(f'"{file_path}" is not of type str')
-        file_path = expanduser(file_path)
-        if not isfile(file_path):
-            raise FileNotFoundError(f'"{file_path}" does not exist')
-        self._global_tags_file = file_path
+        self._global_tags_file = checking_file_path(file_path)
 
-    def track_tags(self, *track_ids, exclusive=False):
+    def track_tags(self, *track_ids: int | list | tuple, exclusive: bool | None = False) -> None:
         """Include or exclude tags from specific tracks.
 
         Parameters
@@ -912,37 +953,40 @@ class MKVFile:
         """
         ids_flat = MKVFile.flatten(track_ids)
         if not track_ids:
-            raise ValueError(f'"{track_ids}" are not properly formatted track ids')
+            msg = f'"{track_ids}" are not properly formatted track ids'
+            raise ValueError(msg)
         for tid in ids_flat:
             if not isinstance(tid, int):
-                raise TypeError(f'track id "{tid}" not an int')
+                msg = f'track id "{tid}" not an int'
+                raise TypeError(msg)
             if tid < 0 or tid >= len(self.tracks):
-                raise IndexError('track id out of range')
+                msg = "track id out of range"
+                raise IndexError(msg)
         for tid in ids_flat if exclusive else list(set(range(len(self.tracks))) - set(ids_flat)):
             self.tracks[tid].no_track_tags = True
 
-    def no_chapters(self):
+    def no_chapters(self) -> None:
         """Ignore the existing chapters of the :class:`~pymkv.MKVFile` object."""
         for track in self.tracks:
             track.no_chapters = True
 
-    def no_global_tags(self):
+    def no_global_tags(self) -> None:
         """Ignore the existing global tags of the :class:`~pymkv.MKVFile` object."""
         for track in self.tracks:
             track.no_global_tags = True
 
-    def no_track_tags(self):
+    def no_track_tags(self) -> None:
         """Ignore the existing track tags of the :class:`~pymkv.MKVFile` object."""
         for track in self.tracks:
             track.no_track_tags = True
 
-    def no_attachments(self):
+    def no_attachments(self) -> None:
         """Ignore the existing attachments of the :class:`~pymkv.MKVFile` object."""
         for track in self.tracks:
             track.no_attachments = True
 
     @staticmethod
-    def flatten(item):
+    def flatten(item: list | tuple) -> list:
         """Flatten a list or a tuple.
 
         Takes a list or a tuple that contains other lists or tuples and flattens into a non-nested list.
@@ -966,11 +1010,11 @@ class MKVFile:
         if not isinstance(item, (list, tuple)):
             return [item]
         flat_list = []
-        for item in item:
+        for item in item:  # noqa: B020
             flat_list.extend(MKVFile.flatten(item))
         return flat_list
 
-    def order_tracks_by_file_id(self):
+    def order_tracks_by_file_id(self) -> None:
         """
         Orders tracks based on their file ID. Tracks from the same file will have the same file ID.
 

@@ -35,6 +35,8 @@ bcp47 = "0.1.0"
 
 [tool.poetry.dev-dependencies]
 Sphinx = "^7.3.7"
+pytest = "^8.2.1"
+pytest-cov = "^5.0.0"
 sphinx-material = {git = "https://github.com/bashtage/sphinx-material.git"}
 
 [tool.poetry.urls]
@@ -125,6 +127,7 @@ select = [
   "RUF"
 ]
 ignore = [
+  "N999",
   "FBT002",
   "FBT001",
   "ANN101",

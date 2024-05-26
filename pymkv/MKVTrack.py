@@ -35,26 +35,26 @@ Now all these tracks can be added to an :class:`~pymkv.MKVFile` object and muxed
 >>> file.mux('path/to/output.mkv')
 """
 
+from __future__ import annotations
+
 import json
-import os.path
-from os import devnull
-from os.path import expanduser, isfile
+import os
 import subprocess as sp
+from os import devnull
 from pathlib import Path
 
-from pymkv.TypeTrack import get_track_extension
-from pymkv.Verifications import verify_supported
-from pymkv.ISO639_2 import is_iso639_2
 from pymkv.BCP47 import is_bcp47
+from pymkv.ISO639_2 import is_iso639_2
+from pymkv.TypeTrack import get_track_extension
+from pymkv.utils import prepare_mkvtoolnix_path
+from pymkv.Verifications import verify_supported
 
 
 class MKVTrack:
     """A class that represents a track for an :class:`~pymkv.MKVFile` object.
-
     :class:`~pymkv.MKVTrack` objects are video, audio, or subtitles. Tracks can be standalone files or a single track
     within an MKV file, both can be handled by pymkv. An :class:`~pymkv.MKVTrack` object can be added to an
     :class:`~pymkv.MKVFile` and will be included when the MKV is muxed.
-
     Parameters
     ----------
     file_path : str
@@ -74,15 +74,20 @@ class MKVTrack:
         Determines if the track should be the default track of its type when muxed into an MKV file.
     forced_track : bool, optional
         Determines if the track should be a forced track when muxed into an MKV file.
-    mkvmerge_path : str, optional
+    mkvmerge_path : str, list, os.PathLike, optional
         The path where pymkv looks for the mkvmerge executable. pymkv relies on the mkvmerge executable to parse
         files. By default, it is assumed mkvmerge is in your shell's $PATH variable. If it is not, you need to set
         *mkvmerge_path* to the executable location.
-
+    mkvextract_path : str, list, os.PathLike, optional
+        The path where pymkv looks for the mkvextract executable. pymkv relies on the mkvextract executable to extract
+        files. By default, it is assumed mkvextract is in your shell's $PATH variable. If it is not, you need to set
+        *mkvextract_path* to the executable location.
     Attributes
     ----------
-    mkvmerge_path : str
+    mkvmerge_path : list
         The path of the mkvmerge executable.
+    mkvextract_path : list
+        The path of the mkvextract executable.
     track_name : str
         The name that will be given to the track when muxed into a file.
     default_track : bool
@@ -107,15 +112,29 @@ class MKVTrack:
         that are already part of an MKV file.
     """
 
-    def __init__(self, file_path, track_id=0, track_name=None, language=None, language_ietf=None, default_track=False,
-                 forced_track=False, flag_commentary=False, flag_hearing_impaired=False, flag_visual_impaired=False,
-                 flag_original=False, mkvmerge_path='mkvmerge', mkvextract_path='mkvextract', sync=None):
+    def __init__(  # noqa: PLR0913
+        self,
+        file_path: str,
+        track_id: int | None = 0,
+        track_name: str | None = None,
+        language: str | None = None,
+        language_ietf: str | None = None,
+        default_track: bool | None = False,
+        forced_track: bool | None = False,
+        flag_commentary: bool | None = False,
+        flag_hearing_impaired: bool | None = False,
+        flag_visual_impaired: bool | None = False,
+        flag_original: bool | None = False,
+        mkvmerge_path: str | list | os.PathLike | None = "mkvmerge",
+        mkvextract_path: str | list | os.PathLike | None = "mkvextract",
+        sync: int | None = None,
+    ) -> None:
         # track info
         self._track_codec = None
         self._track_type = None
 
         # base
-        self.mkvmerge_path = mkvmerge_path
+        self.mkvmerge_path = prepare_mkvtoolnix_path(mkvmerge_path)
         self._file_path = None
         self.file_path = file_path
         self._track_id = None
@@ -146,14 +165,14 @@ class MKVTrack:
         self.no_attachments = False
 
         # mkvextract
-        self.mkvextract_path = mkvextract_path
+        self.mkvextract_path = prepare_mkvtoolnix_path(mkvextract_path)
         self.extension = get_track_extension(self)
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return repr(self.__dict__)
 
     @property
-    def file_path(self):
+    def file_path(self) -> str:
         """str: The path to the track or MKV file containing the desired track.
 
         Setting this property will verify the passed in file is supported by mkvmerge and set the track_id to 0. It
@@ -167,15 +186,16 @@ class MKVTrack:
         return self._file_path
 
     @file_path.setter
-    def file_path(self, file_path):
-        file_path = expanduser(file_path)
+    def file_path(self, file_path: str) -> None:
+        file_path = str(Path(file_path).expanduser())
         if not verify_supported(file_path, mkvmerge_path=self.mkvmerge_path):
-            raise ValueError('"{}" is not a supported file')
+            msg = '"{}" is not a supported file'
+            raise ValueError(msg)
         self._file_path = file_path
         self.track_id = 0
 
     @property
-    def file_id(self):
+    def file_id(self) -> int:
         """int: The ID of the file the track belongs to.
 
         The file ID represents which file the current track is associated with. This is particularly useful
@@ -189,14 +209,15 @@ class MKVTrack:
         return self._file_id
 
     @file_id.setter
-    def file_id(self, file_id: int):
+    def file_id(self, file_id: int) -> None:
         if isinstance(file_id, int):
             self._file_id = file_id
         else:
-            raise ValueError('file_id must be an integer')
+            msg = "file_id must be an integer"
+            raise ValueError(msg)  # noqa: TRY004
 
     @property
-    def track_id(self):
+    def track_id(self) -> int:
         """int: The ID of the track within the file.
 
         Setting *track_id* will check that the ID passed in exists in the file. It will then look at the new track
@@ -210,20 +231,21 @@ class MKVTrack:
         return self._track_id
 
     @track_id.setter
-    def track_id(self, track_id):
-        info_json = json.loads(sp.check_output([self.mkvmerge_path, '-J', self.file_path]).decode())
-        if not 0 <= track_id < len(info_json['tracks']):
-            raise IndexError('track index out of range')
+    def track_id(self, track_id: int) -> None:
+        info_json = json.loads(sp.check_output([*self.mkvmerge_path, "-J", self.file_path]).decode())  # noqa: S603
+        if not 0 <= track_id < len(info_json["tracks"]):
+            msg = "track index out of range"
+            raise IndexError(msg)
         self._track_id = track_id
         try:
-            self._pts = info_json['tracks'][track_id]["start_pts"]
+            self._pts = info_json["tracks"][track_id]["start_pts"]
         except KeyError:
             self._pts = 0
-        self._track_codec = info_json['tracks'][track_id]['codec']
-        self._track_type = info_json['tracks'][track_id]['type']
+        self._track_codec = info_json["tracks"][track_id]["codec"]
+        self._track_type = info_json["tracks"][track_id]["type"]
 
     @property
-    def language(self):
+    def language(self) -> str:
         """str: The language of the track.
 
         Setting this property will verify that the passed in language is an ISO-639 language code and use it as the
@@ -237,7 +259,7 @@ class MKVTrack:
         return self._language
 
     @language.setter
-    def language(self, language):
+    def language(self, language: str) -> None:
         """Sets the language of the MKVTrack.
 
         Args:
@@ -252,10 +274,11 @@ class MKVTrack:
         if language is None or is_iso639_2(language):
             self._language = language
         else:
-            raise ValueError('not an ISO639-2 language code')
+            msg = "not an ISO639-2 language code"
+            raise ValueError(msg)
 
     @property
-    def pts(self):
+    def pts(self) -> int:
         """Returns the value of the `pts` property.
         The Presentation Timestamp (PTS) in multimedia files indicates the exact time when a frame or audio sample
         should be presented to the user, ensuring accurate synchronization between audio and video streams.
@@ -269,7 +292,7 @@ class MKVTrack:
         return self._pts
 
     @property
-    def sync(self):
+    def sync(self) -> int:
         """int: track delay.
 
         Setting this property allows you to wiggle the track negatively/positively.
@@ -277,7 +300,7 @@ class MKVTrack:
         return self._sync
 
     @sync.setter
-    def sync(self, sync):
+    def sync(self, sync: int) -> None:
         """Sets the value of the `sync` property.
 
         Args:
@@ -292,7 +315,7 @@ class MKVTrack:
         self._sync = sync
 
     @property
-    def language_ietf(self):
+    def language_ietf(self) -> str:
         """str: The language of the track with BCP47 format.
         Setting this property will verify that the passed in language is a BCP47 language code and use it as the
         language for the track.
@@ -304,14 +327,15 @@ class MKVTrack:
         return self._language_ietf
 
     @language_ietf.setter
-    def language_ietf(self, language_ietf):
+    def language_ietf(self, language_ietf: str) -> None:
         if language_ietf is None or is_bcp47(language_ietf):
             self._language_ietf = language_ietf
         else:
-            raise ValueError('not a BCP47 language code')
+            msg = "not a BCP47 language code"
+            raise ValueError(msg)
 
     @property
-    def tags(self):
+    def tags(self) -> str:
         """str: The tags file to include with the track.
 
         Setting this property will check that the file path passed in exists and set it as the tags file.
@@ -326,33 +350,41 @@ class MKVTrack:
         return self._tags
 
     @tags.setter
-    def tags(self, file_path):
+    def tags(self, file_path: str) -> None:
         if not isinstance(file_path, str):
-            raise TypeError(f'"{file_path}" is not of type str')
-        file_path = expanduser(file_path)
-        if not isfile(file_path):
-            raise FileNotFoundError(f'"{file_path}" does not exist')
-        self._tags = file_path
+            msg = f'"{file_path}" is not of type str'
+            raise TypeError(msg)
+        file_path = Path(file_path).expanduser()
+        if not file_path.is_file():
+            msg = f'"{file_path}" does not exist'
+            raise FileNotFoundError(msg)
+        self._tags = str(file_path)
 
     @property
-    def track_codec(self):
+    def track_codec(self) -> str:
         """str: The codec of the track such as h264 or AAC."""
         return self._track_codec
 
     @property
-    def track_type(self):
+    def track_type(self) -> str:
         """str: The type of track such as video or audio."""
         return self._track_type
 
-    def extract(self, output_path: str = None, silent: bool = False) -> str:
-        """Extract the track as a file.
+    def extract(self, output_path: str | os.PathLike | None = None, silent: bool | None = False) -> str:
+        """
+        Extract the track as a file.
 
         Parameters
         ----------
-        output_path : str
+        output_path : str, os.PathLike, optional
             The path to be used as the output file in the mkvextract command.
         silent : bool, optional
             By default the mkvmerge output will be shown unless silent is True.
+
+        Returns
+        -------
+        str
+            The path of the extracted file.
         """
         extract_info_file = f"_[{self.track_id}]"
         if self.language:
@@ -365,12 +397,11 @@ class MKVTrack:
             output_path = f"{self.file_path}{extract_info_file}"
         else:
             file = Path(self.file_path)
-            output_path = os.path.join(output_path, f"{file.name}{extract_info_file}")
-        output_path = expanduser(output_path)
-        command = [self.mkvextract_path, 'tracks', f"{self.file_path}", f"{self.track_id}:{output_path}"]
+            output_path = Path(output_path, f"{file.name}{extract_info_file}")
+        output_path = str(Path(output_path).expanduser())
+        command = [*self.mkvextract_path, "tracks", f"{self.file_path}", f"{self.track_id}:{output_path}"]
         if silent:
-            sp.run(command, stdout=open(devnull, 'wb'), check=True)
+            sp.run(command, stdout=open(devnull, "wb"), check=True)  # noqa: S603, PTH123, SIM115
         else:
-            print('Running with command:\n"' + " ".join(command) + '"')
-            sp.run(command, check=True, capture_output=True)
+            sp.run(command, check=True, capture_output=True)  # noqa: S603
         return output_path

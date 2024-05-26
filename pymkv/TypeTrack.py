@@ -1,6 +1,9 @@
-from typing import Optional
+from __future__ import annotations
 
-from pymkv import MKVTrack
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from pymkv import MKVTrack
 
 type_files = {
     "video": {
@@ -14,6 +17,7 @@ type_files = {
         "V_THEORA": "ogg",
         "V_VP8": "ivf",
         "V_VP9": "ivf",
+        "AVC/H.264/MPEG-4p10": "mp4",
     },
     "audio": {
         "AAC": "aac",
@@ -34,6 +38,7 @@ type_files = {
         "WAVPACK4": "wv",
         "V_MS/VFW/FOURCC, WVC1": "wvc",
         "VC-1": "wvc",
+        "Vorbis": "ogg",
     },
     "subtitles": {
         "PGS": "sup",
@@ -49,7 +54,7 @@ type_files = {
 }
 
 
-def get_track_extension(track: MKVTrack) -> Optional[str]:
+def get_track_extension(track: MKVTrack) -> str | None:
     """str: Extension of a track.
 
     Parameters
@@ -66,3 +71,4 @@ def get_track_extension(track: MKVTrack) -> Optional[str]:
     track_codec = track.track_codec
     if track_type in type_files and track_codec in type_files[track_type]:
         return type_files[track_type][track_codec]
+    return None
