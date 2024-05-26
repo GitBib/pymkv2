@@ -1,10 +1,10 @@
 [tool.poetry]
 name = "pymkv2"
-version = "2.0.2"
+version = "2.0.3"
 description = "A Python wrapper for mkvmerge. It provides support for muxing, splitting, linking, chapters, tags, and attachments through the use of mkvmerge."
 authors = [
     "Sheldon Woodward <me@sheldonw.com>",
-    "GitBib"
+    "GitBib <job@bnff.website>"
 ]
 license = "MIT"
 readme = "README.md"
