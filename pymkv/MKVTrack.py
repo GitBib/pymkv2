@@ -370,13 +370,13 @@ class MKVTrack:
         """str: The type of track such as video or audio."""
         return self._track_type
 
-    def extract(self, output_path: str | None = None, silent: bool | None = False) -> str:
+    def extract(self, output_path: str | os.PathLike | None = None, silent: bool | None = False) -> str:
         """
         Extract the track as a file.
 
         Parameters
         ----------
-        output_path : str, optional
+        output_path : str, os.PathLike, optional
             The path to be used as the output file in the mkvextract command.
         silent : bool, optional
             By default the mkvmerge output will be shown unless silent is True.
