@@ -15,6 +15,10 @@ mkvmerge must be installed on your computer, it is needed to process files when 
 recommended to add it to your $PATH variable but a different path can be manually specified. mkvmerge can be found
 and downloaded from [here](https://mkvtoolnix.download/downloads.html) or from most package managers.
 
+To install pymkv from PyPI, use the following command:
+
+    $ pip install pymkv2
+
 You can also clone the repo and run the following command in the project root to install the source code as editable:
 
     $ pip install -e .
