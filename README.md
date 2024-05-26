@@ -27,9 +27,7 @@ You can also clone the repo and run the following command in the project root to
 The documentation for pymkv can be found [here](https://gitbib.github.io/pymkv2/) or in the project's docstrings.
 
 ### Tests
-~~After completing documentation for the existing features, unit tests need to be written to "lock in" the existing
-functionality. Generating mkvmerge commands can be complex and it is easy to subtly modify an existing feature when
-adding a new one. Unit tests will ensure that features remain the same and help prevent bugs in the future.~~
+Added the first tests for the project. Still a lot to do, but it’s a start. Currently, 49% is covered by tests.
 
 ### Cleanup
 ~~The existing code base could use some tidying, better commenting, debugging, and a general styling overhaul. Setting up
