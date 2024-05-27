@@ -93,7 +93,11 @@ def verify_matroska(file_path: str | os.PathLike, mkvmerge_path: str = "mkvmerge
         msg = "mkvmerge is not at the specified path, add it there or change the mkvmerge_path property"
         raise FileNotFoundError(msg)
     try:
-        info_json = json.loads(sp.check_output([mkvmerge_path, "-J", checking_file_path(file_path)]).decode())  # noqa: S603
+        info_json = json.loads(
+            sp.check_output(
+                [*prepare_mkvtoolnix_path(mkvmerge_path), "-J", checking_file_path(file_path)],  # noqa: S603
+            ).decode(),
+        )
 
     except sp.CalledProcessError as e:
         msg = f'"{file_path}" could not be opened'
@@ -148,7 +152,11 @@ def verify_recognized(file_path: str, mkvmerge_path: str | None = "mkvmerge"):  
     """
     file_path = verify_file_path_and_mkvmerge(file_path, mkvmerge_path)
     try:
-        info_json = json.loads(sp.check_output([mkvmerge_path, "-J", file_path]).decode())  # noqa: S603
+        info_json = json.loads(
+            sp.check_output(
+                [*prepare_mkvtoolnix_path(mkvmerge_path), "-J", file_path],  # noqa: S603
+            ).decode(),
+        )
     except sp.CalledProcessError as e:
         msg = f'"{file_path}" could not be opened'
         raise ValueError(msg) from e
