@@ -1,5 +1,5 @@
-FILE_URL := https://filesamples.com/samples/video/mkv/sample_1280x720_surfing_with_audio.mkv
-FILE_TWO_URL := https://filesamples.com/samples/video/mkv/sample_960x400_ocean_with_audio.mkv
+FILE_URL := https://pymkv-files.bnff.website/file.mkv
+FILE_TWO_URL := https://pymkv-files.bnff.website/file_2.mkv
 
 TEST_FILE := tests/file.mkv
 TEST_TWO_FILE := tests/file_2.mkv
