@@ -23,7 +23,7 @@ copyright = "2024, Sheldon Woodward & GitBib"
 author = "Sheldon Woodward & GitBib"
 
 # The full version, including alpha/beta/rc tags
-release = "2.0.4"
+release = "2.0.5"
 
 
 # -- General configuration ---------------------------------------------------
