@@ -2,6 +2,7 @@
 [![PyPI Version](https://img.shields.io/pypi/v/pymkv2.svg)](https://pypi.python.org/pypi/pymkv2)
 [![License](https://img.shields.io/github/license/gitbib/pymkv.svg)](https://github.com/gitbib/pymkv/LICENSE.txt)
 [![codecov](https://codecov.io/github/GitBib/pymkv2/branch/master/graph/badge.svg?token=2JDX5HHGUO)](https://codecov.io/github/GitBib/pymkv2)
+[![versions](https://img.shields.io/pypi/pyversions/pymkv2.svg)](https://github.com/GitBib/pymkv2)
 
 pymkv2 is a Python wrapper for mkvmerge and other tools in the MKVToolNix suite. It provides support for muxing,
 splitting, linking, chapters, tags, and attachments through the use of mkvmerge.
