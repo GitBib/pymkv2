@@ -33,6 +33,7 @@ jobs:
         run: poetry install --no-interaction
       - name: Run tests and collect coverage
         run: |
+          source .venv/bin/activate
           pytest --cov=pymkv tests/
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v4
