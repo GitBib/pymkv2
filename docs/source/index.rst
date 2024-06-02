@@ -24,6 +24,17 @@ functionality that is missing or an error in the docs, please open a new issue `
     pymkv/Timestamp
     pymkv/Verifications
 
+Install
+-------
+
+To install pymkv2 from PyPI, use the following command:
+
+    $ pip install pymkv2
+
+You can also clone the repo and run the following command in the project root to install the source code as editable:
+
+    $ pip install -e .
+
 Indices and tables
 ------------------
 
