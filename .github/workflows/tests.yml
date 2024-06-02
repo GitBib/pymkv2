@@ -34,7 +34,7 @@ jobs:
       - name: Run tests and collect coverage
         run: |
           source .venv/bin/activate
-          pytest --cov=pymkv tests/
+          make
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v4
         if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/master' || github.event_name == 'pull_request' || github.event_name == 'workflow_dispatch' }}

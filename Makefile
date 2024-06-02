@@ -9,7 +9,7 @@ TEST_DIR := tests
 .PHONY: test clean
 
 test: $(TEST_FILE) $(TEST_TWO_FILE)
-	pytest $(TEST_DIR)
+	pytest --cov=pymkv $(TEST_DIR)
 
 $(TEST_FILE):
 	@if [ ! -f $(TEST_FILE) ]; then \
