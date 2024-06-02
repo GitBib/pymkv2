@@ -20,6 +20,8 @@ jobs:
           sudo apt-get update
       - name: Install MKVToolNix
         run: sudo apt-get install -y mkvtoolnix mkvtoolnix-gui
+      - name: Verify MKVToolNix installation
+        run: mkvmerge -V
       - name: Install Poetry
         uses: snok/install-poetry@v1
         with:
