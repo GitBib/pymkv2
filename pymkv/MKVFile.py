@@ -50,7 +50,7 @@ from pymkv.MKVAttachment import MKVAttachment
 from pymkv.MKVTrack import MKVTrack
 from pymkv.Timestamp import Timestamp
 from pymkv.utils import prepare_mkvtoolnix_path
-from pymkv.Verifications import checking_file_path, verify_mkvmerge
+from pymkv.Verifications import checking_file_path, verify_mkvmerge, verify_supported
 
 
 class MKVFile:
@@ -104,9 +104,13 @@ class MKVFile:
         self.attachments = []
         self._number_file = 0
 
-        if not verify_mkvmerge(mkvmerge_path=mkvmerge_path):
+        if not verify_mkvmerge(mkvmerge_path=self.mkvmerge_path):
             msg = "mkvmerge is not at the specified path, add it there or changed mkvmerge_path property"
             raise FileNotFoundError(msg)
+
+        if not verify_supported(file_path, mkvmerge_path=self.mkvmerge_path):
+            msg = f"The file '{file_path}' is not a valid Matroska file or is not supported."
+            raise ValueError(msg)
 
         if file_path is not None:
             # add file title
