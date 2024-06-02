@@ -13,9 +13,10 @@ jobs:
           python-version: '3.11'
       - name: Set up MKVToolNix repository
         run: |
+          sudo apt-get update
           sudo apt-get install -y wget gnupg
-          wget -qO - https://mkvtoolnix.download/gpg-pub-moritzbunkus.asc | sudo apt-key add -
-          sudo sh -c 'echo "deb https://mkvtoolnix.download/ubuntu/ jammy main" > /etc/apt/sources.list.d/mkvtoolnix.list'
+          wget -qO - https://mkvtoolnix.download/gpg-pub-moritzbunkus.asc | gpg --dearmor | sudo tee /usr/share/keyrings/mkvtoolnix-archive-keyring.gpg
+          echo "deb [signed-by=/usr/share/keyrings/mkvtoolnix-archive-keyring.gpg] https://mkvtoolnix.download/ubuntu/ jammy main" | sudo tee /etc/apt/sources.list.d/mkvtoolnix.list
           sudo apt-get update
       - name: Install MKVToolNix
         run: sudo apt-get install -y mkvtoolnix
