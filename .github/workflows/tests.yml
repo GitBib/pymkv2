@@ -1,0 +1,42 @@
+name: Tests
+on: [push, pull_request]
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+      - name: Set up python
+        id: setup-python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Set up MKVToolNix repository
+        run: |
+          sudo apt-get install -y wget gnupg
+          wget -qO - https://mkvtoolnix.download/gpg-pub-moritzbunkus.asc | sudo apt-key add -
+          sudo sh -c 'echo "deb https://mkvtoolnix.download/ubuntu/ jammy main" > /etc/apt/sources.list.d/mkvtoolnix.list'
+          sudo apt-get update
+      - name: Install MKVToolNix
+        run: sudo apt-get install -y mkvtoolnix
+      - name: Install Poetry
+        uses: snok/install-poetry@v1
+        with:
+          version: 1.8.3
+          virtualenvs-create: true
+          virtualenvs-in-project: true
+          installer-parallel: true
+      - name: Install dependencies
+        run: poetry install --no-interaction --no-root
+      - name: Install project
+        run: poetry install --no-interaction
+      - name: Run tests and collect coverage
+        run: |
+          pytest --cov=pymkv tests/
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v4
+        if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/master' || github.event_name == 'pull_request' || github.event_name == 'workflow_dispatch' }}
+        with:
+          verbose: true
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
