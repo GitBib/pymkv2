@@ -3,7 +3,7 @@ name = "pymkv2"
 version = "2.0.4"
 description = "A Python wrapper for mkvmerge. It provides support for muxing, splitting, linking, chapters, tags, and attachments through the use of mkvmerge."
 authors = [
-     "GitBib <job@bnff.website>",
+    "GitBib <job@bnff.website>",
     "Sheldon Woodward <me@sheldonw.com>",
 ]
 license = "MIT"
@@ -43,7 +43,7 @@ sphinx-material = {git = "https://github.com/bashtage/sphinx-material.git"}
 homepage = "https://github.com/GitBib/pymkv2"
 
 [build-system]
-requires = ["poetry-core>=1.0.0", "setuptools", "wheel"]
+requires = ["poetry-core>=1.0.0", "setuptools", "wheel", "setuptools_scm"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.ruff]
