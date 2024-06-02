@@ -58,7 +58,7 @@ def verify_mkvmerge(mkvmerge_path: str | list | os.PathLike | None = "mkvmerge")
     return bool(match("mkvmerge.*", output))
 
 
-def verify_matroska(file_path: str | os.PathLike, mkvmerge_path: str = "mkvmerge") -> bool:
+def verify_matroska(file_path: str | os.PathLike, mkvmerge_path: str | list | os.PathLike | None = "mkvmerge") -> bool:
     """
     Parameters
     ----------
@@ -93,7 +93,7 @@ def verify_matroska(file_path: str | os.PathLike, mkvmerge_path: str = "mkvmerge
         msg = "mkvmerge is not at the specified path, add it there or change the mkvmerge_path property"
         raise FileNotFoundError(msg)
     try:
-        info_json = json.loads(
+        info_json: dict = json.loads(
             sp.check_output(
                 [*prepare_mkvtoolnix_path(mkvmerge_path), "-J", checking_file_path(file_path)],  # noqa: S603
             ).decode(),

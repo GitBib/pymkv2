@@ -49,7 +49,7 @@ from pymkv.BCP47 import is_bcp47
 from pymkv.ISO639_2 import is_iso639_2
 from pymkv.TypeTrack import get_track_extension
 from pymkv.utils import prepare_mkvtoolnix_path
-from pymkv.Verifications import verify_supported
+from pymkv.Verifications import checking_file_path, verify_supported
 
 
 class MKVTrack:
@@ -189,9 +189,9 @@ class MKVTrack:
 
     @file_path.setter
     def file_path(self, file_path: str) -> None:
-        file_path = str(Path(file_path).expanduser())
+        file_path = checking_file_path(file_path)
         if not verify_supported(file_path, mkvmerge_path=self.mkvmerge_path):
-            msg = '"{}" is not a supported file'
+            msg = f"The file '{file_path}' is not a valid Matroska file or is not supported."
             raise ValueError(msg)
         self._file_path = file_path
         self.track_id = 0
