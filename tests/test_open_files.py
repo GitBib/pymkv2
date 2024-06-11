@@ -38,3 +38,10 @@ def test_track_not_support() -> None:
         match="The file 'tests/conftest.py' is not a valid Matroska file or is not supported.",
     ):
         MKVTrack("tests/conftest.py")
+
+
+def test_empty_mkv_file() -> None:
+    mkv = MKVFile(title="test")
+
+    assert mkv.title == "test"
+    assert len(mkv.tracks) == 0
