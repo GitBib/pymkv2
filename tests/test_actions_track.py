@@ -165,3 +165,21 @@ def test_move_track_backward_and_mux(get_base_path: Path, get_path_test_file: Pa
     assert len(mkv.tracks) == 2  # noqa: PLR2004
     assert mkv.tracks[0].track_type == "audio"
     assert mkv.tracks[1].track_type == "video"
+
+
+def test_get_track(get_path_test_file: Path) -> None:
+    mkv = MKVFile(get_path_test_file)
+    track = mkv.get_track(1)
+
+    assert track.track_type == "audio"
+
+    tracks = mkv.get_track()
+
+    assert isinstance(tracks, list)
+    assert len(tracks) == 2  # noqa: PLR2004
+
+
+def test_get_track_error(get_path_test_file: Path) -> None:
+    mkv = MKVFile(get_path_test_file)
+    with pytest.raises(IndexError):
+        mkv.get_track(2)

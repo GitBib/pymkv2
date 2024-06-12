@@ -435,7 +435,7 @@ class MKVFile:
             msg = "Attachment is not str of MKVAttachment"
             raise TypeError(msg)
 
-    def get_track(self, track_num: int | None = None) -> MKVTrack:
+    def get_track(self, track_num: int | None = None) -> MKVTrack | list[MKVTrack]:
         """Get a :class:`~pymkv.MKVTrack` from the :class:`~pymkv.MKVFile` object.
 
         Parameters
