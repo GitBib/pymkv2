@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from re import match
+import re
 
 
 class Timestamp:
@@ -175,7 +175,7 @@ class Timestamp:
     def ts(self) -> str:
         """Generates the timestamp specified in the object."""
         # parse timestamp format
-        format_groups = match(r"^(([Hh]{1,2}):)?([Mm]{1,2}):([Ss]{1,2})(\.([Nn]{1,9}))?$", self.form).groups()
+        format_groups = re.match(r"^(([Hh]{1,2}):)?([Mm]{1,2}):([Ss]{1,2})(\.([Nn]{1,9}))?$", self.form).groups()
         timestamp_format = [format_groups[i] is not None for i in (1, 2, 3, 5)]
 
         # create timestamp string
@@ -248,16 +248,16 @@ class Timestamp:
         self._form = form
 
     @staticmethod
-    def verify(timestamp: str | int) -> bool:
+    def verify(timestamp: str) -> bool:
         """Verify a timestamp has the proper form to be used in mkvmerge.
 
-        timestamp (str, int):
+        timestamp (str):
             The timestamp to be verified.
         """
         if not isinstance(timestamp, str):
             msg = f'"{type(timestamp)}" is not str type'
             raise TypeError(msg)
-        elif match(r"^[0-9]{1,2}(:[0-9]{1,2}){1,2}(\.[0-9]{1,9})?$", timestamp):  # noqa: RET506
+        elif re.match(r"^[0-9]{1,2}(:[0-9]{1,2}){1,2}(\.[0-9]{1,9})?$", timestamp):  # noqa: RET506
             return True
         return False
 
@@ -305,7 +305,7 @@ class Timestamp:
         The seconds (self.ss) will be set to 56.
         The nanoseconds (self.nn) will be set to 789012345.
         """
-        timestamp_groups = match(r"^(([0-9]{1,2}):)?([0-9]{1,2}):([0-9]{1,2})(\.([0-9]{1,9}))?$", timestamp).groups()
+        timestamp_groups = re.match(r"^(([0-9]{1,2}):)?([0-9]{1,2}):([0-9]{1,2})(\.([0-9]{1,9}))?$", timestamp).groups()
 
         timestamp = [timestamp_groups[i] for i in (1, 2, 3, 4)]
         timestamp_clean = []
