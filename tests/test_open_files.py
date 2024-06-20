@@ -8,6 +8,7 @@ from pymkv import MKVFile, MKVTrack
 def test_open_file(get_path_test_file: Path) -> None:
     mkv = MKVFile(get_path_test_file)
 
+    assert mkv.title is None
     assert len(mkv.tracks) == 2  # noqa: PLR2004
 
 
@@ -45,3 +46,11 @@ def test_empty_mkv_file() -> None:
 
     assert mkv.title == "test"
     assert len(mkv.tracks) == 0
+
+
+def test_verify_mkvmerge_in_mkv_file() -> None:
+    with pytest.raises(
+        FileNotFoundError,
+        match="mkvmerge is not at the specified path, add it there or changed mkvmerge_path property",
+    ):
+        MKVFile(title="test", mkvmerge_path="mkvmerge_test")
