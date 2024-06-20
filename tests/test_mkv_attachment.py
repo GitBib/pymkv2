@@ -67,10 +67,8 @@ def test_file_path_expansion(tmp_path: Path, monkeypatch) -> None:  # noqa: ANN0
     fake_home.mkdir()
     monkeypatch.setenv("HOME", str(fake_home))
 
-    # Создаем файл в поддельной домашней директории
     test_file = fake_home / "test_file.txt"
     test_file.write_text("Test content")
 
-    # Используем ~ в пути к файлу
     attachment = MKVAttachment("~/test_file.txt")
     assert attachment.file_path == str(test_file)
