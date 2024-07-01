@@ -37,7 +37,6 @@ Combine two MKVs. This example takes two existing MKVs and combines their tracks
 
 from __future__ import annotations
 
-import json
 import logging
 import os
 import subprocess as sp
@@ -50,7 +49,7 @@ from pymkv.MKVAttachment import MKVAttachment
 from pymkv.MKVTrack import MKVTrack
 from pymkv.Timestamp import Timestamp
 from pymkv.utils import prepare_mkvtoolnix_path
-from pymkv.Verifications import checking_file_path, verify_mkvmerge, verify_supported
+from pymkv.Verifications import checking_file_path, get_file_info, verify_mkvmerge, verify_supported
 
 
 class MKVFile:
@@ -93,7 +92,7 @@ class MKVFile:
         title: str | None = None,
         mkvmerge_path: str | list | os.PathLike | None = "mkvmerge",
     ) -> None:
-        self.mkvmerge_path: list[str] = prepare_mkvtoolnix_path(mkvmerge_path)
+        self.mkvmerge_path: tuple[str, ...] = prepare_mkvtoolnix_path(mkvmerge_path)
         self.title = title
         self._chapters_file = None
         self._chapter_language = None
@@ -103,6 +102,7 @@ class MKVFile:
         self.tracks: list[MKVTrack] = []
         self.attachments = []
         self._number_file = 0
+        self._info_json: dict = None
 
         if not verify_mkvmerge(mkvmerge_path=self.mkvmerge_path):
             msg = "mkvmerge is not at the specified path, add it there or changed mkvmerge_path property"
@@ -115,7 +115,8 @@ class MKVFile:
             # add file title
             file_path = checking_file_path(file_path)
             try:
-                info_json = json.loads(sp.check_output([*self.mkvmerge_path, "-J", file_path]).decode())  # noqa: S603
+                info_json = get_file_info(file_path, self.mkvmerge_path, check_path=False)
+                self._info_json = info_json
             except sp.CalledProcessError as e:
                 error_output = e.output.decode()
                 raise sp.CalledProcessError(e.returncode, e.cmd, output=error_output) from e
@@ -124,7 +125,12 @@ class MKVFile:
 
             # add tracks with info
             for track in info_json["tracks"]:
-                new_track = MKVTrack(file_path, track_id=track["id"], mkvmerge_path=self.mkvmerge_path)
+                new_track = MKVTrack(
+                    file_path,
+                    track_id=track["id"],
+                    mkvmerge_path=self.mkvmerge_path,
+                    existing_info=self._info_json,
+                )
                 if "track_name" in track["properties"]:
                     new_track.track_name = track["properties"]["track_name"]
                 if "language" in track["properties"]:
@@ -398,7 +404,7 @@ class MKVFile:
             Raised if `track` is not a string-like path to a track file or an :class:`~pymkv.MKVTrack`.
         """
         if isinstance(track, str):
-            new_track = MKVTrack(track, mkvmerge_path=self.mkvmerge_path)
+            new_track = MKVTrack(track, mkvmerge_path=self.mkvmerge_path, existing_info=self._info_json)
             self._extracted_from_add_track(new_track, new_file)
         elif isinstance(track, MKVTrack):
             self._extracted_from_add_track(track, new_file)

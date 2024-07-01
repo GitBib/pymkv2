@@ -39,7 +39,6 @@ Now all these tracks can be added to an :class:`~pymkv.MKVFile` object and muxed
 
 from __future__ import annotations
 
-import json
 import os
 import subprocess as sp
 from os import devnull
@@ -48,8 +47,8 @@ from pathlib import Path
 from pymkv.BCP47 import is_bcp47
 from pymkv.ISO639_2 import is_iso639_2
 from pymkv.TypeTrack import get_track_extension
-from pymkv.utils import prepare_mkvtoolnix_path
-from pymkv.Verifications import checking_file_path, verify_supported
+from pymkv.utils import ensure_info, prepare_mkvtoolnix_path
+from pymkv.Verifications import checking_file_path, get_file_info, verify_supported
 
 
 class MKVTrack:
@@ -127,9 +126,10 @@ class MKVTrack:
         flag_hearing_impaired: bool | None = False,
         flag_visual_impaired: bool | None = False,
         flag_original: bool | None = False,
-        mkvmerge_path: str | list | os.PathLike | None = "mkvmerge",
-        mkvextract_path: str | list | os.PathLike | None = "mkvextract",
+        mkvmerge_path: str | list | tuple[str, ...] | os.PathLike | None = "mkvmerge",
+        mkvextract_path: str | list | tuple[str, ...] | os.PathLike | None = "mkvextract",
         sync: int | None = None,
+        existing_info: dict | None = None,
     ) -> None:
         # track info
         self._track_codec = None
@@ -137,6 +137,7 @@ class MKVTrack:
 
         # base
         self.mkvmerge_path = prepare_mkvtoolnix_path(mkvmerge_path)
+        self._info_json: dict = existing_info
         self._file_path = None
         self.file_path = file_path
         self._track_id = None
@@ -233,18 +234,23 @@ class MKVTrack:
         return self._track_id
 
     @track_id.setter
+    @ensure_info(
+        "_info_json",
+        get_file_info,
+        ["file_path", "mkvmerge_path"],
+        check_path=False,
+    )
     def track_id(self, track_id: int) -> None:
-        info_json = json.loads(sp.check_output([*self.mkvmerge_path, "-J", self.file_path]).decode())  # noqa: S603
-        if not 0 <= track_id < len(info_json["tracks"]):
+        if not 0 <= track_id < len(self._info_json["tracks"]):
             msg = "track index out of range"
             raise IndexError(msg)
         self._track_id = track_id
         try:
-            self._pts = info_json["tracks"][track_id]["start_pts"]
+            self._pts = self._info_json["tracks"][track_id]["start_pts"]
         except KeyError:
             self._pts = 0
-        self._track_codec = info_json["tracks"][track_id]["codec"]
-        self._track_type = info_json["tracks"][track_id]["type"]
+        self._track_codec = self._info_json["tracks"][track_id]["codec"]
+        self._track_type = self._info_json["tracks"][track_id]["type"]
 
     @property
     def language(self) -> str:
