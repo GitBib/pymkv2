@@ -5,15 +5,16 @@ import os
 import subprocess as sp
 from pathlib import Path
 from re import match
+from typing import Any
 
 from pymkv.utils import prepare_mkvtoolnix_path
 
 
-def checking_file_path(file_path: str) -> str:
+def checking_file_path(file_path: str | os.PathLike[Any]) -> str:
     """
     Parameters
     ----------
-    file_path : str
+    file_path : str, os.PathLike
         The path to the file that needs to be checked.
 
     Returns
