@@ -1,6 +1,7 @@
 from __future__ import annotations
 
-from iso639 import languages
+import iso639
+from iso639 import LanguageNotFoundError
 
 
 def is_iso639_2(language: str) -> bool:
@@ -16,7 +17,7 @@ def is_iso639_2(language: str) -> bool:
         True if the language code is valid according to ISO 639-2, False otherwise.
     """
     try:
-        languages.get(part2b=language)
+        iso639.Language.from_part2b(language)
         return True  # noqa: TRY300
-    except KeyError:
+    except LanguageNotFoundError:
         return False
