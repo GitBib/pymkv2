@@ -13,7 +13,8 @@ class Timestamp:
         nn: int | None = None,
         form: str | None = "MM:SS",
     ) -> None:
-        """A class that represents a timestamp used in MKVFiles.
+        """
+        A class that represents a timestamp used in MKVFiles.
 
         The Timestamp class represents a timestamp used in mkvmerge. These are commonly used for splitting MKVFiles.
         Specific time values can overridden in the timestamp using 'hh', 'mm', 'ss', and 'nn'. Any override value
@@ -173,12 +174,20 @@ class Timestamp:
 
     @property
     def ts(self) -> str:
-        """Generates the timestamp specified in the object."""
-        # parse timestamp format
+        """
+        Generates and returns the timestamp string specified by the object.
+
+        Returns:
+            str: A formatted timestamp string based on the object's properties and format.
+
+        The timestamp format is determined by the 'form' attribute and includes hours (HH),
+        minutes (MM), seconds (SS), and nanoseconds (NN) as applicable. The method constructs
+        the timestamp string according to the specified format, including or omitting parts
+        based on the format and the presence of non-zero values.
+        """
         format_groups = re.match(r"^(([Hh]{1,2}):)?([Mm]{1,2}):([Ss]{1,2})(\.([Nn]{1,9}))?$", self.form).groups()
         timestamp_format = [format_groups[i] is not None for i in (1, 2, 3, 5)]
 
-        # create timestamp string
         timestamp_string = ""
         if timestamp_format[0] or self._hh:
             timestamp_string += f"{self.hh:0=2d}:"
@@ -192,7 +201,8 @@ class Timestamp:
 
     @ts.setter
     def ts(self, timestamp: Timestamp) -> None:
-        """Set a new timestamp.
+        """
+        Set a new timestamp.
 
         timestamp (str, int):
             A str of a timestamp acceptable to mkvmerge or an int representing seconds. This value will be
@@ -209,47 +219,108 @@ class Timestamp:
 
     @property
     def hh(self) -> int:
+        """
+        Get the hours component of the timestamp.
+
+        Returns:
+            int: The hours value.
+        """
         return self._hh
 
     @hh.setter
     def hh(self, value: int) -> None:
+        """
+        Set the hours component of the timestamp.
+
+        Args:
+            value (int): The new hours value.
+        """
         self._hh = value
 
     @property
     def mm(self) -> int:
+        """
+        Get the minutes component of the timestamp.
+
+        Returns:
+            int: The minutes value.
+        """
         return self._mm
 
     @mm.setter
     def mm(self, value: int) -> None:
+        """
+        Set the minutes component of the timestamp.
+
+        Args:
+            value (int): The new minutes value. If greater than or equal to 60, it will be set to 0.
+        """
         self._mm = value if value < 60 else 0  # noqa: PLR2004
 
     @property
     def ss(self) -> int:
+        """
+        Get the seconds component of the timestamp.
+
+        Returns:
+            int: The seconds value.
+        """
         return self._ss
 
     @ss.setter
     def ss(self, value: int) -> None:
+        """
+        Set the seconds component of the timestamp.
+
+        Args:
+            value (int): The new seconds value. If greater than or equal to 60, it will be set to 0.
+        """
         self._ss = value if value < 60 else 0  # noqa: PLR2004
 
     @property
     def nn(self) -> int:
+        """
+        Get the nanoseconds component of the timestamp.
+
+        Returns:
+            int: The nanoseconds value.
+        """
         return self._nn
 
     @nn.setter
     def nn(self, value: int) -> None:
+        """
+        Set the nanoseconds component of the timestamp.
+
+        Args:
+            value (int): The new nanoseconds value. If greater than or equal to 1,000,000,000, it will be set to 0.
+        """
         self._nn = value if value < 1000000000 else 0  # noqa: PLR2004
 
     @property
     def form(self) -> str:
+        """
+        Get the format string for the timestamp.
+
+        Returns:
+            str: The format string.
+        """
         return self._form
 
     @form.setter
     def form(self, form: str) -> None:
+        """
+        Set the format string for the timestamp.
+
+        Args:
+            form (str): The new format string.
+        """
         self._form = form
 
     @staticmethod
     def verify(timestamp: str) -> bool:
-        """Verify a timestamp has the proper form to be used in mkvmerge.
+        """
+        Verify a timestamp has the proper form to be used in mkvmerge.
 
         timestamp (str):
             The timestamp to be verified.
@@ -262,7 +333,8 @@ class Timestamp:
         return False
 
     def extract(self, timestamp: str | int) -> None:
-        """Extracts time info from a timestamp.
+        """
+        Extracts time info from a timestamp.
 
         timestamp (str, int):
             A str of a timestamp acceptable to mkvmerge or an int representing seconds. The timing info will be
@@ -283,7 +355,8 @@ class Timestamp:
             self._nn = 0
 
     def splitting_timestamp(self, timestamp: str) -> None:
-        """This method splits the given timestamp string into hours, minutes, seconds, and nanoseconds. The timestamp
+        """
+        This method splits the given timestamp string into hours, minutes, seconds, and nanoseconds. The timestamp
         string should be in the format "HH:MM:SS.NNNNNNNNN", where HH represents hours,
         MM represents minutes, SS represents seconds, and NNNNNNNNN represents nanoseconds.
 
