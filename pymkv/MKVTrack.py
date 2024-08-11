@@ -172,24 +172,41 @@ class MKVTrack:
         self.extension = get_track_extension(self)
 
     def __repr__(self) -> str:
+        """
+        Return a string representation of the MKVTrack object.
+
+        Returns:
+            str: A string representation of the object's dictionary.
+        """
         return repr(self.__dict__)
 
     @property
     def file_path(self) -> str:
-        """str: The path to the track or MKV file containing the desired track.
+        """
+        Get the path to the track or MKV file containing the desired track.
 
-        Setting this property will verify the passed in file is supported by mkvmerge and set the track_id to 0. It
-        is recommended to recreate MKVTracks instead of setting their file path after instantiation.
+        Returns:
+            str: The file path.
 
-        Raises
-        ------
-        ValueError
-            Raised if `file_path` is not a supported file type.
+        Raises:
+            ValueError: If `file_path` is not a supported file type.
         """
         return self._file_path
 
     @file_path.setter
     def file_path(self, file_path: str) -> None:
+        """
+        Set the file path for the track.
+
+        This method checks if the provided file path is valid and supported by mkvmerge.
+        If the file is valid, it sets the file path and resets the track_id to 0.
+
+        Args:
+            file_path (str): The path to the file containing the track.
+
+        Raises:
+            ValueError: If the file is not a valid Matroska file or is not supported.
+        """
         file_path = checking_file_path(file_path)
         if not verify_supported(file_path, mkvmerge_path=self.mkvmerge_path):
             msg = f"The file '{file_path}' is not a valid Matroska file or is not supported."
@@ -199,20 +216,31 @@ class MKVTrack:
 
     @property
     def file_id(self) -> int:
-        """int: The ID of the file the track belongs to.
+        """
+        Get the ID of the file the track belongs to.
 
         The file ID represents which file the current track is associated with. This is particularly useful
         when handling multiple files.
 
-        Raises
-        ------
-        IndexError
-            Raised if the passed in index is out of range of the file's tracks.
+        Returns:
+            int: The file ID.
+
+        Raises:
+            IndexError: If the passed in index is out of range of the file's tracks.
         """
         return self._file_id
 
     @file_id.setter
     def file_id(self, file_id: int) -> None:
+        """
+        Set the ID of the file the track belongs to.
+
+        Args:
+            file_id (int): The file ID to set.
+
+        Raises:
+            ValueError: If file_id is not an integer.
+        """
         if isinstance(file_id, int):
             self._file_id = file_id
         else:
@@ -221,15 +249,14 @@ class MKVTrack:
 
     @property
     def track_id(self) -> int:
-        """int: The ID of the track within the file.
+        """
+        Get the ID of the track within the file.
 
-        Setting *track_id* will check that the ID passed in exists in the file. It will then look at the new track
-        and set the codec and track type. Should be left at 0 unless extracting a specific track from an MKV.
+        Returns:
+            int: The track ID.
 
-        Raises
-        ------
-        IndexError
-            Raised if the passed in index is out of range of the file's tracks.
+        Raises:
+            IndexError: If the passed in index is out of range of the file's tracks.
         """
         return self._track_id
 
@@ -241,6 +268,18 @@ class MKVTrack:
         check_path=False,
     )
     def track_id(self, track_id: int) -> None:
+        """
+        Set the ID of the track within the file.
+
+        This method checks that the ID passed in exists in the file. It then looks at the new track
+        and sets the codec and track type. Should be left at 0 unless extracting a specific track from an MKV.
+
+        Args:
+            track_id (int): The track ID to set.
+
+        Raises:
+            IndexError: If the passed in index is out of range of the file's tracks.
+        """
         if not 0 <= track_id < len(self._info_json["tracks"]):
             msg = "track index out of range"
             raise IndexError(msg)
@@ -254,27 +293,24 @@ class MKVTrack:
 
     @property
     def language(self) -> str:
-        """str: The language of the track.
+        """
+        Get the language of the track.
 
-        Setting this property will verify that the passed in language is an ISO-639 language code and use it as the
-        language for the track.
+        Returns:
+            str: The language of the track.
 
-        Raises
-        ------
-        ValueError
-            Raised if the passed in language is not an ISO 639-2 language code.
+        Raises:
+            ValueError: If the passed in language is not an ISO 639-2 language code.
         """
         return self._language
 
     @language.setter
     def language(self, language: str) -> None:
-        """Sets the language of the MKVTrack.
+        """
+        Set the language of the MKVTrack.
 
         Args:
-            language: The language to be set for the MKVTrack.
-
-        Returns:
-            None
+            language (str): The language to be set for the MKVTrack.
 
         Raises:
             ValueError: If the provided language is not a valid ISO639-2 language code.
@@ -287,55 +323,73 @@ class MKVTrack:
 
     @property
     def pts(self) -> int:
-        """Returns the value of the `pts` property.
-        The Presentation Timestamp (PTS) in multimedia files indicates the exact time when a frame or audio sample
+        """
+        Get the Presentation Timestamp (PTS) of the track.
+
+        The PTS in multimedia files indicates the exact time when a frame or audio sample
         should be presented to the user, ensuring accurate synchronization between audio and video streams.
 
-        Args:
-            self: The instance of the class.
-
         Returns:
-            The value of the `pts` property.
+            int: The PTS value.
         """
         return self._pts
 
     @property
     def sync(self) -> int:
-        """int: track delay.
+        """
+        Get the synchronization offset for the track.
 
-        Setting this property allows you to wiggle the track negatively/positively.
+        This property represents the synchronization offset for the track.
+        Positive values delay the track, while negative values advance it.
+
+        Returns:
+            int: The current synchronization offset in milliseconds.
+
+        Note:
+            Setting this property allows you to adjust the track timing:
+            - Positive values delay the track (shift it later in time)
+            - Negative values advance the track (shift it earlier in time)
+
+        Example:
+            track.sync = 1000  # Delay the track by 1 second
+            track.sync = -500  # Advance the track by 0.5 seconds
         """
         return self._sync
 
     @sync.setter
     def sync(self, sync: int) -> None:
-        """Sets the value of the `sync` property.
+        """
+        Set the synchronization offset for the track.
 
         Args:
-            sync: The value to be set for the `sync` property.
-
-        Returns:
-            None
-
-        Raises:
-            None
+            sync (int): The synchronization offset in milliseconds.
         """
         self._sync = sync
 
     @property
     def language_ietf(self) -> str:
-        """str: The language of the track with BCP47 format.
-        Setting this property will verify that the passed in language is a BCP47 language code and use it as the
-        language for the track.
-        Raises
-        ------
-        ValueError
-            Raised if the passed in language is not a BCP47 language code.
+        """
+        Get the language of the track with BCP47 format.
+
+        Returns:
+            str: The language of the track in BCP47 format.
+
+        Raises:
+            ValueError: If the passed in language is not a BCP47 language code.
         """
         return self._language_ietf
 
     @language_ietf.setter
     def language_ietf(self, language_ietf: str) -> None:
+        """
+        Set the language of the track with BCP47 format.
+
+        Args:
+            language_ietf (str): The language to set in BCP47 format.
+
+        Raises:
+            ValueError: If the passed in language is not a BCP47 language code.
+        """
         if language_ietf is None or is_bcp47(language_ietf):
             self._language_ietf = language_ietf
         else:
@@ -344,21 +398,30 @@ class MKVTrack:
 
     @property
     def tags(self) -> str:
-        """str: The tags file to include with the track.
+        """
+        Get the tags file to include with the track.
 
-        Setting this property will check that the file path passed in exists and set it as the tags file.
+        Returns:
+            str: The path to the tags file.
 
-        Raises
-        ------
-        FileNotFoundError
-            Raised if the passed in file does not exist or is not a file.
-        TypeError
-            Raises if the passed in file is not of type str.
+        Raises:
+            FileNotFoundError: If the passed in file does not exist or is not a file.
+            TypeError: If the passed in file is not of type str.
         """
         return self._tags
 
     @tags.setter
     def tags(self, file_path: str) -> None:
+        """
+        Set the tags file for the track.
+
+        Args:
+            file_path (str): The path to the tags file.
+
+        Raises:
+            TypeError: If the file_path is not a string.
+            FileNotFoundError: If the file does not exist or is not a file.
+        """
         if not isinstance(file_path, str):
             msg = f'"{file_path}" is not of type str'
             raise TypeError(msg)
@@ -370,29 +433,35 @@ class MKVTrack:
 
     @property
     def track_codec(self) -> str:
-        """str: The codec of the track such as h264 or AAC."""
+        """
+        Get the codec of the track.
+
+        Returns:
+            str: The codec of the track, such as h264 or AAC.
+        """
         return self._track_codec
 
     @property
     def track_type(self) -> str:
-        """str: The type of track such as video or audio."""
+        """
+        Get the type of the track.
+
+        Returns:
+            str: The type of track, such as video or audio.
+        """
         return self._track_type
 
     def extract(self, output_path: str | os.PathLike | None = None, silent: bool | None = False) -> str:
         """
         Extract the track as a file.
 
-        Parameters
-        ----------
-        output_path : str, os.PathLike, optional
-            The path to be used as the output file in the mkvextract command.
-        silent : bool, optional
-            By default the mkvmerge output will be shown unless silent is True.
+        Args:
+            output_path (str | os.PathLike | None, optional): The path to be used as the output file
+            in the mkvextract command.
+            silent (bool | None, optional): By default the mkvmerge output will be shown unless silent is True.
 
-        Returns
-        -------
-        str
-            The path of the extracted file.
+        Returns:
+            str: The path of the extracted file.
         """
         extract_info_file = f"_[{self.track_id}]"
         if self.language:
