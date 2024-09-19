@@ -37,7 +37,6 @@ Combine two MKVs. This example takes two existing MKVs and combines their tracks
 
 from __future__ import annotations
 
-import json
 import logging
 import os
 import subprocess as sp
@@ -50,11 +49,12 @@ from pymkv.MKVAttachment import MKVAttachment
 from pymkv.MKVTrack import MKVTrack
 from pymkv.Timestamp import Timestamp
 from pymkv.utils import prepare_mkvtoolnix_path
-from pymkv.Verifications import checking_file_path, verify_mkvmerge, verify_supported
+from pymkv.Verifications import checking_file_path, get_file_info, verify_mkvmerge, verify_supported
 
 
 class MKVFile:
-    """A class that represents an MKV file.
+    """
+    A class that represents an MKV file.
 
     The :class:`~pymkv.MKVFile` class can either import a pre-existing MKV file or create a new one. After an
     :class:`~pymkv.MKVFile` object has been instantiated, :class:`~pymkv.MKVTrack` objects or other
@@ -93,7 +93,7 @@ class MKVFile:
         title: str | None = None,
         mkvmerge_path: str | list | os.PathLike | None = "mkvmerge",
     ) -> None:
-        self.mkvmerge_path: list[str] = prepare_mkvtoolnix_path(mkvmerge_path)
+        self.mkvmerge_path: tuple[str, ...] = prepare_mkvtoolnix_path(mkvmerge_path)
         self.title = title
         self._chapters_file = None
         self._chapter_language = None
@@ -103,6 +103,7 @@ class MKVFile:
         self.tracks: list[MKVTrack] = []
         self.attachments = []
         self._number_file = 0
+        self._info_json: dict = None
 
         if not verify_mkvmerge(mkvmerge_path=self.mkvmerge_path):
             msg = "mkvmerge is not at the specified path, add it there or changed mkvmerge_path property"
@@ -115,7 +116,8 @@ class MKVFile:
             # add file title
             file_path = checking_file_path(file_path)
             try:
-                info_json = json.loads(sp.check_output([*self.mkvmerge_path, "-J", file_path]).decode())  # noqa: S603
+                info_json = get_file_info(file_path, self.mkvmerge_path, check_path=False)
+                self._info_json = info_json
             except sp.CalledProcessError as e:
                 error_output = e.output.decode()
                 raise sp.CalledProcessError(e.returncode, e.cmd, output=error_output) from e
@@ -124,7 +126,12 @@ class MKVFile:
 
             # add tracks with info
             for track in info_json["tracks"]:
-                new_track = MKVTrack(file_path, track_id=track["id"], mkvmerge_path=self.mkvmerge_path)
+                new_track = MKVTrack(
+                    file_path,
+                    track_id=track["id"],
+                    mkvmerge_path=self.mkvmerge_path,
+                    existing_info=self._info_json,
+                )
                 if "track_name" in track["properties"]:
                     new_track.track_name = track["properties"]["track_name"]
                 if "language" in track["properties"]:
@@ -150,45 +157,45 @@ class MKVFile:
 
     def __repr__(self) -> str:
         """
-        Return a string representation of the object.
+        Return a string representation of the MKVFile object.
 
-        :returns: A string representation of the object.
-        :rtype: str
+        Returns:
+            str: A string representation of the object's attributes.
         """
         return repr(self.__dict__)
 
     @property
     def chapter_language(self) -> str:
-        """str: The language code of the chapters in the :class:`~pymkv.MKVFile` object.
+        """
+        Get the language code of the chapters in the MKVFile object.
 
-        Raises
-        ------
-        ValueError
-            Raised if not a valid ISO 639-2 language code.
+        Returns:
+            str: The ISO 639-2 language code of the chapters.
+
+        Raises:
+            ValueError: If the stored language code is not a valid ISO 639-2 language code.
         """
         return self._chapter_language
 
     @chapter_language.setter
     def chapter_language(self, language: str) -> None:
         """
-        Parameters
-        ----------
-        language : str
-            The language code for the chapter.
-            Must be an ISO639-2 language code.
+        Set the language code of the chapters in the MKVFile object.
 
-        Raises
-        ------
-        ValueError
-            If the provided language code is not a valid ISO639-2 language code.
+        Args:
+            language (str): The language code for the chapters. Must be a valid ISO 639-2 language code.
+
+        Raises:
+            ValueError: If the provided language code is not a valid ISO 639-2 language code.
         """
         if language is not None and not is_iso639_2(language):
-            msg = "not an ISO639-2 language code"
+            msg = "The provided language code is not a valid ISO 639-2 language code."
             raise ValueError(msg)
         self._chapter_language = language
 
     def command(self, output_path: str, subprocess: bool = False) -> str | list:  # noqa: C901, PLR0912, PLR0915
-        """Generates an mkvmerge command based on the configured :class:`~pymkv.MKVFile`.
+        """
+        Generates an mkvmerge command based on the configured :class:`~pymkv.MKVFile`.
 
         Parameters
         ----------
@@ -311,7 +318,8 @@ class MKVFile:
         return command if subprocess else " ".join(command)
 
     def mux(self, output_path: str | os.PathLike, silent: bool = False) -> int:
-        """Mixes the specified :class:`~pymkv.MKVFile`.
+        """
+        Mixes the specified :class:`~pymkv.MKVFile`.
 
         Parameters
         ----------
@@ -353,7 +361,8 @@ class MKVFile:
         return proc.returncode
 
     def add_file(self, file: MKVFile | str | os.PathLike) -> None:
-        """Add an MKV file into the :class:`~pymkv.MKVFile` object.
+        """
+        Add an MKV file into the :class:`~pymkv.MKVFile` object.
 
         Parameters
         ----------
@@ -382,7 +391,8 @@ class MKVFile:
         self.order_tracks_by_file_id()
 
     def add_track(self, track: str | MKVTrack, new_file: bool = True) -> None:
-        """Add a track to the :class:`~pymkv.MKVFile`.
+        """
+        Add a track to the :class:`~pymkv.MKVFile`.
 
         Parameters
         ----------
@@ -398,7 +408,7 @@ class MKVFile:
             Raised if `track` is not a string-like path to a track file or an :class:`~pymkv.MKVTrack`.
         """
         if isinstance(track, str):
-            new_track = MKVTrack(track, mkvmerge_path=self.mkvmerge_path)
+            new_track = MKVTrack(track, mkvmerge_path=self.mkvmerge_path, existing_info=self._info_json)
             self._extracted_from_add_track(new_track, new_file)
         elif isinstance(track, MKVTrack):
             self._extracted_from_add_track(track, new_file)
@@ -414,7 +424,8 @@ class MKVFile:
         self.tracks.append(track)
 
     def add_attachment(self, attachment: str | MKVAttachment) -> None:
-        """Add an attachment to the :class:`~pymkv.MKVFile`.
+        """
+        Add an attachment to the :class:`~pymkv.MKVFile`.
 
         Parameters
         ----------
@@ -436,7 +447,8 @@ class MKVFile:
             raise TypeError(msg)
 
     def get_track(self, track_num: int | None = None) -> MKVTrack | list[MKVTrack]:
-        """Get a :class:`~pymkv.MKVTrack` from the :class:`~pymkv.MKVFile` object.
+        """
+        Get a :class:`~pymkv.MKVTrack` from the :class:`~pymkv.MKVFile` object.
 
         Parameters
         ----------
@@ -453,7 +465,8 @@ class MKVFile:
         return self.tracks if track_num is None else self.tracks[track_num]
 
     def move_track_front(self, track_num: int) -> None:
-        """Set a track as the first in the :class:`~pymkv.MKVFile` object.
+        """
+        Set a track as the first in the :class:`~pymkv.MKVFile` object.
 
         Parameters
         ----------
@@ -472,7 +485,8 @@ class MKVFile:
         self.order_tracks_by_file_id()
 
     def move_track_end(self, track_num: int) -> None:
-        """Set as track as the last in the :class:`~pymkv.MKVFile` object.
+        """
+        Set as track as the last in the :class:`~pymkv.MKVFile` object.
 
         Parameters
         ----------
@@ -491,7 +505,8 @@ class MKVFile:
         self.order_tracks_by_file_id()
 
     def move_track_forward(self, track_num: int) -> None:
-        """Move a track forward in the :class:`~pymkv.MKVFile` object.
+        """
+        Move a track forward in the :class:`~pymkv.MKVFile` object.
 
         Parameters
         ----------
@@ -510,7 +525,8 @@ class MKVFile:
         self.order_tracks_by_file_id()
 
     def move_track_backward(self, track_num: int) -> None:
-        """Move a track backward in the :class:`~pymkv.MKVFile` object.
+        """
+        Move a track backward in the :class:`~pymkv.MKVFile` object.
 
         Parameters
         ----------
@@ -529,7 +545,8 @@ class MKVFile:
         self.order_tracks_by_file_id()
 
     def swap_tracks(self, track_num_1: int, track_num_2: int) -> None:
-        """Swap the position of two tracks in the :class:`~pymkv.MKVFile` object.
+        """
+        Swap the position of two tracks in the :class:`~pymkv.MKVFile` object.
 
         Parameters
         ----------
@@ -552,7 +569,8 @@ class MKVFile:
         self.order_tracks_by_file_id()
 
     def replace_track(self, track_num: int, track: MKVTrack) -> None:
-        """Replace a track with another track in the :class:`~pymkv.MKVFile` object.
+        """
+        Replace a track with another track in the :class:`~pymkv.MKVFile` object.
 
         Parameters
         ----------
@@ -573,7 +591,8 @@ class MKVFile:
         self.order_tracks_by_file_id()
 
     def remove_track(self, track_num: int) -> None:
-        """Remove a track from the :class:`~pymkv.MKVFile` object.
+        """
+        Remove a track from the :class:`~pymkv.MKVFile` object.
 
         Parameters
         ----------
@@ -596,7 +615,8 @@ class MKVFile:
         self._split_options = []
 
     def split_size(self, size: bitmath.Bitmath | int, link: bool | None = False) -> None:
-        """Split the output file into parts by size.
+        """
+        Split the output file into parts by size.
 
         Parameters
         ----------
@@ -621,7 +641,8 @@ class MKVFile:
             self._split_options += "--link"
 
     def split_duration(self, duration: str | int, link: bool | None = False) -> None:
-        """Split the output file into parts by duration.
+        """
+        Split the output file into parts by duration.
 
         Parameters
         ----------
@@ -636,7 +657,8 @@ class MKVFile:
             self._split_options += "--link"
 
     def split_timestamps(self, *timestamps: str | int | list | tuple, link: bool | None = False) -> None:
-        """Split the output file into parts by timestamps.
+        """
+        Split the output file into parts by timestamps.
 
         Parameters
         ----------
@@ -674,7 +696,8 @@ class MKVFile:
             self._split_options += "--link"
 
     def split_frames(self, *frames: int | list | tuple, link: bool | None = False) -> None:
-        """Split the output file into parts by frames.
+        """
+        Split the output file into parts by frames.
 
         Parameters
         ----------
@@ -714,7 +737,8 @@ class MKVFile:
             self._split_options += "--link"
 
     def split_timestamp_parts(self, timestamp_parts: list | tuple, link: bool | None = False) -> None:  # noqa: C901
-        """Split the output in parts by time parts.
+        """
+        Split the output in parts by time parts.
 
         Parameters
         ----------
@@ -766,7 +790,8 @@ class MKVFile:
             self._split_options += "--link"
 
     def split_parts_frames(self, frame_parts: list | tuple, link: bool | None = False) -> None:  # noqa: C901
-        """Split the output in parts by frames.
+        """
+        Split the output in parts by frames.
 
         Parameters
         ----------
@@ -819,7 +844,8 @@ class MKVFile:
             self._split_options += "--link"
 
     def split_chapters(self, *chapters: int | list | tuple, link: bool | None = False) -> None:
-        """Split the output file into parts by chapters.
+        """
+        Split the output file into parts by chapters.
 
         Parameters
         ----------
@@ -859,7 +885,8 @@ class MKVFile:
             self._split_options += "--link"
 
     def link_to_previous(self, file_path: str) -> None:
-        """Link the output file as the predecessor of the `file_path` file.
+        """
+        Link the output file as the predecessor of the `file_path` file.
 
         Parameters
         ----------
@@ -876,7 +903,8 @@ class MKVFile:
         self._link_to_previous_file = checking_file_path(file_path)
 
     def link_to_next(self, file_path: str) -> None:
-        """Link the output file as the successor of the `file_path` file.
+        """
+        Link the output file as the successor of the `file_path` file.
 
         Parameters
         ----------
@@ -893,12 +921,18 @@ class MKVFile:
         self._link_to_next_file = checking_file_path(file_path)
 
     def link_to_none(self) -> None:
-        """Remove all linking to previous and next options."""
+        """
+        Remove all linking to previous and next files.
+
+        This method clears any existing links to previous or next files,
+        effectively removing the file linking options for the current MKVFile object.
+        """
         self._link_to_previous_file = None
         self._link_to_next_file = None
 
     def chapters(self, file_path: str, language: str | None = None) -> None:
-        """Add a chapters file to the :class:`~pymkv.MKVFile` object.
+        """
+        Add a chapters file to the :class:`~pymkv.MKVFile` object.
 
         Parameters
         ----------
@@ -918,7 +952,8 @@ class MKVFile:
         self.chapter_language = language
 
     def global_tags(self, file_path: str) -> None:
-        """Add global tags to the :class:`~pymkv.MKVFile` object.
+        """
+        Add global tags to the :class:`~pymkv.MKVFile` object.
 
         Parameters
         ----------
@@ -935,7 +970,8 @@ class MKVFile:
         self._global_tags_file = checking_file_path(file_path)
 
     def track_tags(self, *track_ids: int | list | tuple, exclusive: bool | None = False) -> None:
-        """Include or exclude tags from specific tracks.
+        """
+        Include or exclude tags from specific tracks.
 
         Parameters
         ----------
@@ -969,28 +1005,45 @@ class MKVFile:
             self.tracks[tid].no_track_tags = True
 
     def no_chapters(self) -> None:
-        """Ignore the existing chapters of the :class:`~pymkv.MKVFile` object."""
+        """
+        Ignore the existing chapters of all tracks in the :class:`~pymkv.MKVFile` object.
+
+        This method sets the `no_chapters` attribute to True for all tracks in the MKVFile.
+        """
         for track in self.tracks:
             track.no_chapters = True
 
     def no_global_tags(self) -> None:
-        """Ignore the existing global tags of the :class:`~pymkv.MKVFile` object."""
+        """
+        Ignore the existing global tags of all tracks in the :class:`~pymkv.MKVFile` object.
+
+        This method sets the `no_global_tags` attribute to True for all tracks in the MKVFile.
+        """
         for track in self.tracks:
             track.no_global_tags = True
 
     def no_track_tags(self) -> None:
-        """Ignore the existing track tags of the :class:`~pymkv.MKVFile` object."""
+        """
+        Ignore the existing track tags of all tracks in the :class:`~pymkv.MKVFile` object.
+
+        This method sets the `no_track_tags` attribute to True for all tracks in the MKVFile.
+        """
         for track in self.tracks:
             track.no_track_tags = True
 
     def no_attachments(self) -> None:
-        """Ignore the existing attachments of the :class:`~pymkv.MKVFile` object."""
+        """
+        Ignore the existing attachments of all tracks in the :class:`~pymkv.MKVFile` object.
+
+        This method sets the `no_attachments` attribute to True for all tracks in the MKVFile.
+        """
         for track in self.tracks:
             track.no_attachments = True
 
     @staticmethod
     def flatten(item: list | tuple) -> list:
-        """Flatten a list or a tuple.
+        """
+        Flatten a list or a tuple.
 
         Takes a list or a tuple that contains other lists or tuples and flattens into a non-nested list.
 
@@ -1019,11 +1072,13 @@ class MKVFile:
 
     def order_tracks_by_file_id(self) -> None:
         """
-        Orders tracks based on their file ID. Tracks from the same file will have the same file ID.
+        Assigns file IDs to tracks based on their source files.
 
-        This method first generates a list of unique file paths from the existing tracks.
-        Then, it assigns each track a file ID, which is the index of its file path in the unique list.
-        As a result, tracks from the same file will have the same file ID.
+        Creates a mapping of unique file paths to numeric IDs,
+        then assigns each track a file ID corresponding to its source file.
+        Tracks from the same file will have the same file ID.
+
+        This method modifies the file_id attribute of each track in self.tracks.
         """
         unique_file_dict = {}
         for track in self.tracks:
