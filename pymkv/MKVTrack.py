@@ -10,45 +10,47 @@ Below are some basic examples of how the :class:`~pymkv.MKVTrack` objects can be
 Create a new :class:`~pymkv.MKVTrack` from a track file. This example takes a standalone track file and uses it in an
 :class:`~pymkv.MKVTrack`.
 
->>> from pymkv import MKVTrack
->>> track1 = MKVTrack("path/to/track.h264")
->>> track1.track_name = "Some Name"
->>> track1.language = "eng"
+>> from pymkv import MKVTrack
+>> track1 = MKVTrack("path/to/track.h264")
+>> track1.track_name = "Some Name"
+>> track1.language = "eng"
 
 Create a new :class:`~pymkv.MKVTrack` from an MKV file. This example will take a specific track from an MKV and also
 prevent any global tags from being included if the :class:`~pymkv.MKVTrack` is muxed into an :class:`~pymkv.MKVFile`.
 
->>> track2 = MKVTrack("path/to/track.aac")
->>> track2.language = "eng"
+>> track2 = MKVTrack("path/to/track.aac")
+>> track2.language = "eng"
 
 Create a new :class:`~pymkv.MKVTrack` from an MKV file. This example will take a specific track from an MKV and also
 prevent any global tags from being included if the :class:`~pymkv.MKVTrack` is muxed into an :class:`~pymkv.MKVFile`.
 
->>> track3 = MKVTrack("path/to/MKV.mkv", track_id=1)
->>> track3.no_global_tags = True
+>> track3 = MKVTrack("path/to/MKV.mkv", track_id=1)
+>> track3.no_global_tags = True
 
 Now all these tracks can be added to an :class:`~pymkv.MKVFile` object and muxed together.
 
->>> from pymkv import MKVFile
->>> file = MKVFile()
->>> file.add_track(track1)
->>> file.add_track(track2)
->>> file.add_track(track3)
->>> file.mux("path/to/output.mkv")
+>> from pymkv import MKVFile
+>> file = MKVFile()
+>> file.add_track(track1)
+>> file.add_track(track2)
+>> file.add_track(track3)
+>> file.mux("path/to/output.mkv")
 """
 
 from __future__ import annotations
 
 import os
 import subprocess as sp
-from os import devnull
 from pathlib import Path
+from typing import TYPE_CHECKING, Any
 
 from pymkv.BCP47 import is_bcp47
 from pymkv.ISO639_2 import is_iso639_2
-from pymkv.TypeTrack import get_track_extension
 from pymkv.utils import ensure_info, prepare_mkvtoolnix_path
 from pymkv.Verifications import checking_file_path, get_file_info, verify_supported
+
+if TYPE_CHECKING:
+    from collections.abc import Iterable
 
 
 class MKVTrack:
@@ -116,7 +118,7 @@ class MKVTrack:
     def __init__(  # noqa: PLR0913
         self,
         file_path: str,
-        track_id: int | None = 0,
+        track_id: int = 0,
         track_name: str | None = None,
         language: str | None = None,
         language_ietf: str | None = None,
@@ -126,34 +128,36 @@ class MKVTrack:
         flag_hearing_impaired: bool | None = False,
         flag_visual_impaired: bool | None = False,
         flag_original: bool | None = False,
-        mkvmerge_path: str | list | tuple[str, ...] | os.PathLike | None = "mkvmerge",
-        mkvextract_path: str | list | tuple[str, ...] | os.PathLike | None = "mkvextract",
+        mkvmerge_path: str | os.PathLike | Iterable[str] = "mkvmerge",
+        mkvextract_path: str | os.PathLike | Iterable[str] = "mkvextract",
         sync: int | None = None,
-        existing_info: dict | None = None,
+        existing_info: dict[str, Any] | None = None,
     ) -> None:
+        from pymkv.TypeTrack import get_track_extension
+
         # track info
-        self._track_codec = None
-        self._track_type = None
+        self._track_codec: str | None = None
+        self._track_type: str | None = None
 
         # base
         self.mkvmerge_path = prepare_mkvtoolnix_path(mkvmerge_path)
-        self._info_json: dict = existing_info
-        self._file_path = None
+        self._info_json: dict[str, Any] = existing_info or {}
+        self._file_path: str
         self.file_path = file_path
-        self._track_id = None
+        self._track_id: int
         self.track_id = track_id
         self._file_id = 0
         self._pts = 0
 
         # flags
         self.track_name = track_name
-        self._language = None
+        self._language: str | None = None
         self.language = language
-        self._sync = None
+        self._sync: int | None = None
         self.sync = sync
-        self._language_ietf = None
+        self._language_ietf: str | None = None
         self.language_ietf = language_ietf
-        self._tags = None
+        self._tags: str | None = None
         self.default_track = default_track
         self.forced_track = forced_track
         self.flag_commentary = flag_commentary
@@ -280,19 +284,20 @@ class MKVTrack:
         Raises:
             IndexError: If the passed in index is out of range of the file's tracks.
         """
-        if not 0 <= track_id < len(self._info_json["tracks"]):
+        tracks = self._info_json.get("tracks", [])
+        if not 0 <= track_id < len(tracks):
             msg = "track index out of range"
             raise IndexError(msg)
         self._track_id = track_id
         try:
-            self._pts = self._info_json["tracks"][track_id]["start_pts"]
+            self._pts = tracks[track_id]["start_pts"]
         except KeyError:
             self._pts = 0
-        self._track_codec = self._info_json["tracks"][track_id]["codec"]
-        self._track_type = self._info_json["tracks"][track_id]["type"]
+        self._track_codec = tracks[track_id]["codec"]
+        self._track_type = tracks[track_id]["type"]
 
     @property
-    def language(self) -> str:
+    def language(self) -> str | None:
         """
         Get the language of the track.
 
@@ -305,7 +310,7 @@ class MKVTrack:
         return self._language
 
     @language.setter
-    def language(self, language: str) -> None:
+    def language(self, language: str | None) -> None:
         """
         Set the language of the MKVTrack.
 
@@ -335,7 +340,7 @@ class MKVTrack:
         return self._pts
 
     @property
-    def sync(self) -> int:
+    def sync(self) -> int | None:
         """
         Get the synchronization offset for the track.
 
@@ -357,7 +362,7 @@ class MKVTrack:
         return self._sync
 
     @sync.setter
-    def sync(self, sync: int) -> None:
+    def sync(self, sync: int | None) -> None:
         """
         Set the synchronization offset for the track.
 
@@ -367,7 +372,7 @@ class MKVTrack:
         self._sync = sync
 
     @property
-    def language_ietf(self) -> str:
+    def language_ietf(self) -> str | None:
         """
         Get the language of the track with BCP47 format.
 
@@ -380,7 +385,7 @@ class MKVTrack:
         return self._language_ietf
 
     @language_ietf.setter
-    def language_ietf(self, language_ietf: str) -> None:
+    def language_ietf(self, language_ietf: str | None) -> None:
         """
         Set the language of the track with BCP47 format.
 
@@ -397,7 +402,7 @@ class MKVTrack:
             raise ValueError(msg)
 
     @property
-    def tags(self) -> str:
+    def tags(self) -> str | None:
         """
         Get the tags file to include with the track.
 
@@ -411,7 +416,7 @@ class MKVTrack:
         return self._tags
 
     @tags.setter
-    def tags(self, file_path: str) -> None:
+    def tags(self, file_path: str | os.PathLike | None) -> None:
         """
         Set the tags file for the track.
 
@@ -422,9 +427,14 @@ class MKVTrack:
             TypeError: If the file_path is not a string.
             FileNotFoundError: If the file does not exist or is not a file.
         """
+        if file_path is None:
+            self._tags = None
+            return
+
         if not isinstance(file_path, str):
             msg = f'"{file_path}" is not of type str'
             raise TypeError(msg)
+
         file_path = Path(file_path).expanduser()
         if not file_path.is_file():
             msg = f'"{file_path}" does not exist'
@@ -432,7 +442,7 @@ class MKVTrack:
         self._tags = str(file_path)
 
     @property
-    def track_codec(self) -> str:
+    def track_codec(self) -> str | None:
         """
         Get the codec of the track.
 
@@ -442,7 +452,7 @@ class MKVTrack:
         return self._track_codec
 
     @property
-    def track_type(self) -> str:
+    def track_type(self) -> str | None:
         """
         Get the type of the track.
 
@@ -451,7 +461,11 @@ class MKVTrack:
         """
         return self._track_type
 
-    def extract(self, output_path: str | os.PathLike | None = None, silent: bool | None = False) -> str:
+    def extract(
+        self,
+        output_path: str | os.PathLike | None = None,
+        silent: bool | None = False,
+    ) -> str:
         """
         Extract the track as a file.
 
@@ -468,7 +482,8 @@ class MKVTrack:
             extract_info_file += f"_{self.language}"
         if self.extension:
             extract_info_file += f".{self.extension}"
-        if (not self.language and not self.expansion) and self.track_name:
+        # TODO: Should this be extension?
+        if (not self.language and not self.extension) and self.track_name:
             extract_info_file += f"_{self.track_name}"
         if output_path is None:
             output_path = f"{self.file_path}{extract_info_file}"
@@ -476,9 +491,18 @@ class MKVTrack:
             file = Path(self.file_path)
             output_path = Path(output_path, f"{file.name}{extract_info_file}")
         output_path = str(Path(output_path).expanduser())
-        command = [*self.mkvextract_path, "tracks", f"{self.file_path}", f"{self.track_id}:{output_path}"]
+        command = [
+            *self.mkvextract_path,
+            "tracks",
+            f"{self.file_path}",
+            f"{self.track_id}:{output_path}",
+        ]
         if silent:
-            sp.run(command, stdout=open(devnull, "wb"), check=True)  # noqa: S603, PTH123, SIM115
+            sp.run(  # noqa: S603
+                command,
+                stdout=sp.DEVNULL,
+                check=True,
+            )
         else:
             sp.run(command, check=True, capture_output=True)  # noqa: S603
         return output_path

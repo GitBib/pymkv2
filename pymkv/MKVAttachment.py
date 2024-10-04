@@ -64,8 +64,8 @@ class MKVAttachment:
         description: str | None = None,
         attach_once: bool | None = False,
     ) -> None:
-        self.mime_type = None
-        self._file_path = None
+        self.mime_type: str | None = None
+        self._file_path: str
         self.file_path = file_path
         self.name = name
         self.description = description
@@ -111,10 +111,10 @@ class MKVAttachment:
         -------
         None
         """
-        file_path = Path(file_path).expanduser()
-        if not file_path.is_file():
-            msg = f'"{file_path}" does not exist'
+        fp = Path(file_path).expanduser()
+        if not fp.is_file():
+            msg = f'"{fp}" does not exist'
             raise FileNotFoundError(msg)
-        self.mime_type = guess_type(file_path)[0]
+        self.mime_type = guess_type(fp)[0]
         self.name = None
-        self._file_path = str(file_path)
+        self._file_path = str(fp)
