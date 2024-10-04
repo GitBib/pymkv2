@@ -1,4 +1,6 @@
-from pkg_resources import DistributionNotFound, get_distribution
+from __future__ import annotations
+
+import importlib
 
 # package imports
 from .MKVAttachment import MKVAttachment
@@ -14,10 +16,10 @@ from .Verifications import (
     verify_supported,
 )
 
-# set the version number within the package using setuptools-scm
+# set the version number within the package using importlib
 try:
-    __version__ = get_distribution(__name__).version
-except DistributionNotFound:
+    __version__: str | None = importlib.metadata.version(__name__)
+except importlib.metadata.PackageNotFoundError:
     # package is not installed
     __version__ = None
 

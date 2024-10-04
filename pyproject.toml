@@ -34,10 +34,14 @@ bcp47 = "0.1.0"
 python-iso639 = "^2024.4.27"
 
 [tool.poetry.dev-dependencies]
+pre-commit = "^4.0.1"
 Sphinx = "^7.3.7"
 pytest = "^8.2.1"
 pytest-cov = "^5.0.0"
-sphinx-material = {git = "https://github.com/bashtage/sphinx-material.git"}
+pytest-ruff = "^0.4.1"
+pytest-mypy = "^0.10.3"
+mypy = "^1.11.2"
+sphinx-material = "^0.0.36"
 
 [tool.poetry.urls]
 homepage = "https://github.com/GitBib/pymkv2"
@@ -45,6 +49,13 @@ homepage = "https://github.com/GitBib/pymkv2"
 [build-system]
 requires = ["poetry-core>=1.0.0", "setuptools", "wheel", "setuptools_scm"]
 build-backend = "poetry.core.masonry.api"
+
+[tool.pytest.ini_options]
+addopts = "--doctest-modules --mypy --ruff --ruff-format"
+
+[[tool.mypy.overrides]]
+module = ["bcp47.*", "bitmath.*", "iso639.*"]
+ignore_missing_imports = true
 
 [tool.ruff]
 # Exclude a variety of commonly ignored directories.
@@ -74,6 +85,7 @@ exclude = [
 line-length = 120
 indent-width = 4
 target-version = "py39"
+namespace-packages = ["docs/source"]
 
 [tool.ruff.lint]
 select = [
@@ -134,10 +146,12 @@ ignore = [
   "S101", # Use of assert detected https://docs.astral.sh/ruff/rules/assert/
   "RUF012", # Mutable class attributes should be annotated with `typing.ClassVar`
   "SIM102", # sometimes it's better to nest
-  "UP038" # Checks for uses of isinstance/issubclass that take a tuple
+  "UP038", # Checks for uses of isinstance/issubclass that take a tuple
           # of types for comparison.
           # Deactivated because it can make the code slow:
           # https://github.com/astral-sh/ruff/issues/7871
+   "TCH003", # Ignore moving imports into a type-checking block.
+   "C901" # too complex
 ]
 # Allow fix for all enabled rules (when `--fix`) is provided.
 fixable = ["ALL"]
@@ -158,3 +172,7 @@ line-ending = "auto"
 
 [tool.ruff.lint.isort]
 force-single-line = false
+
+[tool.ruff.lint.pylint]
+max-statements = 82
+max-branches = 40
