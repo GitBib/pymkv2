@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 import os
 import subprocess as sp
+from collections.abc import Iterable, Sequence
 from pathlib import Path
 from re import match
 from typing import Any
@@ -10,7 +11,7 @@ from typing import Any
 from pymkv.utils import prepare_mkvtoolnix_path
 
 
-def checking_file_path(file_path: str | os.PathLike[Any]) -> str:
+def checking_file_path(file_path: str | os.PathLike[Any] | None) -> str:
     """
     Parameters
     ----------
@@ -40,10 +41,10 @@ def checking_file_path(file_path: str | os.PathLike[Any]) -> str:
 
 
 def get_file_info(
-    file_path: str | os.PathLike,
-    mkvmerge_path: str | tuple | os.PathLike,
+    file_path: str | os.PathLike[Any],
+    mkvmerge_path: str | os.PathLike | Iterable[str],
     check_path: bool = True,
-) -> dict:
+) -> dict[str, Any]:
     """
     Get information about a media file using mkvmerge.
 
@@ -76,14 +77,13 @@ def get_file_info(
     if check_path:
         file_path = checking_file_path(file_path)
 
-    return json.loads(
-        sp.check_output(
-            [*prepare_mkvtoolnix_path(mkvmerge_path), "-J", file_path],  # noqa: S603
-        ).decode(),
-    )
+    cmds = [*prepare_mkvtoolnix_path(mkvmerge_path), "-J", file_path]
+    return json.loads(sp.check_output(cmds).decode())  # noqa: S603
 
 
-def verify_mkvmerge(mkvmerge_path: str | list | os.PathLike | tuple[str, ...] | None = "mkvmerge") -> bool:
+def verify_mkvmerge(
+    mkvmerge_path: str | os.PathLike | Iterable[str] = "mkvmerge",
+) -> bool:
     """
     Parameters
     ----------
@@ -96,14 +96,18 @@ def verify_mkvmerge(mkvmerge_path: str | list | os.PathLike | tuple[str, ...] | 
         True, if `mkvmerge_path` is valid and the `mkvmerge` executable is found. False otherwise.
     """
     try:
-        mkvmerge_command = [*prepare_mkvtoolnix_path(mkvmerge_path), "-V"]
+        mkvmerge_command = list(prepare_mkvtoolnix_path(mkvmerge_path))
+        mkvmerge_command.append("-V")
         output = sp.check_output(mkvmerge_command).decode()  # noqa: S603
     except (sp.CalledProcessError, FileNotFoundError):
         return False
     return bool(match("mkvmerge.*", output))
 
 
-def verify_matroska(file_path: str | os.PathLike, mkvmerge_path: str | list | os.PathLike | None = "mkvmerge") -> bool:
+def verify_matroska(
+    file_path: str | os.PathLike[Any],
+    mkvmerge_path: str | os.PathLike | Iterable[str] = "mkvmerge",
+) -> bool:
     """
     Parameters
     ----------
@@ -138,9 +142,9 @@ def verify_matroska(file_path: str | os.PathLike, mkvmerge_path: str | list | os
         msg = "mkvmerge is not at the specified path, add it there or change the mkvmerge_path property"
         raise FileNotFoundError(msg)
     try:
-        if isinstance(mkvmerge_path, list):
+        if isinstance(mkvmerge_path, Sequence) and not isinstance(mkvmerge_path, str):
             mkvmerge_path = tuple(mkvmerge_path)
-        info_json: dict = get_file_info(file_path, mkvmerge_path)
+        info_json: dict[str, Any] = get_file_info(file_path, mkvmerge_path)
 
     except sp.CalledProcessError as e:
         msg = f'"{file_path}" could not be opened'
@@ -149,13 +153,13 @@ def verify_matroska(file_path: str | os.PathLike, mkvmerge_path: str | list | os
 
 
 def verify_file_path_and_mkvmerge(
-    file_path: str,
-    mkvmerge_path: str | list | tuple[str, ...] | os.PathLike | None = "mkvmerge",
+    file_path: str | os.PathLike[Any],
+    mkvmerge_path: str | os.PathLike | Iterable[str] = "mkvmerge",
 ) -> str:
     """
     Parameters
     ----------
-    file_path : str
+    file_path : Union[str, os.PathLike]
         The path to the file that needs to be verified.
 
     mkvmerge_path : str, optional
@@ -181,11 +185,14 @@ def verify_file_path_and_mkvmerge(
     return checking_file_path(file_path)
 
 
-def verify_recognized(file_path: str, mkvmerge_path: str | None = "mkvmerge"):  # noqa: ANN201
+def verify_recognized(
+    file_path: str | os.PathLike[Any],
+    mkvmerge_path: str | os.PathLike | Iterable[str] = "mkvmerge",
+) -> bool:
     """
     Parameters
     ----------
-    file_path : str
+    file_path : Union[str, os.PathLike]
         The path to the file that will be verified.
 
     mkvmerge_path : str, optional
@@ -208,13 +215,13 @@ def verify_recognized(file_path: str, mkvmerge_path: str | None = "mkvmerge"):  
 
 
 def verify_supported(  # noqa: ANN201
-    file_path: str,
-    mkvmerge_path: str | list | tuple[str, ...] | os.PathLike | None = "mkvmerge",
+    file_path: str | os.PathLike[Any],
+    mkvmerge_path: str | os.PathLike | Iterable[str] = "mkvmerge",
 ):
     """
     Parameters
     ----------
-    file_path : str
+    file_path : Union[str, os.PathLike]
         The path of the file to be verified.
 
     mkvmerge_path : str, optional

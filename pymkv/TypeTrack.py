@@ -3,7 +3,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from pymkv import MKVTrack
+    from pymkv.MKVTrack import MKVTrack
 
 type_files = {
     "video": {

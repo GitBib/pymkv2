@@ -15,7 +15,7 @@ test: $(TEST_FILE) $(TEST_TWO_FILE)
 	@mkvmerge -J $(TEST_FILE)
 	@echo "Running mkvmerge -J $(TEST_TWO_FILE)..."
 	@mkvmerge -J $(TEST_TWO_FILE)
-	pytest --cov=pymkv $(TEST_DIR) --cov-report=xml
+	pytest --cov=pymkv $(TEST_DIR) --cov-report=xml --junitxml=test-results/junit.xml
 
 $(TEST_FILE):
 	@if [ ! -f $(TEST_FILE) ]; then \

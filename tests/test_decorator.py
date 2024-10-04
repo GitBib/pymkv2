@@ -1,3 +1,7 @@
+from __future__ import annotations
+
+from typing import Any
+
 import pytest
 
 from pymkv.utils import ensure_info
@@ -7,11 +11,11 @@ class MockMKVTrack:
     def __init__(self) -> None:
         self.file_path = "/path/to/file.mkv"
         self.mkvmerge_path = "/path/to/mkvmerge"
-        self._info_json = None
-        self._track_id = None
+        self._info_json: dict[str, Any] | None = None
+        self._track_id: int | None = None
 
     @property
-    def track_id(self):  # noqa: ANN201
+    def track_id(self) -> int | None:
         return self._track_id
 
     @track_id.setter
@@ -22,6 +26,7 @@ class MockMKVTrack:
         check_path=False,
     )
     def track_id(self, track_id: int) -> None:
+        assert self._info_json is not None
         if not 0 <= track_id < len(self._info_json["tracks"]):
             msg = "Track index out of range"
             raise IndexError(msg)
@@ -68,7 +73,7 @@ def test_ensure_info_with_custom_fetch_function() -> None:
 
 def test_ensure_info_with_kwargs() -> None:
     def fetch_with_kwargs(*args, **kwargs):  # noqa: ANN202, ANN002, ANN003
-        return {"tracks": [{"id": 0}], "check_path": kwargs.get("check_path")}
+        return {"tracks": [{"id": 0}], "check_path": kwargs["check_path"]}
 
     class KwargsMockTrack:
         def __init__(self) -> None:
