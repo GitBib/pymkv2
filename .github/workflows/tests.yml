@@ -2,24 +2,37 @@ name: Tests
 on: [push, pull_request]
 jobs:
   run:
-    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        python-version: ['3.9', '3.10', '3.11', '3.12', '3.13']
+    runs-on: ${{ matrix.os }}
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
-      - name: Set up python
+      - name: Set up python ${{ matrix.python-version }}
         id: setup-python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.11'
+          python-version: ${{ matrix.python-version }}
       - name: Set up MKVToolNix repository
+        if: matrix.os == 'ubuntu-latest'
         run: |
           sudo apt-get update
           sudo apt-get install -y wget gnupg
           sudo wget -O /usr/share/keyrings/gpg-pub-moritzbunkus.gpg https://mkvtoolnix.download/gpg-pub-moritzbunkus.gpg
-          echo "deb [arch=amd64 signed-by=/usr/share/keyrings/gpg-pub-moritzbunkus.gpg] https://mkvtoolnix.download/ubuntu/ jammy main" | sudo tee /etc/apt/sources.list.d/mkvtoolnix.list
+          UBUNTU_CODENAME=$(lsb_release -cs)
+          echo "deb [arch=amd64 signed-by=/usr/share/keyrings/gpg-pub-moritzbunkus.gpg] https://mkvtoolnix.download/ubuntu/ $UBUNTU_CODENAME main" | sudo tee /etc/apt/sources.list.d/mkvtoolnix.list
           sudo apt-get update
-      - name: Install MKVToolNix
+      - name: Install MKVToolNix (Ubuntu)
+        if: matrix.os == 'ubuntu-latest'
         run: sudo apt-get install -y mkvtoolnix mkvtoolnix-gui
+      - name: Install MKVToolNix (macOS)
+        if: matrix.os == 'macos-latest'
+        run: brew install mkvtoolnix
+      - name: Install MKVToolNix (Windows)
+        if: matrix.os == 'windows-latest'
+        run: choco install mkvtoolnix
       - name: Verify MKVToolNix installation
         run: mkvmerge -V
       - name: Install Poetry
@@ -37,6 +50,7 @@ jobs:
         run: |
           source .venv/bin/activate
           make
+        shell: bash
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v4
         if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/master' || github.event_name == 'pull_request' || github.event_name == 'workflow_dispatch' }}
