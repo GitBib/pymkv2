@@ -32,8 +32,16 @@ jobs:
         run: brew install mkvtoolnix
       - name: Install MKVToolNix (Windows)
         if: matrix.os == 'windows-latest'
-        run: choco install mkvtoolnix
-      - name: Verify MKVToolNix installation
+        run: |
+          choco install mkvtoolnix
+          echo "C:\Program Files\MKVToolNix" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+      - name: Verify MKVToolNix installation (Windows)
+        if: matrix.os == 'windows-latest'
+        run: |
+          & "C:\Program Files\MKVToolNix\mkvmerge.exe" -V
+        shell: pwsh
+      - name: Verify MKVToolNix installation (Linux and macOS)
+        if: matrix.os != 'windows-latest'
         run: mkvmerge -V
       - name: Install Poetry
         uses: snok/install-poetry@v1
