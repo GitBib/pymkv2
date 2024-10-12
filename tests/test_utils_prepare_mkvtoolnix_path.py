@@ -1,5 +1,5 @@
-import os
 from pathlib import Path
+from unittest.mock import patch
 
 import pytest
 
@@ -16,13 +16,35 @@ def test_prepare_mkvmerge_path_with_base_string() -> None:
     assert result == ("mkvmerge",)
 
 
+@patch("pathlib.Path.exists")
+def test_prepare_mkvmerge_path_with_linux_path(mock_exists):  # noqa: ANN201, ANN001
+    mock_exists.return_value = True
+    path = "/home/bob/dir with space/mkv/mkvmerge"
+    result = utils.prepare_mkvtoolnix_path(path)
+    assert result == (path,)
+
+
+@patch("pathlib.Path.exists")
+def test_prepare_mkvmerge_path_with_windows_path(mock_exists):  # noqa: ANN201, ANN001
+    mock_exists.return_value = True
+    path = r"C:\Program Files\MKVToolNix\mkvmerge.exe"
+    result = utils.prepare_mkvtoolnix_path(path)
+    assert result == (path,)
+
+
+def test_prepare_mkvmerge_path_with_nonexistent_path() -> None:
+    path = "/nonexistent/path with spaces/mkvmerge"
+    result = utils.prepare_mkvtoolnix_path(path)
+    assert result == ("/nonexistent/path", "with", "spaces/mkvmerge")
+
+
 def test_prepare_mkvmerge_path_with_list() -> None:
     result = utils.prepare_mkvtoolnix_path(["mkvmerge", "path"])
     assert result == ("mkvmerge", "path")
 
 
 def test_prepare_mkvmerge_path_with_pathlike() -> None:
-    path = Path(os.path.join(os.path.dirname(__file__), "mkvmerge"))  # noqa: PTH120, PTH118
+    path = Path(__file__).parent / "mkvmerge"
     result = utils.prepare_mkvtoolnix_path(path)
     assert result == (str(path),)
 

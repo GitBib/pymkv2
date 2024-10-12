@@ -3,6 +3,7 @@ from __future__ import annotations
 import os
 import shlex
 from functools import wraps
+from pathlib import Path
 from typing import Any, Callable
 
 
@@ -16,17 +17,18 @@ def prepare_mkvtoolnix_path(path: str | list[str] | os.PathLike | tuple[str, ...
     Returns
     -------
     tuple[str, ...]
-        The prepared path as a list of strings.
+        The prepared path as a tuple of strings.
 
     Raises
     ------
     ValueError
-        If the path type is invalid. Expected str, list of str, or os.PathLike.
+        If the path type is invalid. Expected str, list of str, tuple of str, or os.PathLike.
     """
     if isinstance(path, os.PathLike):
         return (os.fspath(path),)
     elif isinstance(path, str):  # noqa: RET505
-        return tuple(shlex.split(path))
+        # Check if the path exists and is accessible
+        return (path,) if Path(path).exists() else tuple(shlex.split(path))
     elif isinstance(path, list):
         return tuple(path)
     elif isinstance(path, tuple):
