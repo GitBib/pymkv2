@@ -15,7 +15,7 @@ def is_bcp47(language_ietf: str) -> bool:
     bool
         True if the language tag is a valid BCP 47 language tag, False otherwise.
     """
-    if language_ietf != "und":
+    if language_ietf not in {"und", "zaa", "mul"}:
         return language_ietf in bcp47.languages.values()
     else:  # noqa: RET505
         return True
