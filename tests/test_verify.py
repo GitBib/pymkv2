@@ -18,7 +18,10 @@ def test_verify_matroska_true(get_path_test_file: Path) -> None:
 
 
 def test_verify_matroska_mkvmerge_not_found(get_path_test_file: Path) -> None:
-    with pytest.raises(FileNotFoundError, match="mkvmerge is not at the specified path"):
+    with pytest.raises(
+        FileNotFoundError,
+        match="mkvmerge is not at the specified path",
+    ):
         verify_matroska(get_path_test_file, "mkvmerge-test")
 
 
@@ -42,7 +45,11 @@ def test_verify_matroska_invalid_file() -> None:
         ("MP4", False),
     ],
 )
-def test_verify_matroska_various_types(file_type: str, expected: bool, get_path_test_file: Path) -> None:
+def test_verify_matroska_various_types(
+    file_type: str,
+    expected: bool,
+    get_path_test_file: Path,
+) -> None:
     with patch("pymkv.Verifications.get_file_info") as mock_get_file_info:
         mock_get_file_info.return_value = {"container": {"type": file_type}}
         assert verify_matroska(get_path_test_file) is expected
@@ -57,7 +64,10 @@ def test_verify_matroska_various_types(file_type: str, expected: bool, get_path_
         Path("path/to/mkvmerge"),
     ],
 )
-def test_verify_matroska_mkvmerge_path_types(mkvmerge_path: str | list | os.PathLike, get_path_test_file: Path) -> None:
+def test_verify_matroska_mkvmerge_path_types(
+    mkvmerge_path: str | list | os.PathLike,
+    get_path_test_file: Path,
+) -> None:
     with (
         patch("pymkv.Verifications.verify_mkvmerge") as mock_verify_mkvmerge,
         patch("pymkv.Verifications.get_file_info") as mock_get_file_info,
@@ -71,5 +81,8 @@ def test_verify_matroska_mkvmerge_path_types(mkvmerge_path: str | list | os.Path
 def test_verify_matroska_mkvmerge_not_found_various_types() -> None:
     with patch("pymkv.Verifications.verify_mkvmerge") as mock_verify_mkvmerge:
         mock_verify_mkvmerge.return_value = False
-        with pytest.raises(FileNotFoundError, match="mkvmerge is not at the specified path"):
+        with pytest.raises(
+            FileNotFoundError,
+            match="mkvmerge is not at the specified path",
+        ):
             verify_matroska("test.mkv", "non_existent_path")

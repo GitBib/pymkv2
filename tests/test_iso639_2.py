@@ -1,3 +1,5 @@
+from typing import cast
+
 from pymkv.ISO639_2 import is_iso639_2
 
 
@@ -10,7 +12,7 @@ def test_is_iso639_2_false() -> None:
 
 
 def test_is_iso639_2_non_str_input() -> None:
-    assert is_iso639_2(123) is False
+    assert is_iso639_2(cast(str, 123)) is False
 
 
 def test_is_iso639_2_empty_string() -> None:
