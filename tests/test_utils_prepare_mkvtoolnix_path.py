@@ -1,4 +1,5 @@
 from pathlib import Path
+from typing import cast
 from unittest.mock import patch
 
 import pytest
@@ -7,7 +8,9 @@ from pymkv import utils
 
 
 def test_prepare_mkvmerge_path_with_string() -> None:
-    result = utils.prepare_mkvtoolnix_path("flatpak run org.bunkus.mkvtoolnix-gui mkvmerge")
+    result = utils.prepare_mkvtoolnix_path(
+        "flatpak run org.bunkus.mkvtoolnix-gui mkvmerge",
+    )
     assert result == ("flatpak", "run", "org.bunkus.mkvtoolnix-gui", "mkvmerge")
 
 
@@ -44,11 +47,11 @@ def test_prepare_mkvmerge_path_with_list() -> None:
 
 
 def test_prepare_mkvmerge_path_with_pathlike() -> None:
-    path = Path(__file__).parent / "mkvmerge"
+    path = Path(Path(__file__).parent, "mkvmerge")
     result = utils.prepare_mkvtoolnix_path(path)
     assert result == (str(path),)
 
 
 def test_prepare_mkvmerge_path_with_invalid_argument() -> None:
     with pytest.raises(ValueError):  # noqa: PT011
-        utils.prepare_mkvtoolnix_path(123)
+        utils.prepare_mkvtoolnix_path(cast(str, 123))

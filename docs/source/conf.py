@@ -13,13 +13,13 @@
 import os
 import sys
 
-sys.path.insert(0, os.path.abspath("../.."))
+sys.path.insert(0, os.path.abspath("../.."))  # noqa: PTH100
 
 
 # -- Project information -----------------------------------------------------
 
 project = "pymkv2"
-copyright = "2024, Sheldon Woodward & GitBib"
+copyright = "2024, Sheldon Woodward & GitBib"  # noqa: A001
 author = "Sheldon Woodward & GitBib"
 
 # The full version, including alpha/beta/rc tags
@@ -43,7 +43,7 @@ templates_path = ["_templates"]
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
 # This pattern also affects html_static_path and html_extra_path.
-exclude_patterns = []
+exclude_patterns: list[str] = []
 
 master_doc = "index"
 
@@ -63,25 +63,19 @@ html_static_path = ["_static"]
 
 # Material theme options (see theme.conf for more information)
 html_theme_options = {
-
     # Set the name of the project to appear in the navigation.
     "nav_title": "PyMKV2 DOCS",
-
     # Set you GA account ID to enable tracking
     "google_analytics_account": "G-YMTSDQ0M8Z",
-
     # Specify a base_url used to generate sitemap.xml. If not
     # specified, then no sitemap will be built.
     "base_url": "https://gitbib.github.io/pymkv2/",
-
     # Set the color and the accent color
     "color_primary": "blue",
     "color_accent": "light-blue",
-
     # Set the repo location to get a badge with stats
     "repo_url": "https://github.com/GitBib/pymkv2",
     "repo_name": "pymkv2",
-
     # Visible levels of the global TOC; -1 means unlimited
     "globaltoc_depth": 3,
     # If False, expand all TOC entries
