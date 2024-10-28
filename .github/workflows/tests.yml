@@ -14,7 +14,8 @@ jobs:
           sudo apt-get -qq update
           sudo apt-get -qq install -y wget gnupg
           sudo wget -O /usr/share/keyrings/gpg-pub-moritzbunkus.gpg https://mkvtoolnix.download/gpg-pub-moritzbunkus.gpg
-          echo "deb [arch=amd64 signed-by=/usr/share/keyrings/gpg-pub-moritzbunkus.gpg] https://mkvtoolnix.download/ubuntu/ jammy main" | sudo tee /etc/apt/sources.list.d/mkvtoolnix.list
+          UBUNTU_CODENAME=$(lsb_release -cs)
+          echo "deb [arch=amd64 signed-by=/usr/share/keyrings/gpg-pub-moritzbunkus.gpg] https://mkvtoolnix.download/ubuntu/ $UBUNTU_CODENAME main" | sudo tee /etc/apt/sources.list.d/mkvtoolnix.list
           sudo apt-get -qq update
       - name: Install MKVToolNix
         run: sudo apt-get -qq install -y mkvtoolnix mkvtoolnix-gui
