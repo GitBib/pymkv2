@@ -15,7 +15,12 @@ def test_init(temp_file: str) -> None:
 
 
 def test_init_with_options(temp_file: str) -> None:
-    attachment = MKVAttachment(temp_file, name="Test", description="Test Description", attach_once=True)
+    attachment = MKVAttachment(
+        temp_file,
+        name="Test",
+        description="Test Description",
+        attach_once=True,
+    )
     assert attachment.file_path == temp_file
     assert attachment.name == "Test"
     assert attachment.description == "Test Description"

@@ -1,8 +1,9 @@
 from pathlib import Path
+from typing import cast
 
 import pytest
 
-from pymkv import MKVFile
+from pymkv import MKVFile, MKVTrack
 
 
 def test_remove_track_one_track(get_path_test_file: Path) -> None:
@@ -21,7 +22,10 @@ def test_remove_track_zero_track(get_path_test_file: Path) -> None:
     assert mkv.tracks[0].track_type == "audio"
 
 
-def test_remove_track_and_mux_file(get_base_path: Path, get_path_test_file: Path) -> None:
+def test_remove_track_and_mux_file(
+    get_base_path: Path,
+    get_path_test_file: Path,
+) -> None:
     mkv = MKVFile(get_path_test_file)
     output_file = get_base_path / "file-test.mkv"
     mkv.remove_track(1)
@@ -54,7 +58,10 @@ def test_move_track_front_raises(get_path_test_file: Path) -> None:
         mkv.move_track_front(2)
 
 
-def test_move_track_front_and_mux(get_base_path: Path, get_path_test_file: Path) -> None:
+def test_move_track_front_and_mux(
+    get_base_path: Path,
+    get_path_test_file: Path,
+) -> None:
     output_file = get_base_path / "file-test.mkv"
 
     mkv = MKVFile(get_path_test_file)
@@ -129,7 +136,10 @@ def test_move_track_forward_raises(get_path_test_file: Path) -> None:
         mkv.move_track_forward(1)
 
 
-def test_move_track_forward_and_mux(get_base_path: Path, get_path_test_file: Path) -> None:
+def test_move_track_forward_and_mux(
+    get_base_path: Path,
+    get_path_test_file: Path,
+) -> None:
     output_file = get_base_path / "file-test.mkv"
 
     mkv = MKVFile(get_path_test_file)
@@ -153,7 +163,10 @@ def test_move_track_backward_raises(get_path_test_file: Path) -> None:
         mkv.move_track_backward(2)
 
 
-def test_move_track_backward_and_mux(get_base_path: Path, get_path_test_file: Path) -> None:
+def test_move_track_backward_and_mux(
+    get_base_path: Path,
+    get_path_test_file: Path,
+) -> None:
     output_file = get_base_path / "file-test.mkv"
 
     mkv = MKVFile(get_path_test_file)
@@ -169,7 +182,7 @@ def test_move_track_backward_and_mux(get_base_path: Path, get_path_test_file: Pa
 
 def test_get_track(get_path_test_file: Path) -> None:
     mkv = MKVFile(get_path_test_file)
-    track = mkv.get_track(1)
+    track = cast(MKVTrack, mkv.get_track(1))
 
     assert track.track_type == "audio"
 

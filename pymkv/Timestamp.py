@@ -1,17 +1,24 @@
 from __future__ import annotations
 
 import re
+from typing import Final, cast
+
+_TIMESTAMP_PATTERN: Final[re.Pattern] = re.compile(
+    r"^[0-9]{1,2}(:[0-9]{1,2}){1,2}(\.[0-9]{1,9})?$",
+)
 
 
 class Timestamp:
+    __slots__ = ["_hh", "_mm", "_ss", "_nn", "_form"]
+
     def __init__(  # noqa: PLR0913
         self,
-        timestamp: str | int | Timestamp = None,
+        timestamp: str | int | Timestamp | None = None,
         hh: int | None = None,
         mm: int | None = None,
         ss: int | None = None,
         nn: int | None = None,
-        form: str | None = "MM:SS",
+        form: str = "MM:SS",
     ) -> None:
         """
         A class that represents a timestamp used in MKVFiles.
@@ -48,12 +55,12 @@ class Timestamp:
         elif timestamp is not None:
             self.extract(timestamp)
         else:
-            self._hh = 0 if self._hh is None else self._hh
-            self._mm = 0 if self._mm is None else self._mm
-            self._ss = 0 if self._ss is None else self._ss
-            self._nn = 0 if self._nn is None else self._nn
+            self._hh = 0 if hh is None else hh
+            self._mm = 0 if mm is None else mm
+            self._ss = 0 if ss is None else ss
+            self._nn = 0 if nn is None else nn
 
-    def __eq__(self, other: Timestamp) -> bool:
+    def __eq__(self, other: object) -> bool:
         """
         Compares the Timestamp object with another Timestamp object for equality.
 
@@ -63,9 +70,12 @@ class Timestamp:
         Returns:
             bool: True if the Timestamp objects are equal, False otherwise.
         """
+        if not isinstance(other, Timestamp):
+            return NotImplemented
+
         return self.hh == other.hh and self.mm == other.mm and self.ss == other.ss and self.nn == other.nn
 
-    def __ne__(self, other: Timestamp) -> bool:
+    def __ne__(self, other: object) -> bool:
         """
         Compares the Timestamp object with another Timestamp object for inequality.
 
@@ -75,9 +85,11 @@ class Timestamp:
         Returns:
             bool: True if the Timestamp objects are not equal, False otherwise.
         """
+        if not isinstance(other, Timestamp):
+            return NotImplemented
         return self.hh != other.hh or self.mm != other.mm or self.ss != other.ss or self.nn != other.nn
 
-    def __lt__(self, other: Timestamp) -> bool:
+    def __lt__(self, other: object) -> bool:
         """
         Compares the Timestamp object with another Timestamp object to determine if it is less than.
 
@@ -87,6 +99,8 @@ class Timestamp:
         Returns:
             bool: True if the Timestamp object is less than the other Timestamp object, False otherwise.
         """
+        if not isinstance(other, Timestamp):
+            return NotImplemented
         if self.hh != other.hh:
             return self.hh < other.hh
         elif self.mm != other.mm:  # noqa: RET505
@@ -97,7 +111,7 @@ class Timestamp:
             return self.nn < other.nn
         return False
 
-    def __le__(self, other: Timestamp) -> bool:
+    def __le__(self, other: object) -> bool:
         """
         Compares the Timestamp object with another Timestamp object to determine if it is less than or equal to.
 
@@ -107,6 +121,8 @@ class Timestamp:
         Returns:
             bool: True if the Timestamp object is less than or equal to the other Timestamp object, False otherwise.
         """
+        if not isinstance(other, Timestamp):
+            return NotImplemented
         if self.hh != other.hh:
             return self.hh <= other.hh
         elif self.mm != other.mm:  # noqa: RET505
@@ -117,7 +133,7 @@ class Timestamp:
             return self.nn <= other.nn
         return True
 
-    def __gt__(self, other: Timestamp) -> bool:
+    def __gt__(self, other: object) -> bool:
         """
         Compares the Timestamp object with another Timestamp object to determine if it is greater than.
 
@@ -127,6 +143,8 @@ class Timestamp:
         Returns:
             bool: True if the Timestamp object is greater than the other Timestamp object, False otherwise.
         """
+        if not isinstance(other, Timestamp):
+            return NotImplemented
         if self.hh != other.hh:
             return self.hh > other.hh
         elif self.mm != other.mm:  # noqa: RET505
@@ -137,7 +155,7 @@ class Timestamp:
             return self.nn > other.nn
         return False
 
-    def __ge__(self, other: Timestamp) -> bool:
+    def __ge__(self, other: object) -> bool:
         """
         Compares the Timestamp object with another Timestamp object to determine if it is greater than or equal to.
 
@@ -147,6 +165,8 @@ class Timestamp:
         Returns:
             bool: True if the Timestamp object is greater than or equal to the other Timestamp object, False otherwise.
         """
+        if not isinstance(other, Timestamp):
+            return NotImplemented
         if self.hh != other.hh:
             return self.hh >= other.hh
         elif self.mm != other.mm:  # noqa: RET505
@@ -185,7 +205,12 @@ class Timestamp:
         the timestamp string according to the specified format, including or omitting parts
         based on the format and the presence of non-zero values.
         """
-        format_groups = re.match(r"^(([Hh]{1,2}):)?([Mm]{1,2}):([Ss]{1,2})(\.([Nn]{1,9}))?$", self.form).groups()
+        format_match = re.match(
+            r"^(([Hh]{1,2}):)?([Mm]{1,2}):([Ss]{1,2})(\.([Nn]{1,9}))?$",
+            self.form,
+        )
+        assert format_match is not None
+        format_groups = format_match.groups()
         timestamp_format = [format_groups[i] is not None for i in (1, 2, 3, 5)]
 
         timestamp_string = ""
@@ -225,7 +250,7 @@ class Timestamp:
         Returns:
             int: The hours value.
         """
-        return self._hh
+        return cast(int, self._hh)
 
     @hh.setter
     def hh(self, value: int) -> None:
@@ -245,7 +270,7 @@ class Timestamp:
         Returns:
             int: The minutes value.
         """
-        return self._mm
+        return cast(int, self._mm)
 
     @mm.setter
     def mm(self, value: int) -> None:
@@ -265,7 +290,7 @@ class Timestamp:
         Returns:
             int: The seconds value.
         """
-        return self._ss
+        return cast(int, self._ss)
 
     @ss.setter
     def ss(self, value: int) -> None:
@@ -285,7 +310,7 @@ class Timestamp:
         Returns:
             int: The nanoseconds value.
         """
-        return self._nn
+        return cast(int, self._nn)
 
     @nn.setter
     def nn(self, value: int) -> None:
@@ -328,9 +353,7 @@ class Timestamp:
         if not isinstance(timestamp, str):
             msg = f'"{type(timestamp)}" is not str type'
             raise TypeError(msg)
-        elif re.match(r"^[0-9]{1,2}(:[0-9]{1,2}){1,2}(\.[0-9]{1,9})?$", timestamp):  # noqa: RET506
-            return True
-        return False
+        return bool(_TIMESTAMP_PATTERN.match(timestamp))
 
     def extract(self, timestamp: str | int) -> None:
         """
@@ -343,10 +366,12 @@ class Timestamp:
         if not isinstance(timestamp, (str, int)):
             msg = f'"{type(timestamp)}" is not str or int type'
             raise TypeError(msg)
-        elif isinstance(timestamp, str) and not Timestamp.verify(timestamp):  # noqa: RET506
+        if isinstance(timestamp, str) and not Timestamp.verify(
+            timestamp,
+        ):
             msg = f'"{timestamp}" is not a valid timestamp'
             raise ValueError(msg)
-        elif isinstance(timestamp, str):
+        if isinstance(timestamp, str):
             self.splitting_timestamp(timestamp)
         elif isinstance(timestamp, int):
             self._hh = int(timestamp / 3600)
@@ -371,18 +396,30 @@ class Timestamp:
 
         Example
         -------
-        >>> obj.splitting_timestamp("12:34:56.789012345")
+        >>> obj = Timestamp("12:34:56.789012345")
+        >>> print(obj)
+        12:34:56.789012345
+        >>> assert obj.hh == 12
+        >>> assert obj.mm == 34
+        >>> assert obj.ss == 56
+        >>> assert obj.nn == 789012345
+
         # Assuming self._hh, self._mm, self._ss, and self._nn are all None initially
         The hours (self.hh) will be set to 12.
         The minutes (self.mm) will be set to 34.
         The seconds (self.ss) will be set to 56.
         The nanoseconds (self.nn) will be set to 789012345.
         """
-        timestamp_groups = re.match(r"^(([0-9]{1,2}):)?([0-9]{1,2}):([0-9]{1,2})(\.([0-9]{1,9}))?$", timestamp).groups()
+        timestamp_match = re.match(
+            r"^(([0-9]{1,2}):)?([0-9]{1,2}):([0-9]{1,2})(\.([0-9]{1,9}))?$",
+            timestamp,
+        )
+        assert timestamp_match is not None
+        timestamp_groups = timestamp_match.groups()
 
-        timestamp = [timestamp_groups[i] for i in (1, 2, 3, 4)]
+        timestamp_lst = [cast(str, timestamp_groups[i]) for i in (1, 2, 3, 4)]
         timestamp_clean = []
-        for ts in timestamp:
+        for ts in timestamp_lst:
             if ts is None:
                 timestamp_clean.append(0)
             else:
@@ -391,3 +428,7 @@ class Timestamp:
         self.mm = int(timestamp_clean[1]) if self._mm is None else self._mm
         self.ss = int(timestamp_clean[2]) if self._ss is None else self._ss
         self.nn = int(timestamp_clean[3] * 1000000000) if self._nn is None else self._nn
+
+
+if __name__ == "__main__":
+    pass

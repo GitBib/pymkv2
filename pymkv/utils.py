@@ -2,12 +2,18 @@ from __future__ import annotations
 
 import os
 import shlex
+from collections.abc import Iterable, Sequence
 from functools import wraps
 from pathlib import Path
-from typing import Any, Callable
+from typing import Any, Callable, TypeVar, cast
+
+T = TypeVar("T")
+SelfType = TypeVar("SelfType")
 
 
-def prepare_mkvtoolnix_path(path: str | list[str] | os.PathLike | tuple[str, ...]) -> tuple[str, ...]:
+def prepare_mkvtoolnix_path(
+    path: str | os.PathLike | Iterable[str],
+) -> tuple[str, ...]:
     """
     Parameters
     ----------
@@ -17,28 +23,33 @@ def prepare_mkvtoolnix_path(path: str | list[str] | os.PathLike | tuple[str, ...
     Returns
     -------
     tuple[str, ...]
-        The prepared path as a tuple of strings.
+        The prepared path as a list of strings.
 
     Raises
     ------
     ValueError
-        If the path type is invalid. Expected str, list of str, tuple of str, or os.PathLike.
+        If the path type is invalid. Expected str, list of str, or os.PathLike.
     """
     if isinstance(path, os.PathLike):
         return (os.fspath(path),)
     elif isinstance(path, str):  # noqa: RET505
         # Check if the path exists and is accessible
         return (path,) if Path(path).exists() else tuple(shlex.split(path))
-    elif isinstance(path, list):
-        return tuple(path)
     elif isinstance(path, tuple):
         return path
+    elif isinstance(path, Sequence):
+        return tuple(path)
     else:
         msg = "Invalid path type. Expected str, List[str], Tuple[str] or os.PathLike."
         raise ValueError(msg)  # noqa: TRY004
 
 
-def ensure_info(info_attr: str, fetch_func: Callable, fetch_args: list[str], **fetch_kwargs: Any) -> Callable:  # noqa: ANN401
+def ensure_info(
+    info_attr: str,
+    fetch_func: Callable[..., T],
+    fetch_args: list[str],
+    **fetch_kwargs: Any,  # noqa: ANN401
+) -> Callable[[Callable[..., T]], Callable[..., T]]:
     """
     A decorator that ensures the specified attribute (info_attr) is available before executing the method.
 
@@ -69,9 +80,13 @@ def ensure_info(info_attr: str, fetch_func: Callable, fetch_args: list[str], **f
         pass
     """
 
-    def decorator(method: Callable) -> Callable:
+    def decorator(method: Callable[..., T]) -> Callable[..., T]:
         @wraps(method)
-        def wrapper(self: Any, *args: Any, **kwargs: Any) -> Any:  # noqa: ANN401
+        def wrapper(
+            self: SelfType,
+            *args: list[Any],
+            **kwargs: dict[str, Any],
+        ) -> T:
             if not hasattr(self, info_attr) or getattr(self, info_attr) is None:
                 func_params = []
                 for arg in fetch_args:
@@ -82,6 +97,6 @@ def ensure_info(info_attr: str, fetch_func: Callable, fetch_args: list[str], **f
                 setattr(self, info_attr, fetch_func(*func_params, **fetch_kwargs))
             return method(self, *args, **kwargs)
 
-        return wrapper
+        return cast(Callable[..., T], wrapper)
 
     return decorator
