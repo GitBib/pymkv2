@@ -27,13 +27,6 @@ jobs:
         run: sudo apt-get -qq install -y mkvtoolnix mkvtoolnix-gui
       - name: Verify MKVToolNix installation
         run: mkvmerge -V
-      - name: Install Poetry
-        uses: snok/install-poetry@v1
-        with:
-          version: 1.8.3
-          virtualenvs-create: true
-          virtualenvs-in-project: true
-          installer-parallel: true
       - name: Set up Python
         id: setup-python
         uses: actions/setup-python@v5
