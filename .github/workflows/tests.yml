@@ -2,7 +2,7 @@ name: Tests
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
-on: [push, pull_request]
+on: [push]
 
 permissions:
   contents: read
