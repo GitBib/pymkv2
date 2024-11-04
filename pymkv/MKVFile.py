@@ -6,33 +6,33 @@ Below are some basic examples of how the :class:`~pymkv.MKVFile` objects can be 
 
 Create and mux a new MKV. This example takes an standalone video and audio track and combines them into an MKV file.
 
->> from pymkv import MKVFile
->> mkv = MKVFile()
->> mkv.add_track('/path/to/track.h264')
->> mkv.add_track(MKVTrack('/path/to/another/track.aac'))
+>>> from pymkv import MKVFile
+>>> mkv = MKVFile()
+>>> mkv.add_track('/path/to/track.h264')
+>>> mkv.add_track(MKVTrack('/path/to/another/track.aac'))
 >> mkv.mux('/path/to/output.mkv')
 
 Generate the mkvmerge command to mux an MKV. This is example is identical to the first example except the command is
 only generated, not executed.
 
->> mkv = MKVFile()
->> mkv.add_track('/path/to/track.h264')
->> mkv.add_track(MKVTrack('/path/to/another/track.aac'))
->> mkv.command('/path/to/output.mkv')
+>>> mkv = MKVFile()
+>>> mkv.add_track('/path/to/track.h264')
+>>> mkv.add_track(MKVTrack('/path/to/another/track.aac'))
+>>> mkv.command('/path/to/output.mkv')
 
 Import an existing MKV and remove a track. This example will import an MKV that already exists on your filesystem,
 remove a track and allow you to mux that change into a new file.
 
->> mkv = MKVFile('/path/to/file.mkv')
->> mkv.remove_track(0)
->> mkv.mux('/path/to/output.mkv')
+>>> mkv = MKVFile('/path/to/file.mkv')
+>>> mkv.remove_track(0)
+>>> mkv.mux('/path/to/output.mkv')
 
 Combine two MKVs. This example takes two existing MKVs and combines their tracks into a single MKV file.
 
->> mkv1 = MKVFile('/path/to/file1.mkv')
->> mkv2 = MKVFile('/path/to/file2.mkv')
->> mkv1.add_file(mkv2)
->> mkv1.mux('/path/to/output.mkv')
+>>> mkv1 = MKVFile('/path/to/file1.mkv')
+>>> mkv2 = MKVFile('/path/to/file2.mkv')
+>>> mkv1.add_file(mkv2)
+>>> mkv1.mux('/path/to/output.mkv')
 """
 
 from __future__ import annotations
