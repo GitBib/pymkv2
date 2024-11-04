@@ -1,9 +1,5 @@
-from __future__ import annotations
-
-from mimetypes import guess_type
-from pathlib import Path
-
-""":class:`~pymkv.MKVAttachment` classes are used to represent attachment files within an MKV or to be used in an
+"""
+:class:`~pymkv.MKVAttachment` classes are used to represent attachment files within an MKV or to be used in an
 MKV.
 
 Examples
@@ -27,6 +23,11 @@ Now, the MKV can be muxed with both attachments.
 >>> mkv.add_attachment(attachment)
 >>> mkv.mux('path/to/output.mkv')
 """
+
+from __future__ import annotations
+
+from mimetypes import guess_type
+from pathlib import Path
 
 
 class MKVAttachment:
