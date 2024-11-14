@@ -40,7 +40,7 @@ pytest = "^8.2.1"
 pytest-cov = "^5.0.0"
 pytest-ruff = "^0.4.1"
 pytest-mypy = "^0.10.3"
-mypy = "^1.11.2"
+mypy = "^1.13.0"
 sphinx-material = "^0.0.36"
 
 [tool.poetry.urls]
