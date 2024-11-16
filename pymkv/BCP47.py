@@ -1,6 +1,9 @@
+from functools import cache
+
 import bcp47
 
 
+@cache
 def is_bcp47(language_ietf: str) -> bool:
     """
     Check if a given language tag is a valid BCP 47 language tag.

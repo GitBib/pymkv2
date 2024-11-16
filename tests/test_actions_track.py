@@ -196,3 +196,15 @@ def test_get_track_error(get_path_test_file: Path) -> None:
     mkv = MKVFile(get_path_test_file)
     with pytest.raises(IndexError):
         mkv.get_track(2)
+
+
+def test_added_lang_in_track_and_mux_file(
+    get_base_path: Path,
+    get_path_test_file: Path,
+) -> None:
+    mkv = MKVFile(get_path_test_file)
+    output_file = get_base_path / "file-test.mkv"
+    track = cast(MKVTrack, mkv.get_track(1))
+    track.language_ietf = "TEST"
+    with pytest.raises(ValueError):  # noqa: PT011
+        mkv.mux(output_file)
