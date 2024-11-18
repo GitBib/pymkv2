@@ -55,7 +55,7 @@ jobs:
           source .venv/bin/activate
           make
       - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v4
+        uses: codecov/codecov-action@v5
         if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/master' || github.event_name == 'pull_request' || github.event_name == 'workflow_dispatch' }}
         with:
           env_vars: OS,PYTHON
