@@ -18,7 +18,7 @@ from .Verifications import (
 
 # set the version number within the package using importlib
 try:
-    __version__: str | None = importlib.metadata.version(__name__)
+    __version__: str | None = importlib.metadata.version("pymkv2")
 except importlib.metadata.PackageNotFoundError:
     # package is not installed
     __version__ = None
