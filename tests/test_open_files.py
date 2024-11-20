@@ -10,6 +10,9 @@ def test_open_file(get_path_test_file: Path) -> None:
 
     assert mkv.title is None
     assert len(mkv.tracks) == 2  # noqa: PLR2004
+    assert mkv.global_tag_entries == 4  # noqa: PLR2004
+    assert mkv.tracks[0].tag_entries == 3  # noqa: PLR2004
+    assert mkv.tracks[1].tag_entries == 4  # noqa: PLR2004
 
 
 def test_mux_file(get_base_path: Path, get_path_test_file: Path) -> None:
