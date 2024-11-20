@@ -113,6 +113,7 @@ class MKVFile:
         self.attachments: list[MKVAttachment] = []
         self._number_file = 0
         self._info_json: dict[str, Any] | None = None
+        self._global_tag_entries = 0
 
         if not verify_mkvmerge(mkvmerge_path=self.mkvmerge_path):
             msg = "mkvmerge is not at the specified path, add it there or changed mkvmerge_path property"
@@ -141,13 +142,22 @@ class MKVFile:
             if self.title is None and "title" in info_json["container"]["properties"]:
                 self.title = info_json["container"]["properties"]["title"]
 
+            self._global_tag_entries = sum(t["num_entries"] for t in info_json.get("global_tags", []))
+
+            # dictionary associating track_id to the number of tag entries:
+            track_tag_entries: dict[int, int] = {
+                t["track_id"]: t["num_entries"] for t in self._info_json.get("track_tags", [])
+            }
+
             # add tracks with info
             for track in info_json["tracks"]:
+                track_id = track["id"]
                 new_track = MKVTrack(
                     file_path,
-                    track_id=track["id"],
+                    track_id=track_id,
                     mkvmerge_path=self.mkvmerge_path,
                     existing_info=self._info_json,
+                    tag_entries=track_tag_entries.get(track_id, 0),
                 )
                 if "track_name" in track["properties"]:
                     new_track.track_name = track["properties"]["track_name"]
@@ -167,6 +177,7 @@ class MKVFile:
                     new_track.flag_visual_impaired = track["properties"]["flag_visual_impaired"]
                 if "flag_original" in track["properties"]:
                     new_track.flag_original = track["properties"]["flag_original"]
+
                 self.add_track(new_track, new_file=False)
 
         # split options
@@ -209,6 +220,16 @@ class MKVFile:
             msg = "The provided language code is not a valid ISO 639-2 language code."
             raise ValueError(msg)
         self._chapter_language = language
+
+    @property
+    def global_tag_entries(self) -> int:
+        """
+        Gets the number of global tag entries in the MKVFile object.
+
+        Returns:
+            int: The number of entries.
+        """
+        return self._global_tag_entries
 
     def command(
         self,

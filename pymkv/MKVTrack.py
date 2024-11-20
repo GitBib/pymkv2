@@ -84,6 +84,8 @@ class MKVTrack:
         The path where pymkv looks for the mkvextract executable. pymkv relies on the mkvextract executable to extract
         files. By default, it is assumed mkvextract is in your shell's $PATH variable. If it is not, you need to set
         *mkvextract_path* to the executable location.
+    tag_entries : int, optional
+        The number of tag entries.
     Attributes
     ----------
     mkvmerge_path : list
@@ -131,6 +133,7 @@ class MKVTrack:
         mkvextract_path: str | os.PathLike | Iterable[str] = "mkvextract",
         sync: int | None = None,
         existing_info: dict[str, Any] | None = None,
+        tag_entries: int = 0,
     ) -> None:
         from pymkv.TypeTrack import get_track_extension
 
@@ -163,6 +166,7 @@ class MKVTrack:
         self.flag_hearing_impaired = flag_hearing_impaired
         self.flag_visual_impaired = flag_visual_impaired
         self.flag_original = flag_original
+        self._tag_entries = tag_entries
 
         # exclusions
         self.no_chapters = False
@@ -428,6 +432,16 @@ class MKVTrack:
             msg = f'"{file_path}" does not exist'
             raise FileNotFoundError(msg)
         self._tags = str(file_path)
+
+    @property
+    def tag_entries(self) -> int:
+        """
+        Gets the number of existing tag entries in the track.
+
+        Returns:
+            int: The number of entries.
+        """
+        return self._tag_entries
 
     @property
     def track_codec(self) -> str | None:
