@@ -115,6 +115,9 @@ class MKVFile:
         self._info_json: dict[str, Any] | None = None
         self._global_tag_entries = 0
 
+        # exclusions
+        self.no_track_statistics_tags = False
+
         if not verify_mkvmerge(mkvmerge_path=self.mkvmerge_path):
             msg = "mkvmerge is not at the specified path, add it there or changed mkvmerge_path property"
             raise FileNotFoundError(msg)
@@ -231,7 +234,7 @@ class MKVFile:
         """
         return self._global_tag_entries
 
-    def command(
+    def command(  # noqa: PLR0915
         self,
         output_path: str,
         subprocess: bool = False,
@@ -256,6 +259,9 @@ class MKVFile:
         command = [*self.mkvmerge_path, "-o", output_path]
         if self.title is not None:
             command.extend(["--title", self.title])
+        if self.no_track_statistics_tags:
+            # Do not write tags with track statistics.
+            command.append("--disable-track-statistics-tags")
         track_order = []
         for track in self.tracks:
             # for track_order
