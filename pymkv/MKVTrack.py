@@ -45,7 +45,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
 from pymkv.ISO639_2 import is_iso639_2
-from pymkv.utils import ensure_info, prepare_mkvtoolnix_path
+from pymkv.utils import prepare_mkvtoolnix_path
 from pymkv.Verifications import checking_file_path, get_file_info, verify_supported
 
 if TYPE_CHECKING:
@@ -140,7 +140,7 @@ class MKVTrack:
 
         # base
         self.mkvmerge_path = prepare_mkvtoolnix_path(mkvmerge_path)
-        self._info_json: dict[str, Any] = existing_info or {}
+        self._info_json: dict[str, Any] | None = existing_info or None
         self._file_path: str
         self.file_path = file_path
         self._track_id: int
@@ -264,12 +264,6 @@ class MKVTrack:
         return self._track_id
 
     @track_id.setter
-    @ensure_info(
-        "_info_json",
-        get_file_info,
-        ["file_path", "mkvmerge_path"],
-        check_path=False,
-    )
     def track_id(self, track_id: int) -> None:
         """
         Set the ID of the track within the file.
@@ -283,6 +277,8 @@ class MKVTrack:
         Raises:
             IndexError: If the passed in index is out of range of the file's tracks.
         """
+        if not self._info_json:
+            self._info_json = get_file_info(self.file_path, mkvmerge_path=self.mkvmerge_path)
         tracks = self._info_json.get("tracks", [])
         if not 0 <= track_id < len(tracks):
             msg = "track index out of range"
