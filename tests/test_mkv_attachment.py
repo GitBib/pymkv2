@@ -71,6 +71,7 @@ def test_file_path_expansion(tmp_path: Path, monkeypatch) -> None:  # noqa: ANN0
     fake_home = tmp_path / "fake_home"
     fake_home.mkdir()
     monkeypatch.setenv("HOME", str(fake_home))
+    monkeypatch.setenv("USERPROFILE", str(fake_home))
 
     test_file = fake_home / "test_file.txt"
     test_file.write_text("Test content")

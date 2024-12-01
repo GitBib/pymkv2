@@ -17,11 +17,16 @@ permissions:
 
 jobs:
   run:
-    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        python-version: ['3.9', '3.10', '3.11', '3.12', '3.13']
+    runs-on: ${{ matrix.os }}
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
       - name: Set up MKVToolNix repository
+        if: matrix.os == 'ubuntu-latest'
         run: |
           sudo apt-get -qq update
           sudo apt-get -qq install -y wget gnupg
@@ -29,19 +34,34 @@ jobs:
           UBUNTU_CODENAME=$(lsb_release -cs)
           echo "deb [arch=amd64 signed-by=/usr/share/keyrings/gpg-pub-moritzbunkus.gpg] https://mkvtoolnix.download/ubuntu/ $UBUNTU_CODENAME main" | sudo tee /etc/apt/sources.list.d/mkvtoolnix.list
           sudo apt-get -qq update
-      - name: Install MKVToolNix
+      - name: Install MKVToolNix (Ubuntu)
+        if: matrix.os == 'ubuntu-latest'
         run: sudo apt-get -qq install -y mkvtoolnix mkvtoolnix-gui
-      - name: Verify MKVToolNix installation
+      - name: Install MKVToolNix (macOS)
+        if: matrix.os == 'macos-latest'
+        run: brew install --quiet  mkvtoolnix
+      - name: Install MKVToolNix (Windows)
+        if: matrix.os == 'windows-latest'
+        run: |
+          choco install -y --no-progress mkvtoolnix
+          echo "C:\Program Files\MKVToolNix" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+      - name: Verify MKVToolNix installation (Windows)
+        if: matrix.os == 'windows-latest'
+        run: |
+          & "C:\Program Files\MKVToolNix\mkvmerge.exe" -V
+        shell: pwsh
+      - name: Verify MKVToolNix installation (Linux and macOS)
+        if: matrix.os != 'windows-latest'
         run: mkvmerge -V
-      - name: Set up Python
+      - name: Set up Python ${{ matrix.python-version }}
         id: setup-python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.11'
+          python-version: ${{ matrix.python-version }}
       - name: Install Poetry
         uses: snok/install-poetry@v1
         with:
-          version: 1.8.3
+          version: latest
           virtualenvs-create: true
           virtualenvs-in-project: true
           installer-parallel: true
@@ -51,15 +71,18 @@ jobs:
         with:
           path: .venv
           key: venv-pypi-${{ runner.os }}-${{ steps.setup-python.outputs.python-version }}-${{ hashFiles('**/poetry.lock') }}
+      - name: Add Poetry to Path (Windows)
+        if: matrix.os == 'windows-latest'
+        run: |
+          echo "C:\Users\runneradmin\.local\bin" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
       - name: Install dependencies
         if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
         run: poetry install --no-interaction --no-root
       - name: Install project
         run: poetry install --no-interaction
       - name: Run tests and collect coverage
-        run: |
-          source .venv/bin/activate
-          make
+        run: poetry run make
+        shell: bash
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v5
         if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/master' || github.event_name == 'pull_request' || github.event_name == 'workflow_dispatch' }}

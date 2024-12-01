@@ -214,11 +214,11 @@ class MKVTrack:
         Raises:
             ValueError: If the file is not a valid Matroska file or is not supported.
         """
-        file_path = checking_file_path(file_path)
-        if not verify_supported(file_path, mkvmerge_path=self.mkvmerge_path):
+        fp = checking_file_path(file_path)
+        if not verify_supported(fp, mkvmerge_path=self.mkvmerge_path):
             msg = f"The file '{file_path}' is not a valid Matroska file or is not supported."
             raise ValueError(msg)
-        self._file_path = file_path
+        self._file_path = fp
         self.track_id = 0
 
     @property

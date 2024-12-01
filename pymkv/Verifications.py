@@ -238,12 +238,12 @@ def verify_supported(  # noqa: ANN201
         If the file cannot be opened or an error occurs during the verification process.
     """
     mkvmerge_path = prepare_mkvtoolnix_path(mkvmerge_path)
-    file_path = verify_file_path_and_mkvmerge(file_path, mkvmerge_path)
+    fp = verify_file_path_and_mkvmerge(file_path, mkvmerge_path)
     try:
         if isinstance(mkvmerge_path, list):
             mkvmerge_path = tuple(mkvmerge_path)
-        info_json = get_file_info(file_path, mkvmerge_path, check_path=False)
+        info_json = get_file_info(fp, mkvmerge_path, check_path=False)
     except sp.CalledProcessError as e:
-        msg = '"{}" could not be opened'
+        msg = f'"{file_path}" could not be opened'
         raise ValueError(msg) from e
     return info_json["container"]["supported"]
