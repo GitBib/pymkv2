@@ -369,7 +369,7 @@ class MKVFile:
 
         return command if subprocess else " ".join(command)
 
-    def mux(self, output_path: str | os.PathLike, silent: bool = False) -> int:
+    def mux(self, output_path: str | os.PathLike, silent: bool = False, ignore_warning: bool = False) -> int:
         """
         Mixes the specified :class:`~pymkv.MKVFile`.
 
@@ -379,6 +379,8 @@ class MKVFile:
             The path to be used as the output file in the mkvmerge command.
         silent : bool, optional
             By default the mkvmerge output will be shown unless silent is True.
+        ignore_warning : bool, optional
+            If set to True, the muxing process will ignore any warnings (exit code 1) from mkvmerge.
         Returns
         -------
         int of Any
@@ -387,10 +389,11 @@ class MKVFile:
         Raises
         ------
         ValueError
-            Raised if the external mkvmerge command fails with a non-zero exit status.
-            This includes scenarios such as invalid command arguments, errors in
-            processing the :class:`~pymkv.MKVFile`, or issues with output file writing. The error
-            message provides details about the failure based on the output of the command.
+            Raised if the external mkvmerge command fails with a non-zero exit status
+            (except for warnings when ignore_warning is True). This includes scenarios
+            such as invalid command arguments, errors in processing the :class:`~pymkv.MKVFile`,
+            or issues with output file writing. The error message provides details about
+            the failure based on the output of the command.
         """
         output_path = str(Path(output_path).expanduser())
         args = self.command(output_path, subprocess=True)
@@ -401,7 +404,13 @@ class MKVFile:
         proc = sp.Popen(args, stdout=stdout, stderr=stderr)  # noqa: S603
         _, err = proc.communicate()
 
-        if proc.returncode:
+        if proc.returncode != 0:
+            # Handle warnings (exit code 1) if ignore_warning is True
+            if proc.returncode == 1 and ignore_warning:
+                logging.warning("Process completed with warnings, but ignored as per the setting.")
+                return proc.returncode
+
+            # For other non-zero exit codes, raise an exception
             error_message = f"Command failed with non-zero exit status {proc.returncode}"
             if err:
                 error_details = err.decode()
