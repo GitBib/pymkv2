@@ -428,7 +428,3 @@ class Timestamp:
         self.mm = int(timestamp_clean[1]) if self._mm is None else self._mm
         self.ss = int(timestamp_clean[2]) if self._ss is None else self._ss
         self.nn = int(timestamp_clean[3] * 1000000000) if self._nn is None else self._nn
-
-
-if __name__ == "__main__":
-    pass
