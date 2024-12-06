@@ -1,0 +1,973 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  <meta name="lang:clipboard.copy" content="Copy to clipboard">
+  <meta name="lang:clipboard.copied" content="Copied to clipboard">
+  <meta name="lang:search.language" content="en">
+  <meta name="lang:search.pipeline.stopwords" content="True">
+  <meta name="lang:search.pipeline.trimmer" content="True">
+  <meta name="lang:search.result.none" content="No matching documents">
+  <meta name="lang:search.result.one" content="1 matching document">
+  <meta name="lang:search.result.other" content="# matching documents">
+  <meta name="lang:search.tokenizer" content="[\s\-]+">
+
+  
+    <link href="https://fonts.gstatic.com/" rel="preconnect" crossorigin>
+    <link href="https://fonts.googleapis.com/css?family=Roboto+Mono:400,500,700|Roboto:300,400,400i,700&display=fallback" rel="stylesheet">
+
+    <style>
+      body,
+      input {
+        font-family: "Roboto", "Helvetica Neue", Helvetica, Arial, sans-serif
+      }
+
+      code,
+      kbd,
+      pre {
+        font-family: "Roboto Mono", "Courier New", Courier, monospace
+      }
+    </style>
+  
+
+  <link rel="stylesheet" href="../_static/stylesheets/application.css"/>
+  <link rel="stylesheet" href="../_static/stylesheets/application-palette.css"/>
+  <link rel="stylesheet" href="../_static/stylesheets/application-fixes.css"/>
+  
+  <link rel="stylesheet" href="../_static/fonts/material-icons.css"/>
+  
+  <meta name="theme-color" content="#3f51b5">
+  <script src="../_static/javascripts/modernizr.js"></script>
+  
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-YMTSDQ0M8Z"></script>
+<script>
+    window.dataLayer = window.dataLayer || [];
+
+    function gtag() {
+        dataLayer.push(arguments);
+    }
+
+    gtag('js', new Date());
+
+    gtag('config', 'G-YMTSDQ0M8Z');
+</script>
+  
+  
+    <title>MKVFile &#8212; pymkv2 2.1.0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=83e35b93" />
+    <link rel="stylesheet" type="text/css" href="../_static/material.css?v=79c92029" />
+    <script src="../_static/documentation_options.js?v=20623aea"></script>
+    <script src="../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="MKVTrack" href="MKVTrack.html" />
+    <link rel="prev" title="pymkv2" href="../index.html" />
+  
+   
+
+  </head>
+  <body dir=ltr
+        data-md-color-primary=blue data-md-color-accent=light-blue>
+  
+  <svg class="md-svg">
+    <defs data-children-count="0">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" width="416" height="448" viewBox="0 0 416 448" id="__github"><path fill="currentColor" d="M160 304q0 10-3.125 20.5t-10.75 19T128 352t-18.125-8.5-10.75-19T96 304t3.125-20.5 10.75-19T128 256t18.125 8.5 10.75 19T160 304zm160 0q0 10-3.125 20.5t-10.75 19T288 352t-18.125-8.5-10.75-19T256 304t3.125-20.5 10.75-19T288 256t18.125 8.5 10.75 19T320 304zm40 0q0-30-17.25-51T296 232q-10.25 0-48.75 5.25Q229.5 240 208 240t-39.25-2.75Q130.75 232 120 232q-29.5 0-46.75 21T56 304q0 22 8 38.375t20.25 25.75 30.5 15 35 7.375 37.25 1.75h42q20.5 0 37.25-1.75t35-7.375 30.5-15 20.25-25.75T360 304zm56-44q0 51.75-15.25 82.75-9.5 19.25-26.375 33.25t-35.25 21.5-42.5 11.875-42.875 5.5T212 416q-19.5 0-35.5-.75t-36.875-3.125-38.125-7.5-34.25-12.875T37 371.5t-21.5-28.75Q0 312 0 260q0-59.25 34-99-6.75-20.5-6.75-42.5 0-29 12.75-54.5 27 0 47.5 9.875t47.25 30.875Q171.5 96 212 96q37 0 70 8 26.25-20.5 46.75-30.25T376 64q12.75 25.5 12.75 54.5 0 21.75-6.75 42 34 40 34 99.5z"/></svg>
+      
+    </defs>
+  </svg>
+  
+  <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer">
+  <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search">
+  <label class="md-overlay" data-md-component="overlay" for="__drawer"></label>
+  <a href="#pymkv/MKVFile" tabindex="1" class="md-skip"> Skip to content </a>
+  <header class="md-header" data-md-component="header">
+  <nav class="md-header-nav md-grid">
+    <div class="md-flex navheader">
+      <div class="md-flex__cell md-flex__cell--shrink">
+        <a href="../index.html" title="pymkv2 2.1.0 documentation"
+           class="md-header-nav__button md-logo">
+          
+            &nbsp;
+          
+        </a>
+      </div>
+      <div class="md-flex__cell md-flex__cell--shrink">
+        <label class="md-icon md-icon--menu md-header-nav__button" for="__drawer"></label>
+      </div>
+      <div class="md-flex__cell md-flex__cell--stretch">
+        <div class="md-flex__ellipsis md-header-nav__title" data-md-component="title">
+          <span class="md-header-nav__topic">PyMKV2 DOCS</span>
+          <span class="md-header-nav__topic"> MKVFile </span>
+        </div>
+      </div>
+      <div class="md-flex__cell md-flex__cell--shrink">
+        <label class="md-icon md-icon--search md-header-nav__button" for="__search"></label>
+        
+<div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" action="../search.html" method="get" name="search">
+      <input type="text" class="md-search__input" name="q" placeholder=""Search""
+             autocapitalize="off" autocomplete="off" spellcheck="false"
+             data-md-component="query" data-md-state="active">
+      <label class="md-icon md-search__icon" for="__search"></label>
+      <button type="reset" class="md-icon md-search__icon" data-md-component="reset" tabindex="-1">
+        &#xE5CD;
+      </button>
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="result">
+          <div class="md-search-result__meta">
+            Type to start searching
+          </div>
+          <ol class="md-search-result__list"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+      </div>
+      
+        <div class="md-flex__cell md-flex__cell--shrink">
+          <div class="md-header-nav__source">
+            <a href="https://github.com/GitBib/pymkv2" title="Go to repository" class="md-source" data-md-source="github">
+
+    <div class="md-source__icon">
+      <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 24 24" width="28" height="28">
+        <use xlink:href="#__github" width="24" height="24"></use>
+      </svg>
+    </div>
+  
+  <div class="md-source__repository">
+    pymkv2
+  </div>
+</a>
+          </div>
+        </div>
+      
+      
+  
+  <script src="../_static/javascripts/version_dropdown.js"></script>
+  <script>
+    var json_loc = "../"versions.json"",
+        target_loc = "../../",
+        text = "Versions";
+    $( document ).ready( add_version_dropdown(json_loc, target_loc, text));
+  </script>
+  
+
+    </div>
+  </nav>
+</header>
+
+  
+  <div class="md-container">
+    
+    
+    
+  <nav class="md-tabs" data-md-component="tabs">
+    <div class="md-tabs__inner md-grid">
+      <ul class="md-tabs__list">
+          <li class="md-tabs__item"><a href="../index.html" class="md-tabs__link">pymkv2 2.1.0 documentation</a></li>
+      </ul>
+    </div>
+  </nav>
+    <main class="md-main">
+      <div class="md-main__inner md-grid" data-md-component="container">
+        
+          <div class="md-sidebar md-sidebar--primary" data-md-component="navigation">
+            <div class="md-sidebar__scrollwrap">
+              <div class="md-sidebar__inner">
+                <nav class="md-nav md-nav--primary" data-md-level="0">
+  <label class="md-nav__title md-nav__title--site" for="__drawer">
+    <a href="../index.html" title="pymkv2 2.1.0 documentation" class="md-nav__button md-logo">
+      
+        <img src="../_static/" alt=" logo" width="48" height="48">
+      
+    </a>
+    <a href="../index.html"
+       title="pymkv2 2.1.0 documentation">PyMKV2 DOCS</a>
+  </label>
+    <div class="md-nav__source">
+      <a href="https://github.com/GitBib/pymkv2" title="Go to repository" class="md-source" data-md-source="github">
+
+    <div class="md-source__icon">
+      <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 24 24" width="28" height="28">
+        <use xlink:href="#__github" width="24" height="24"></use>
+      </svg>
+    </div>
+  
+  <div class="md-source__repository">
+    pymkv2
+  </div>
+</a>
+    </div>
+  
+  
+
+</nav>
+              </div>
+            </div>
+          </div>
+          <div class="md-sidebar md-sidebar--secondary" data-md-component="toc">
+            <div class="md-sidebar__scrollwrap">
+              <div class="md-sidebar__inner">
+                
+<nav class="md-nav md-nav--secondary">
+    <label class="md-nav__title" for="__toc">"Contents"</label>
+  <ul class="md-nav__list" data-md-scrollfix="">
+        <li class="md-nav__item"><a href="#pymkv-mkvfile--page-root" class="md-nav__link">MKVFile</a><nav class="md-nav">
+              <ul class="md-nav__list">
+        <li class="md-nav__item"><a href="#pymkv.MKVFile" class="md-nav__link"><code class="docutils literal notranslate"><span class="pre">MKVFile</span></code></a><nav class="md-nav">
+              <ul class="md-nav__list">
+        <li class="md-nav__item"><a href="#pymkv.MKVFile.add_attachment" class="md-nav__link"><code class="docutils literal notranslate"><span class="pre">MKVFile.add_attachment()</span></code></a>
+        </li>
+        <li class="md-nav__item"><a href="#pymkv.MKVFile.add_file" class="md-nav__link"><code class="docutils literal notranslate"><span class="pre">MKVFile.add_file()</span></code></a>
+        </li>
+        <li class="md-nav__item"><a href="#pymkv.MKVFile.add_track" class="md-nav__link"><code class="docutils literal notranslate"><span class="pre">MKVFile.add_track()</span></code></a>
+        </li>
+        <li class="md-nav__item"><a href="#pymkv.MKVFile.chapter_language" class="md-nav__link"><code class="docutils literal notranslate"><span class="pre">MKVFile.chapter_language</span></code></a>
+        </li>
+        <li class="md-nav__item"><a href="#pymkv.MKVFile.chapters" class="md-nav__link"><code class="docutils literal notranslate"><span class="pre">MKVFile.chapters()</span></code></a>
+        </li>
+        <li class="md-nav__item"><a href="#pymkv.MKVFile.command" class="md-nav__link"><code class="docutils literal notranslate"><span class="pre">MKVFile.command()</span></code></a>
+        </li>
+        <li class="md-nav__item"><a href="#pymkv.MKVFile.flatten" class="md-nav__link"><code class="docutils literal notranslate"><span class="pre">MKVFile.flatten()</span></code></a>
+        </li>
+        <li class="md-nav__item"><a href="#pymkv.MKVFile.get_track" class="md-nav__link"><code class="docutils literal notranslate"><span class="pre">MKVFile.get_track()</span></code></a>
+        </li>
+        <li class="md-nav__item"><a href="#pymkv.MKVFile.global_tag_entries" class="md-nav__link"><code class="docutils literal notranslate"><span class="pre">MKVFile.global_tag_entries</span></code></a>
+        </li>
+        <li class="md-nav__item"><a href="#pymkv.MKVFile.global_tags" class="md-nav__link"><code class="docutils literal notranslate"><span class="pre">MKVFile.global_tags()</span></code></a>
+        </li>
+        <li class="md-nav__item"><a href="#pymkv.MKVFile.link_to_next" class="md-nav__link"><code class="docutils literal notranslate"><span class="pre">MKVFile.link_to_next()</span></code></a>
+        </li>
+        <li class="md-nav__item"><a href="#pymkv.MKVFile.link_to_none" class="md-nav__link"><code class="docutils literal notranslate"><span class="pre">MKVFile.link_to_none()</span></code></a>
+        </li>
+        <li class="md-nav__item"><a href="#pymkv.MKVFile.link_to_previous" class="md-nav__link"><code class="docutils literal notranslate"><span class="pre">MKVFile.link_to_previous()</span></code></a>
+        </li>
+        <li class="md-nav__item"><a href="#pymkv.MKVFile.move_track_backward" class="md-nav__link"><code class="docutils literal notranslate"><span class="pre">MKVFile.move_track_backward()</span></code></a>
+        </li>
+        <li class="md-nav__item"><a href="#pymkv.MKVFile.move_track_end" class="md-nav__link"><code class="docutils literal notranslate"><span class="pre">MKVFile.move_track_end()</span></code></a>
+        </li>
+        <li class="md-nav__item"><a href="#pymkv.MKVFile.move_track_forward" class="md-nav__link"><code class="docutils literal notranslate"><span class="pre">MKVFile.move_track_forward()</span></code></a>
+        </li>
+        <li class="md-nav__item"><a href="#pymkv.MKVFile.move_track_front" class="md-nav__link"><code class="docutils literal notranslate"><span class="pre">MKVFile.move_track_front()</span></code></a>
+        </li>
+        <li class="md-nav__item"><a href="#pymkv.MKVFile.mux" class="md-nav__link"><code class="docutils literal notranslate"><span class="pre">MKVFile.mux()</span></code></a>
+        </li>
+        <li class="md-nav__item"><a href="#pymkv.MKVFile.no_attachments" class="md-nav__link"><code class="docutils literal notranslate"><span class="pre">MKVFile.no_attachments()</span></code></a>
+        </li>
+        <li class="md-nav__item"><a href="#pymkv.MKVFile.no_chapters" class="md-nav__link"><code class="docutils literal notranslate"><span class="pre">MKVFile.no_chapters()</span></code></a>
+        </li>
+        <li class="md-nav__item"><a href="#pymkv.MKVFile.no_global_tags" class="md-nav__link"><code class="docutils literal notranslate"><span class="pre">MKVFile.no_global_tags()</span></code></a>
+        </li>
+        <li class="md-nav__item"><a href="#pymkv.MKVFile.no_track_tags" class="md-nav__link"><code class="docutils literal notranslate"><span class="pre">MKVFile.no_track_tags()</span></code></a>
+        </li>
+        <li class="md-nav__item"><a href="#pymkv.MKVFile.order_tracks_by_file_id" class="md-nav__link"><code class="docutils literal notranslate"><span class="pre">MKVFile.order_tracks_by_file_id()</span></code></a>
+        </li>
+        <li class="md-nav__item"><a href="#pymkv.MKVFile.remove_track" class="md-nav__link"><code class="docutils literal notranslate"><span class="pre">MKVFile.remove_track()</span></code></a>
+        </li>
+        <li class="md-nav__item"><a href="#pymkv.MKVFile.replace_track" class="md-nav__link"><code class="docutils literal notranslate"><span class="pre">MKVFile.replace_track()</span></code></a>
+        </li>
+        <li class="md-nav__item"><a href="#pymkv.MKVFile.split_chapters" class="md-nav__link"><code class="docutils literal notranslate"><span class="pre">MKVFile.split_chapters()</span></code></a>
+        </li>
+        <li class="md-nav__item"><a href="#pymkv.MKVFile.split_duration" class="md-nav__link"><code class="docutils literal notranslate"><span class="pre">MKVFile.split_duration()</span></code></a>
+        </li>
+        <li class="md-nav__item"><a href="#pymkv.MKVFile.split_frames" class="md-nav__link"><code class="docutils literal notranslate"><span class="pre">MKVFile.split_frames()</span></code></a>
+        </li>
+        <li class="md-nav__item"><a href="#pymkv.MKVFile.split_none" class="md-nav__link"><code class="docutils literal notranslate"><span class="pre">MKVFile.split_none()</span></code></a>
+        </li>
+        <li class="md-nav__item"><a href="#pymkv.MKVFile.split_parts_frames" class="md-nav__link"><code class="docutils literal notranslate"><span class="pre">MKVFile.split_parts_frames()</span></code></a>
+        </li>
+        <li class="md-nav__item"><a href="#pymkv.MKVFile.split_size" class="md-nav__link"><code class="docutils literal notranslate"><span class="pre">MKVFile.split_size()</span></code></a>
+        </li>
+        <li class="md-nav__item"><a href="#pymkv.MKVFile.split_timestamp_parts" class="md-nav__link"><code class="docutils literal notranslate"><span class="pre">MKVFile.split_timestamp_parts()</span></code></a>
+        </li>
+        <li class="md-nav__item"><a href="#pymkv.MKVFile.split_timestamps" class="md-nav__link"><code class="docutils literal notranslate"><span class="pre">MKVFile.split_timestamps()</span></code></a>
+        </li>
+        <li class="md-nav__item"><a href="#pymkv.MKVFile.swap_tracks" class="md-nav__link"><code class="docutils literal notranslate"><span class="pre">MKVFile.swap_tracks()</span></code></a>
+        </li>
+        <li class="md-nav__item"><a href="#pymkv.MKVFile.track_tags" class="md-nav__link"><code class="docutils literal notranslate"><span class="pre">MKVFile.track_tags()</span></code></a>
+        </li></ul>
+            </nav>
+        </li></ul>
+            </nav>
+        </li>
+    
+<li class="md-nav__item"><a class="md-nav__extra_link" href="../_sources/pymkv/MKVFile.rst.txt">Show Source</a> </li>
+
+<li id="searchbox" class="md-nav__item"></li>
+
+  </ul>
+</nav>
+              </div>
+            </div>
+          </div>
+        
+        <div class="md-content">
+          <article class="md-content__inner md-typeset" role="main">
+            
+  <section id="mkvfile">
+<h1 id="pymkv-mkvfile--page-root">MKVFile<a class="headerlink" href="#pymkv-mkvfile--page-root" title="Link to this heading">¶</a></h1>
+<p><a class="reference internal" href="#pymkv.MKVFile" title="pymkv.MKVFile"><code class="xref py py-class docutils literal notranslate"><span class="pre">MKVFile</span></code></a> is the core class of pymkv. It is used to import, create, modify, and mux MKV files.</p>
+<p class="rubric">Examples</p>
+<p>Below are some basic examples of how the <a class="reference internal" href="#pymkv.MKVFile" title="pymkv.MKVFile"><code class="xref py py-class docutils literal notranslate"><span class="pre">MKVFile</span></code></a> objects can be used.</p>
+<p>Create and mux a new MKV. This example takes an standalone video and audio track and combines them into an MKV file.</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">pymkv</span> <span class="kn">import</span> <span class="n">MKVFile</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">mkv</span> <span class="o">=</span> <span class="n">MKVFile</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">mkv</span><span class="o">.</span><span class="n">add_track</span><span class="p">(</span><span class="s1">'/path/to/track.h264'</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">mkv</span><span class="o">.</span><span class="n">add_track</span><span class="p">(</span><span class="n">MKVTrack</span><span class="p">(</span><span class="s1">'/path/to/another/track.aac'</span><span class="p">))</span>
+<span class="go">&gt;&gt; mkv.mux('/path/to/output.mkv')</span>
+</pre></div>
+</div>
+<p>Generate the mkvmerge command to mux an MKV. This is example is identical to the first example except the command is
+only generated, not executed.</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">mkv</span> <span class="o">=</span> <span class="n">MKVFile</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">mkv</span><span class="o">.</span><span class="n">add_track</span><span class="p">(</span><span class="s1">'/path/to/track.h264'</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">mkv</span><span class="o">.</span><span class="n">add_track</span><span class="p">(</span><span class="n">MKVTrack</span><span class="p">(</span><span class="s1">'/path/to/another/track.aac'</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">mkv</span><span class="o">.</span><span class="n">command</span><span class="p">(</span><span class="s1">'/path/to/output.mkv'</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Import an existing MKV and remove a track. This example will import an MKV that already exists on your filesystem,
+remove a track and allow you to mux that change into a new file.</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">mkv</span> <span class="o">=</span> <span class="n">MKVFile</span><span class="p">(</span><span class="s1">'/path/to/file.mkv'</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">mkv</span><span class="o">.</span><span class="n">remove_track</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">mkv</span><span class="o">.</span><span class="n">mux</span><span class="p">(</span><span class="s1">'/path/to/output.mkv'</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Combine two MKVs. This example takes two existing MKVs and combines their tracks into a single MKV file.</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">mkv1</span> <span class="o">=</span> <span class="n">MKVFile</span><span class="p">(</span><span class="s1">'/path/to/file1.mkv'</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">mkv2</span> <span class="o">=</span> <span class="n">MKVFile</span><span class="p">(</span><span class="s1">'/path/to/file2.mkv'</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">mkv1</span><span class="o">.</span><span class="n">add_file</span><span class="p">(</span><span class="n">mkv2</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">mkv1</span><span class="o">.</span><span class="n">mux</span><span class="p">(</span><span class="s1">'/path/to/output.mkv'</span><span class="p">)</span>
+</pre></div>
+</div>
+<dl class="py class">
+<dt class="sig sig-object py" id="pymkv.MKVFile">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pymkv.</span></span><span class="sig-name descname"><span class="pre">MKVFile</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">PathLike</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">title</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mkvmerge_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">PathLike</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Iterable</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'mkvmerge'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pymkv.MKVFile" title="Link to this definition">¶</a></dt>
+<dd><p>A class that represents an MKV file.</p>
+<p>The <a class="reference internal" href="#pymkv.MKVFile" title="pymkv.MKVFile"><code class="xref py py-class docutils literal notranslate"><span class="pre">MKVFile</span></code></a> class can either import a pre-existing MKV file or create a new one. After an
+<a class="reference internal" href="#pymkv.MKVFile" title="pymkv.MKVFile"><code class="xref py py-class docutils literal notranslate"><span class="pre">MKVFile</span></code></a> object has been instantiated, <a class="reference internal" href="MKVTrack.html#pymkv.MKVTrack" title="pymkv.MKVTrack"><code class="xref py py-class docutils literal notranslate"><span class="pre">MKVTrack</span></code></a> objects or other
+<a class="reference internal" href="#pymkv.MKVFile" title="pymkv.MKVFile"><code class="xref py py-class docutils literal notranslate"><span class="pre">MKVFile</span></code></a> objects can be added using <a class="reference internal" href="#pymkv.MKVFile.add_track" title="pymkv.MKVFile.add_track"><code class="xref py py-meth docutils literal notranslate"><span class="pre">add_track()</span></code></a> and
+<a class="reference internal" href="#pymkv.MKVFile.add_file" title="pymkv.MKVFile.add_file"><code class="xref py py-meth docutils literal notranslate"><span class="pre">add_file()</span></code></a> respectively.</p>
+<p>Tracks are always added in the same order that they exist in a file or are added in. They can be reordered
+using <a class="reference internal" href="#pymkv.MKVFile.move_track_front" title="pymkv.MKVFile.move_track_front"><code class="xref py py-meth docutils literal notranslate"><span class="pre">move_track_front()</span></code></a>, <a class="reference internal" href="#pymkv.MKVFile.move_track_end" title="pymkv.MKVFile.move_track_end"><code class="xref py py-meth docutils literal notranslate"><span class="pre">move_track_end()</span></code></a>,
+<a class="reference internal" href="#pymkv.MKVFile.move_track_forward" title="pymkv.MKVFile.move_track_forward"><code class="xref py py-meth docutils literal notranslate"><span class="pre">move_track_forward()</span></code></a>, <a class="reference internal" href="#pymkv.MKVFile.move_track_backward" title="pymkv.MKVFile.move_track_backward"><code class="xref py py-meth docutils literal notranslate"><span class="pre">move_track_backward()</span></code></a>,
+or <a class="reference internal" href="#pymkv.MKVFile.swap_tracks" title="pymkv.MKVFile.swap_tracks"><code class="xref py py-meth docutils literal notranslate"><span class="pre">swap_tracks()</span></code></a>.</p>
+<p>After an <a class="reference internal" href="#pymkv.MKVFile" title="pymkv.MKVFile"><code class="xref py py-class docutils literal notranslate"><span class="pre">MKVFile</span></code></a> has been created, an mkvmerge command can be generated using
+<a class="reference internal" href="#pymkv.MKVFile.command" title="pymkv.MKVFile.command"><code class="xref py py-meth docutils literal notranslate"><span class="pre">command()</span></code></a> or the file can be muxed using <a class="reference internal" href="#pymkv.MKVFile.mux" title="pymkv.MKVFile.mux"><code class="xref py py-meth docutils literal notranslate"><span class="pre">mux()</span></code></a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>file_path</strong> (<em>str</em><em>, </em><em>optional</em>) – Path to a pre-existing MKV file. The file will be imported into the new <a class="reference internal" href="#pymkv.MKVFile" title="pymkv.MKVFile"><code class="xref py py-class docutils literal notranslate"><span class="pre">MKVFile</span></code></a> object.</p></li>
+<li><p><strong>title</strong> (<em>str</em><em>, </em><em>optional</em>) – The internal title given to the <a class="reference internal" href="#pymkv.MKVFile" title="pymkv.MKVFile"><code class="xref py py-class docutils literal notranslate"><span class="pre">MKVFile</span></code></a>. If <cite>title</cite> is not specified, the title of the
+pre-existing file will be used if it exists.</p></li>
+<li><p><strong>mkvmerge_path</strong> (<em>str</em><em>, </em><em>optional</em>) – The path where pymkv looks for the mkvmerge executable. pymkv relies on the mkvmerge executable to parse
+files. By default, it is assumed mkvmerge is in your shell’s $PATH variable. If it is not, you need to set
+<em>mkvmerge_path</em> to the executable location.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>FileNotFoundError</strong> – Raised if the path to mkvmerge could not be verified.</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="pymkv.MKVFile.add_attachment">
+<span class="sig-name descname"><span class="pre">add_attachment</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">attachment</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="MKVAttachment.html#pymkv.MKVAttachment" title="pymkv.MKVAttachment.MKVAttachment"><span class="pre">MKVAttachment</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">→</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#pymkv.MKVFile.add_attachment" title="Link to this definition">¶</a></dt>
+<dd><p>Add an attachment to the <a class="reference internal" href="#pymkv.MKVFile" title="pymkv.MKVFile"><code class="xref py py-class docutils literal notranslate"><span class="pre">MKVFile</span></code></a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>attachment</strong> (str, <a class="reference internal" href="MKVAttachment.html#pymkv.MKVAttachment" title="pymkv.MKVAttachment"><code class="xref py py-class docutils literal notranslate"><span class="pre">MKVAttachment</span></code></a>) – The attachment to be added to the <a class="reference internal" href="#pymkv.MKVFile" title="pymkv.MKVFile"><code class="xref py py-class docutils literal notranslate"><span class="pre">MKVFile</span></code></a> object.</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>TypeError</strong> – Raised if if <cite>attachment</cite> is not a string-like path to an attachment file
+    or an <a class="reference internal" href="MKVAttachment.html#pymkv.MKVAttachment" title="pymkv.MKVAttachment"><code class="xref py py-class docutils literal notranslate"><span class="pre">MKVAttachment</span></code></a>.</p>
+</dd>
+</dl>
+</dd></dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="pymkv.MKVFile.add_file">
+<span class="sig-name descname"><span class="pre">add_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pymkv.MKVFile" title="pymkv.MKVFile.MKVFile"><span class="pre">MKVFile</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">PathLike</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">→</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#pymkv.MKVFile.add_file" title="Link to this definition">¶</a></dt>
+<dd><p>Add an MKV file into the <a class="reference internal" href="#pymkv.MKVFile" title="pymkv.MKVFile"><code class="xref py py-class docutils literal notranslate"><span class="pre">MKVFile</span></code></a> object.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>file</strong> (str, <a class="reference internal" href="#pymkv.MKVFile" title="pymkv.MKVFile"><code class="xref py py-class docutils literal notranslate"><span class="pre">MKVFile</span></code></a>, os.PathLike) – The file to be combined with the <a class="reference internal" href="#pymkv.MKVFile" title="pymkv.MKVFile"><code class="xref py py-class docutils literal notranslate"><span class="pre">MKVFile</span></code></a> object.</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>TypeError</strong> – Raised if if <cite>file</cite> is not a string-like path to an MKV file or an <a class="reference internal" href="#pymkv.MKVFile" title="pymkv.MKVFile"><code class="xref py py-class docutils literal notranslate"><span class="pre">MKVFile</span></code></a> object.</p>
+</dd>
+</dl>
+</dd></dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="pymkv.MKVFile.add_track">
+<span class="sig-name descname"><span class="pre">add_track</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">track</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="MKVTrack.html#pymkv.MKVTrack" title="pymkv.MKVTrack.MKVTrack"><span class="pre">MKVTrack</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">new_file</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">→</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#pymkv.MKVFile.add_track" title="Link to this definition">¶</a></dt>
+<dd><p>Add a track to the <a class="reference internal" href="#pymkv.MKVFile" title="pymkv.MKVFile"><code class="xref py py-class docutils literal notranslate"><span class="pre">MKVFile</span></code></a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>track</strong> (str, <a class="reference internal" href="MKVTrack.html#pymkv.MKVTrack" title="pymkv.MKVTrack"><code class="xref py py-class docutils literal notranslate"><span class="pre">MKVTrack</span></code></a>) – The track to be added to the <a class="reference internal" href="#pymkv.MKVFile" title="pymkv.MKVFile"><code class="xref py py-class docutils literal notranslate"><span class="pre">MKVFile</span></code></a> object.</p></li>
+<li><p><strong>new_file</strong> (<em>bool</em><em>, </em><em>optional</em>) – If set to True, the file_id for the added track is not incremented. This can be used to preserve
+original track numbering from a source file.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>TypeError</strong> – Raised if <cite>track</cite> is not a string-like path to a track file or an <a class="reference internal" href="MKVTrack.html#pymkv.MKVTrack" title="pymkv.MKVTrack"><code class="xref py py-class docutils literal notranslate"><span class="pre">MKVTrack</span></code></a>.</p>
+</dd>
+</dl>
+</dd></dl>
+<dl class="py property">
+<dt class="sig sig-object py" id="pymkv.MKVFile.chapter_language">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">chapter_language</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#pymkv.MKVFile.chapter_language" title="Link to this definition">¶</a></dt>
+<dd><p>Get the language code of the chapters in the MKVFile object.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The ISO 639-2 language code of the chapters.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>str</p>
+</dd>
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>ValueError</strong> – If the stored language code is not a valid ISO 639-2 language code.</p>
+</dd>
+</dl>
+</dd></dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="pymkv.MKVFile.chapters">
+<span class="sig-name descname"><span class="pre">chapters</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">language</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">→</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#pymkv.MKVFile.chapters" title="Link to this definition">¶</a></dt>
+<dd><p>Add a chapters file to the <a class="reference internal" href="#pymkv.MKVFile" title="pymkv.MKVFile"><code class="xref py py-class docutils literal notranslate"><span class="pre">MKVFile</span></code></a> object.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>file_path</strong> (<em>str</em>) – The chapters file to be added to the <a class="reference internal" href="#pymkv.MKVFile" title="pymkv.MKVFile"><code class="xref py py-class docutils literal notranslate"><span class="pre">MKVFile</span></code></a> object.</p></li>
+<li><p><strong>language</strong> (<em>str</em><em>, </em><em>optional</em>) – Must be an ISO639-2 language code. Only applied if no existing language information exists in chapters.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>FileNotFoundError</strong> – Raised if the file at <cite>file_path</cite> does not exist.</p></li>
+<li><p><strong>TypeError</strong> – Raised if <cite>file_path</cite> is not of type str.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="pymkv.MKVFile.command">
+<span class="sig-name descname"><span class="pre">command</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">output_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">subprocess</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">→</span> <span class="sig-return-typehint"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">list</span></span></span><a class="headerlink" href="#pymkv.MKVFile.command" title="Link to this definition">¶</a></dt>
+<dd><p>Generates an mkvmerge command based on the configured <a class="reference internal" href="#pymkv.MKVFile" title="pymkv.MKVFile"><code class="xref py py-class docutils literal notranslate"><span class="pre">MKVFile</span></code></a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>output_path</strong> (<em>str</em>) – The path to be used as the output file in the mkvmerge command.</p></li>
+<li><p><strong>subprocess</strong> (<em>bool</em>) – Will return the command as a list so it can be used easily with the <code class="xref py py-mod docutils literal notranslate"><span class="pre">subprocess</span></code> module.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The full command to mux the <a class="reference internal" href="#pymkv.MKVFile" title="pymkv.MKVFile"><code class="xref py py-class docutils literal notranslate"><span class="pre">MKVFile</span></code></a> as a string containing spaces. Will be returned as a
+list of strings with no spaces if <cite>subprocess</cite> is True.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str, list of str</p>
+</dd>
+</dl>
+</dd></dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="pymkv.MKVFile.flatten">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">flatten</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">item</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">T</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Iterable</span><span class="p"><span class="pre">[</span></span><span class="pre">T</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Iterable</span><span class="p"><span class="pre">[</span></span><span class="pre">T</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">→</span> <span class="sig-return-typehint"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">T</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#pymkv.MKVFile.flatten" title="Link to this definition">¶</a></dt>
+<dd><p>Flatten a list or a tuple.</p>
+<p>Takes a list or a tuple that contains other lists or tuples and flattens into a non-nested list.</p>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">tup</span> <span class="o">=</span> <span class="p">((</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">)))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">MKVFile</span><span class="o">.</span><span class="n">flatten</span><span class="p">(</span><span class="n">tup</span><span class="p">)</span>
+<span class="go">[1, 2, 3, 4, 5]</span>
+</pre></div>
+</div>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">tup</span> <span class="o">=</span> <span class="p">([</span><span class="s2">"abc"</span><span class="p">,</span> <span class="s2">"d"</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">MKVFile</span><span class="o">.</span><span class="n">flatten</span><span class="p">(</span><span class="n">tup</span><span class="p">)</span>
+<span class="go">['abc', 'd']</span>
+</pre></div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>item</strong> (<em>list</em><em>, </em><em>tuple</em>) – A list or a tuple object with nested lists or tuples to be flattened.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A flattened version of <cite>item</cite>.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list</p>
+</dd>
+</dl>
+</dd></dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="pymkv.MKVFile.get_track">
+<span class="sig-name descname"><span class="pre">get_track</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">track_num</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">→</span> <span class="sig-return-typehint"><a class="reference internal" href="MKVTrack.html#pymkv.MKVTrack" title="pymkv.MKVTrack.MKVTrack"><span class="pre">MKVTrack</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="MKVTrack.html#pymkv.MKVTrack" title="pymkv.MKVTrack.MKVTrack"><span class="pre">MKVTrack</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#pymkv.MKVFile.get_track" title="Link to this definition">¶</a></dt>
+<dd><p>Get a <a class="reference internal" href="MKVTrack.html#pymkv.MKVTrack" title="pymkv.MKVTrack"><code class="xref py py-class docutils literal notranslate"><span class="pre">MKVTrack</span></code></a> from the <a class="reference internal" href="#pymkv.MKVFile" title="pymkv.MKVFile"><code class="xref py py-class docutils literal notranslate"><span class="pre">MKVFile</span></code></a> object.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>track_num</strong> (<em>int</em><em>, </em><em>optional</em>) – Index of track to retrieve. Will return list of <a class="reference internal" href="MKVTrack.html#pymkv.MKVTrack" title="pymkv.MKVTrack"><code class="xref py py-class docutils literal notranslate"><span class="pre">MKVTrack</span></code></a> objects if argument is not
+provided.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A list of all <a class="reference internal" href="MKVTrack.html#pymkv.MKVTrack" title="pymkv.MKVTrack"><code class="xref py py-class docutils literal notranslate"><span class="pre">MKVTrack</span></code></a> objects in an <a class="reference internal" href="#pymkv.MKVFile" title="pymkv.MKVFile"><code class="xref py py-class docutils literal notranslate"><span class="pre">MKVFile</span></code></a>. Returns a specific
+<a class="reference internal" href="MKVTrack.html#pymkv.MKVTrack" title="pymkv.MKVTrack"><code class="xref py py-class docutils literal notranslate"><span class="pre">MKVTrack</span></code></a> if <cite>track_num</cite> is specified.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="MKVTrack.html#pymkv.MKVTrack" title="pymkv.MKVTrack"><code class="xref py py-class docutils literal notranslate"><span class="pre">MKVTrack</span></code></a>, list of <a class="reference internal" href="MKVTrack.html#pymkv.MKVTrack" title="pymkv.MKVTrack"><code class="xref py py-class docutils literal notranslate"><span class="pre">MKVTrack</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+<dl class="py property">
+<dt class="sig sig-object py" id="pymkv.MKVFile.global_tag_entries">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">global_tag_entries</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#pymkv.MKVFile.global_tag_entries" title="Link to this definition">¶</a></dt>
+<dd><p>Gets the number of global tag entries in the MKVFile object.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The number of entries.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="pymkv.MKVFile.global_tags">
+<span class="sig-name descname"><span class="pre">global_tags</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">→</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#pymkv.MKVFile.global_tags" title="Link to this definition">¶</a></dt>
+<dd><p>Add global tags to the <a class="reference internal" href="#pymkv.MKVFile" title="pymkv.MKVFile"><code class="xref py py-class docutils literal notranslate"><span class="pre">MKVFile</span></code></a> object.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>file_path</strong> (<em>str</em>) – The tags file to be added to the <a class="reference internal" href="#pymkv.MKVFile" title="pymkv.MKVFile"><code class="xref py py-class docutils literal notranslate"><span class="pre">MKVFile</span></code></a> object.</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>FileNotFoundError</strong> – Raised if the file at <cite>file_path</cite> does not exist.</p></li>
+<li><p><strong>TypeError</strong> – Raised if <cite>file_path</cite> is not of type str.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="pymkv.MKVFile.link_to_next">
+<span class="sig-name descname"><span class="pre">link_to_next</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">→</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#pymkv.MKVFile.link_to_next" title="Link to this definition">¶</a></dt>
+<dd><p>Link the output file as the successor of the <cite>file_path</cite> file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>file_path</strong> (<em>str</em>) – Path of the file to be linked to.</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>TypeError</strong> – Raised if <cite>file_path</cite> is not of type str.</p></li>
+<li><p><strong>ValueError</strong> – Raised if file at <cite>file_path</cite> cannot be verified as an MKV.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="pymkv.MKVFile.link_to_none">
+<span class="sig-name descname"><span class="pre">link_to_none</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">→</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#pymkv.MKVFile.link_to_none" title="Link to this definition">¶</a></dt>
+<dd><p>Remove all linking to previous and next files.</p>
+<p>This method clears any existing links to previous or next files,
+effectively removing the file linking options for the current MKVFile object.</p>
+</dd></dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="pymkv.MKVFile.link_to_previous">
+<span class="sig-name descname"><span class="pre">link_to_previous</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">→</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#pymkv.MKVFile.link_to_previous" title="Link to this definition">¶</a></dt>
+<dd><p>Link the output file as the predecessor of the <cite>file_path</cite> file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>file_path</strong> (<em>str</em>) – Path of the file to be linked to.</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>TypeError</strong> – Raised if <cite>file_path</cite> is not of type str.</p></li>
+<li><p><strong>ValueError</strong> – Raised if file at <cite>file_path</cite> cannot be verified as an MKV.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="pymkv.MKVFile.move_track_backward">
+<span class="sig-name descname"><span class="pre">move_track_backward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">track_num</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">→</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#pymkv.MKVFile.move_track_backward" title="Link to this definition">¶</a></dt>
+<dd><p>Move a track backward in the <a class="reference internal" href="#pymkv.MKVFile" title="pymkv.MKVFile"><code class="xref py py-class docutils literal notranslate"><span class="pre">MKVFile</span></code></a> object.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>track_num</strong> (<em>int</em>) – The track number of the track to move backward.</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>IndexError</strong> – Raised if <cite>track_num</cite> is is out of range of the track list.</p>
+</dd>
+</dl>
+</dd></dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="pymkv.MKVFile.move_track_end">
+<span class="sig-name descname"><span class="pre">move_track_end</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">track_num</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">→</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#pymkv.MKVFile.move_track_end" title="Link to this definition">¶</a></dt>
+<dd><p>Set as track as the last in the <a class="reference internal" href="#pymkv.MKVFile" title="pymkv.MKVFile"><code class="xref py py-class docutils literal notranslate"><span class="pre">MKVFile</span></code></a> object.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>track_num</strong> (<em>int</em>) – The track number of the track to move to the back.</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>IndexError</strong> – Raised if <cite>track_num</cite> is is out of range of the track list.</p>
+</dd>
+</dl>
+</dd></dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="pymkv.MKVFile.move_track_forward">
+<span class="sig-name descname"><span class="pre">move_track_forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">track_num</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">→</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#pymkv.MKVFile.move_track_forward" title="Link to this definition">¶</a></dt>
+<dd><p>Move a track forward in the <a class="reference internal" href="#pymkv.MKVFile" title="pymkv.MKVFile"><code class="xref py py-class docutils literal notranslate"><span class="pre">MKVFile</span></code></a> object.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>track_num</strong> (<em>int</em>) – The track number of the track to move forward.</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>IndexError</strong> – Raised if <cite>track_num</cite> is is out of range of the track list.</p>
+</dd>
+</dl>
+</dd></dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="pymkv.MKVFile.move_track_front">
+<span class="sig-name descname"><span class="pre">move_track_front</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">track_num</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">→</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#pymkv.MKVFile.move_track_front" title="Link to this definition">¶</a></dt>
+<dd><p>Set a track as the first in the <a class="reference internal" href="#pymkv.MKVFile" title="pymkv.MKVFile"><code class="xref py py-class docutils literal notranslate"><span class="pre">MKVFile</span></code></a> object.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>track_num</strong> (<em>int</em>) – The track number of the track to move to the front.</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>IndexError</strong> – Raised if <cite>track_num</cite> is is out of range of the track list.</p>
+</dd>
+</dl>
+</dd></dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="pymkv.MKVFile.mux">
+<span class="sig-name descname"><span class="pre">mux</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">output_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">PathLike</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">silent</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ignore_warning</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">→</span> <span class="sig-return-typehint"><span class="pre">int</span></span></span><a class="headerlink" href="#pymkv.MKVFile.mux" title="Link to this definition">¶</a></dt>
+<dd><p>Mixes the specified <a class="reference internal" href="#pymkv.MKVFile" title="pymkv.MKVFile"><code class="xref py py-class docutils literal notranslate"><span class="pre">MKVFile</span></code></a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>output_path</strong> (<em>str</em>) – The path to be used as the output file in the mkvmerge command.</p></li>
+<li><p><strong>silent</strong> (<em>bool</em><em>, </em><em>optional</em>) – By default the mkvmerge output will be shown unless silent is True.</p></li>
+<li><p><strong>ignore_warning</strong> (<em>bool</em><em>, </em><em>optional</em>) – If set to True, the muxing process will ignore any warnings (exit code 1) from mkvmerge.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>return code</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int of Any</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>ValueError</strong> – Raised if the external mkvmerge command fails with a non-zero exit status
+    (except for warnings when ignore_warning is True). This includes scenarios
+    such as invalid command arguments, errors in processing the <a class="reference internal" href="#pymkv.MKVFile" title="pymkv.MKVFile"><code class="xref py py-class docutils literal notranslate"><span class="pre">MKVFile</span></code></a>,
+    or issues with output file writing. The error message provides details about
+    the failure based on the output of the command.</p>
+</dd>
+</dl>
+</dd></dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="pymkv.MKVFile.no_attachments">
+<span class="sig-name descname"><span class="pre">no_attachments</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">→</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#pymkv.MKVFile.no_attachments" title="Link to this definition">¶</a></dt>
+<dd><p>Ignore the existing attachments of all tracks in the <a class="reference internal" href="#pymkv.MKVFile" title="pymkv.MKVFile"><code class="xref py py-class docutils literal notranslate"><span class="pre">MKVFile</span></code></a> object.</p>
+<p>This method sets the <cite>no_attachments</cite> attribute to True for all tracks in the MKVFile.</p>
+</dd></dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="pymkv.MKVFile.no_chapters">
+<span class="sig-name descname"><span class="pre">no_chapters</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">→</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#pymkv.MKVFile.no_chapters" title="Link to this definition">¶</a></dt>
+<dd><p>Ignore the existing chapters of all tracks in the <a class="reference internal" href="#pymkv.MKVFile" title="pymkv.MKVFile"><code class="xref py py-class docutils literal notranslate"><span class="pre">MKVFile</span></code></a> object.</p>
+<p>This method sets the <cite>no_chapters</cite> attribute to True for all tracks in the MKVFile.</p>
+</dd></dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="pymkv.MKVFile.no_global_tags">
+<span class="sig-name descname"><span class="pre">no_global_tags</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">→</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#pymkv.MKVFile.no_global_tags" title="Link to this definition">¶</a></dt>
+<dd><p>Ignore the existing global tags of all tracks in the <a class="reference internal" href="#pymkv.MKVFile" title="pymkv.MKVFile"><code class="xref py py-class docutils literal notranslate"><span class="pre">MKVFile</span></code></a> object.</p>
+<p>This method sets the <cite>no_global_tags</cite> attribute to True for all tracks in the MKVFile.</p>
+</dd></dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="pymkv.MKVFile.no_track_tags">
+<span class="sig-name descname"><span class="pre">no_track_tags</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">→</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#pymkv.MKVFile.no_track_tags" title="Link to this definition">¶</a></dt>
+<dd><p>Ignore the existing track tags of all tracks in the <a class="reference internal" href="#pymkv.MKVFile" title="pymkv.MKVFile"><code class="xref py py-class docutils literal notranslate"><span class="pre">MKVFile</span></code></a> object.</p>
+<p>This method sets the <cite>no_track_tags</cite> attribute to True for all tracks in the MKVFile.</p>
+</dd></dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="pymkv.MKVFile.order_tracks_by_file_id">
+<span class="sig-name descname"><span class="pre">order_tracks_by_file_id</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">→</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#pymkv.MKVFile.order_tracks_by_file_id" title="Link to this definition">¶</a></dt>
+<dd><p>Assigns file IDs to tracks based on their source files.</p>
+<p>Creates a mapping of unique file paths to numeric IDs,
+then assigns each track a file ID corresponding to its source file.
+Tracks from the same file will have the same file ID.</p>
+<p>This method modifies the file_id attribute of each track in self.tracks.</p>
+</dd></dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="pymkv.MKVFile.remove_track">
+<span class="sig-name descname"><span class="pre">remove_track</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">track_num</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">→</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#pymkv.MKVFile.remove_track" title="Link to this definition">¶</a></dt>
+<dd><p>Remove a track from the <a class="reference internal" href="#pymkv.MKVFile" title="pymkv.MKVFile"><code class="xref py py-class docutils literal notranslate"><span class="pre">MKVFile</span></code></a> object.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>track_num</strong> (<em>int</em>) – The track number of the track to remove.</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>IndexError</strong> – Raised if <cite>track_num</cite> is is out of range of the track list.</p>
+</dd>
+</dl>
+</dd></dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="pymkv.MKVFile.replace_track">
+<span class="sig-name descname"><span class="pre">replace_track</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">track_num</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">track</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="MKVTrack.html#pymkv.MKVTrack" title="pymkv.MKVTrack.MKVTrack"><span class="pre">MKVTrack</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">→</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#pymkv.MKVFile.replace_track" title="Link to this definition">¶</a></dt>
+<dd><p>Replace a track with another track in the <a class="reference internal" href="#pymkv.MKVFile" title="pymkv.MKVFile"><code class="xref py py-class docutils literal notranslate"><span class="pre">MKVFile</span></code></a> object.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>track_num</strong> (<em>int</em>) – The track number of the track to replace.</p></li>
+<li><p><strong>track</strong> (<a class="reference internal" href="MKVTrack.html#pymkv.MKVTrack" title="pymkv.MKVTrack"><code class="xref py py-class docutils literal notranslate"><span class="pre">MKVTrack</span></code></a>) – The <a class="reference internal" href="MKVTrack.html#pymkv.MKVTrack" title="pymkv.MKVTrack"><code class="xref py py-class docutils literal notranslate"><span class="pre">MKVTrack</span></code></a> to be replaced into the file.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>IndexError</strong> – Raised if <cite>track_num</cite> is is out of range of the track list.</p>
+</dd>
+</dl>
+</dd></dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="pymkv.MKVFile.split_chapters">
+<span class="sig-name descname"><span class="pre">split_chapters</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">chapters</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Iterable</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">link</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">→</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#pymkv.MKVFile.split_chapters" title="Link to this definition">¶</a></dt>
+<dd><p>Split the output file into parts by chapters.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>*chapters</strong> (<em>int</em><em>, </em><em>list</em><em>, </em><em>tuple</em>) – The chapters to split the file by. Can be passed as any combination of ints, inside or outside an
+<code class="xref py py-obj docutils literal notranslate"><span class="pre">Iterable</span></code> object. Any lists will be flattened. Chapters must be ints.</p></li>
+<li><p><strong>link</strong> (<em>bool</em><em>, </em><em>optional</em>) – Determines if the split files should be linked together after splitting.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>TypeError</strong> – Raised if any chapters in <cite>*chapters</cite> are not of type int.</p></li>
+<li><p><strong>ValueError</strong> – Raised if <cite>*chapters</cite> contains improperly formatted chapters.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="pymkv.MKVFile.split_duration">
+<span class="sig-name descname"><span class="pre">split_duration</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">duration</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">link</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">→</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#pymkv.MKVFile.split_duration" title="Link to this definition">¶</a></dt>
+<dd><p>Split the output file into parts by duration.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>duration</strong> (<em>str</em><em>, </em><em>int</em>) – The duration of each split file. Takes either a str formatted to HH:MM:SS.nnnnnnnnn or an integer
+representing the number of seconds. The duration string requires formatting of at least M:S.</p></li>
+<li><p><strong>link</strong> (<em>bool</em><em>, </em><em>optional</em>) – Determines if the split files should be linked together after splitting.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="pymkv.MKVFile.split_frames">
+<span class="sig-name descname"><span class="pre">split_frames</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">frames</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Iterable</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">link</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">→</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#pymkv.MKVFile.split_frames" title="Link to this definition">¶</a></dt>
+<dd><p>Split the output file into parts by frames.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>*frames</strong> (<em>int</em><em>, </em><em>list</em><em>, </em><em>tuple</em>) – The frames to split the file by. Can be passed as any combination of ints, inside or outside an
+<code class="xref py py-obj docutils literal notranslate"><span class="pre">Iterable</span></code> object. Any lists will be flattened. Frames must be ints.</p></li>
+<li><p><strong>link</strong> (<em>bool</em><em>, </em><em>optional</em>) – Determines if the split files should be linked together after splitting.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>TypeError</strong> – Raised if non-int frames are passed in for <cite>*frames</cite> or within the <cite>*frames</cite> iterable.</p></li>
+<li><p><strong>ValueError</strong> – Raised if improperly formatted frames are passed in for <cite>*frames</cite>.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="pymkv.MKVFile.split_none">
+<span class="sig-name descname"><span class="pre">split_none</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">→</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#pymkv.MKVFile.split_none" title="Link to this definition">¶</a></dt>
+<dd><p>Remove all splitting options.</p>
+</dd></dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="pymkv.MKVFile.split_parts_frames">
+<span class="sig-name descname"><span class="pre">split_parts_frames</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">frame_parts</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Iterable</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">link</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">→</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#pymkv.MKVFile.split_parts_frames" title="Link to this definition">¶</a></dt>
+<dd><p>Split the output in parts by frames.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>frame_parts</strong> (<em>list</em><em>, </em><em>tuple</em>) – An Iterable of frame sets. Each frame set should be an <code class="xref py py-obj docutils literal notranslate"><span class="pre">Iterable</span></code> object of an even number of frames
+or any
+number of frame pairs. The very first and last frames are permitted to be None. Frame sets containing four
+or more frames will output as one file containing the parts specified.</p></li>
+<li><p><strong>link</strong> (<em>bool</em><em>, </em><em>optional</em>) – Determines if the split files should be linked together after splitting.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>TypeError</strong> – Raised if any of the frame sets are not a list or tuple.</p></li>
+<li><p><strong>ValueError</strong> – Raised if <cite>frame_parts</cite> contains improperly formatted parts.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="pymkv.MKVFile.split_size">
+<span class="sig-name descname"><span class="pre">split_size</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Bitmath</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">link</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">→</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#pymkv.MKVFile.split_size" title="Link to this definition">¶</a></dt>
+<dd><p>Split the output file into parts by size.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>size</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">bitmath</span></code>, int) – The size of each split file. Takes either a <code class="xref py py-obj docutils literal notranslate"><span class="pre">bitmath</span></code> size object or an integer representing the
+number of bytes.</p></li>
+<li><p><strong>link</strong> (<em>bool</em><em>, </em><em>optional</em>) – Determines if the split files should be linked together after splitting.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>TypeError</strong> – Raised if if <cite>size</cite> is not a bitmath object or an integer.</p>
+</dd>
+</dl>
+</dd></dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="pymkv.MKVFile.split_timestamp_parts">
+<span class="sig-name descname"><span class="pre">split_timestamp_parts</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">timestamp_parts</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Iterable</span><span class="p"><span class="pre">[</span></span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">link</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">→</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#pymkv.MKVFile.split_timestamp_parts" title="Link to this definition">¶</a></dt>
+<dd><p>Split the output in parts by time parts.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>timestamp_parts</strong> (<em>list</em><em>, </em><em>tuple</em>) – An Iterable of timestamp sets. Each timestamp set should be an Iterable of an even number of timestamps
+or any number of timestamp pairs. The very first and last timestamps are permitted to be None. Timestamp
+sets containing 4 or more timestamps will output as one file containing the parts specified.</p></li>
+<li><p><strong>link</strong> (<em>bool</em><em>, </em><em>optional</em>) – Determines if the split files should be linked together after splitting.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>TypeError</strong> – Raised if any of the timestamp sets are not a list or tuple.</p></li>
+<li><p><strong>ValueError</strong> – Raised if <cite>timestamp_parts</cite> contains improperly formatted parts.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="pymkv.MKVFile.split_timestamps">
+<span class="sig-name descname"><span class="pre">split_timestamps</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">timestamps</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Iterable</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">link</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">→</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#pymkv.MKVFile.split_timestamps" title="Link to this definition">¶</a></dt>
+<dd><p>Split the output file into parts by timestamps.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>*timestamps</strong> (<em>Iterable</em><em>[</em><em>str</em><em> | </em><em>int</em><em>]</em>) – The timestamps to split the file by. Can be passed as any combination of strs and ints, inside or outside
+an <code class="xref py py-obj docutils literal notranslate"><span class="pre">Iterable</span></code> object. Any lists will be flattened. Timestamps must be ints, representing seconds,
+or strs in the form HH:MM:SS.nnnnnnnnn. The timestamp string requires formatting of at least M:S.</p></li>
+<li><p><strong>link</strong> (<em>bool</em><em>, </em><em>optional</em>) – Determines if the split files should be linked together after splitting.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>ValueError</strong> – Raised if invalid or improperly formatted timestamps are passed in for <cite>*timestamps</cite>.</p>
+</dd>
+</dl>
+</dd></dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="pymkv.MKVFile.swap_tracks">
+<span class="sig-name descname"><span class="pre">swap_tracks</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">track_num_1</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">track_num_2</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">→</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#pymkv.MKVFile.swap_tracks" title="Link to this definition">¶</a></dt>
+<dd><p>Swap the position of two tracks in the <a class="reference internal" href="#pymkv.MKVFile" title="pymkv.MKVFile"><code class="xref py py-class docutils literal notranslate"><span class="pre">MKVFile</span></code></a> object.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>track_num_1</strong> (<em>int</em>) – The track number of one track to swap.</p></li>
+<li><p><strong>track_num_2</strong> (<em>int</em>) – The track number of the other track to swap</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>IndexError</strong> – Raised if <cite>track_num_1</cite> or <cite>track_num_2</cite> are out of range of the track list.</p>
+</dd>
+</dl>
+</dd></dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="pymkv.MKVFile.track_tags">
+<span class="sig-name descname"><span class="pre">track_tags</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">track_ids</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">list</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">tuple</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exclusive</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">→</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#pymkv.MKVFile.track_tags" title="Link to this definition">¶</a></dt>
+<dd><p>Include or exclude tags from specific tracks.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>*track_ids</strong> (<em>int</em><em>, </em><em>list</em><em>, </em><em>tuple</em>) – Track ids to have tags included or excluded from.</p></li>
+<li><p><strong>exclusive</strong> (<em>bool</em><em>, </em><em>optional</em>) – Determines if the <cite>track_ids</cite> should have their tags kept or removed. <cite>exclusive</cite> is False by default and
+will remove tags from unspecified tracks.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>IndexError</strong> – Raised if any ids from <cite>*track_ids</cite> is is out of range of the track list.</p></li>
+<li><p><strong>TypeError</strong> – Raised if an ids from <cite>*track_ids</cite> are not of type int.</p></li>
+<li><p><strong>ValueError</strong> – Raised if <cite>*track_ids</cite> are improperly formatted.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+</dd></dl>
+</section>
+
+
+          </article>
+        </div>
+      </div>
+    </main>
+  </div>
+  <footer class="md-footer">
+    <div class="md-footer-nav">
+      <nav class="md-footer-nav__inner md-grid">
+          
+            <a href="../index.html" title="pymkv2"
+               class="md-flex md-footer-nav__link md-footer-nav__link--prev"
+               rel="prev">
+              <div class="md-flex__cell md-flex__cell--shrink">
+                <i class="md-icon md-icon--arrow-back md-footer-nav__button"></i>
+              </div>
+              <div class="md-flex__cell md-flex__cell--stretch md-footer-nav__title">
+                <span class="md-flex__ellipsis">
+                  <span
+                      class="md-footer-nav__direction"> "Previous" </span> pymkv2 </span>
+              </div>
+            </a>
+          
+          
+            <a href="MKVTrack.html" title="MKVTrack"
+               class="md-flex md-footer-nav__link md-footer-nav__link--next"
+               rel="next">
+            <div class="md-flex__cell md-flex__cell--stretch md-footer-nav__title"><span
+                class="md-flex__ellipsis"> <span
+                class="md-footer-nav__direction"> "Next" </span> MKVTrack </span>
+            </div>
+            <div class="md-flex__cell md-flex__cell--shrink"><i
+                class="md-icon md-icon--arrow-forward md-footer-nav__button"></i>
+            </div>
+          
+        </a>
+        
+      </nav>
+    </div>
+    <div class="md-footer-meta md-typeset">
+      <div class="md-footer-meta__inner md-grid">
+        <div class="md-footer-copyright">
+          <div class="md-footer-copyright__highlight">
+              &#169; Copyright 2024, Sheldon Woodward &amp; GitBib.
+              
+          </div>
+            Created using
+            <a href="http://www.sphinx-doc.org/">Sphinx</a> 7.4.7.
+             and
+            <a href="https://github.com/bashtage/sphinx-material/">Material for
+              Sphinx</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+  <script src="../_static/javascripts/application.js"></script>
+  <script>app.initialize({version: "1.0.4", url: {base: ".."}})</script>
+  </body>
+</html>
