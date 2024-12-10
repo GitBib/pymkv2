@@ -44,6 +44,7 @@ import subprocess as sp
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
+from pymkv.BCP47 import is_bcp47
 from pymkv.ISO639_2 import is_iso639_2
 from pymkv.utils import prepare_mkvtoolnix_path
 from pymkv.Verifications import checking_file_path, get_file_info, verify_supported
@@ -391,7 +392,10 @@ class MKVTrack:
         Args:
             language_ietf (str): The language to set in BCP47 format.
         """
-        self._language_ietf = language_ietf
+        if language_ietf is None or is_bcp47:
+            self._language_ietf = language_ietf
+        else:
+            self._language_ietf = None
 
     @property
     def tags(self) -> str | None:
