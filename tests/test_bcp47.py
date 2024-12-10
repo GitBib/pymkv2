@@ -1,5 +1,3 @@
-import pytest
-
 from pymkv import BCP47
 
 
@@ -24,5 +22,4 @@ def test_is_bcp47_empty() -> None:
 
 
 def _test_is_bcp47(language_ietf: str) -> bool:
-    with pytest.deprecated_call():
-        return BCP47.is_bcp47(language_ietf)
+    return BCP47.is_bcp47(language_ietf)
