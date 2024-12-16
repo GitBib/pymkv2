@@ -30,8 +30,8 @@ keywords = ["wrapper"]
 [tool.poetry.dependencies]
 python = ">=3.9,<4.0"
 bitmath = "1.3.3.1"
-bcp47 = "0.1.0"
 python-iso639 = "^2024.4.27"
+iana-bcp47 = "^0.1.2"
 
 [tool.poetry.dev-dependencies]
 pre-commit = "^4.0.1"
