@@ -76,6 +76,8 @@ class MKVTrack:
         Determines if the track should be the default track of its type when muxed into an MKV file.
     forced_track : bool, optional
         Determines if the track should be a forced track when muxed into an MKV file.
+    compression : bool, optional
+        Determines if the track should be compressed when muxed into an MKV file.
     mkvmerge_path : str, list, os.PathLike, optional
         The path where pymkv looks for the mkvmerge executable. pymkv relies on the mkvmerge executable to parse
         files. By default, it is assumed mkvmerge is in your shell's $PATH variable. If it is not, you need to set
@@ -98,6 +100,8 @@ class MKVTrack:
         Determines if the track should be the default track of its type when muxed into an MKV file.
     forced_track : bool
         Determines if the track should be a forced track when muxed into an MKV file.
+    compression : bool
+        Determines if the track should be compressed when muxed into an MKV file.
     no_chapters : bool
         If chapters exist in the track file, don't include them when this :class:`~pymkv.MKVTrack` object is a track
         in an :class:`~pymkv.MKVFile` mux operation. This option has no effect on standalone track files, only tracks
@@ -129,6 +133,7 @@ class MKVTrack:
         flag_hearing_impaired: bool | None = False,
         flag_visual_impaired: bool | None = False,
         flag_original: bool | None = False,
+        compression: bool | None = None,
         mkvmerge_path: str | os.PathLike | Iterable[str] = "mkvmerge",
         mkvextract_path: str | os.PathLike | Iterable[str] = "mkvextract",
         sync: int | None = None,
@@ -166,6 +171,7 @@ class MKVTrack:
         self.flag_hearing_impaired = flag_hearing_impaired
         self.flag_visual_impaired = flag_visual_impaired
         self.flag_original = flag_original
+        self.compression = compression
         self._tag_entries = tag_entries
 
         # exclusions
