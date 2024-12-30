@@ -57,6 +57,7 @@ class MKVTrack:
     :class:`~pymkv.MKVTrack` objects are video, audio, or subtitles. Tracks can be standalone files or a single track
     within an MKV file, both can be handled by pymkv. An :class:`~pymkv.MKVTrack` object can be added to an
     :class:`~pymkv.MKVFile` and will be included when the MKV is muxed.
+
     Parameters
     ----------
     file_path : str
@@ -76,8 +77,6 @@ class MKVTrack:
         Determines if the track should be the default track of its type when muxed into an MKV file.
     forced_track : bool, optional
         Determines if the track should be a forced track when muxed into an MKV file.
-    compression : bool, optional
-        Determines if the track should be compressed when muxed into an MKV file.
     mkvmerge_path : str, list, os.PathLike, optional
         The path where pymkv looks for the mkvmerge executable. pymkv relies on the mkvmerge executable to parse
         files. By default, it is assumed mkvmerge is in your shell's $PATH variable. If it is not, you need to set
@@ -88,6 +87,9 @@ class MKVTrack:
         *mkvextract_path* to the executable location.
     tag_entries : int, optional
         The number of tag entries.
+    compression : bool, optional
+        Determines if the track should be compressed when muxed into an MKV file.
+
     Attributes
     ----------
     mkvmerge_path : list
@@ -133,12 +135,12 @@ class MKVTrack:
         flag_hearing_impaired: bool | None = False,
         flag_visual_impaired: bool | None = False,
         flag_original: bool | None = False,
-        compression: bool | None = None,
         mkvmerge_path: str | os.PathLike | Iterable[str] = "mkvmerge",
         mkvextract_path: str | os.PathLike | Iterable[str] = "mkvextract",
         sync: int | None = None,
         existing_info: dict[str, Any] | None = None,
         tag_entries: int = 0,
+        compression: bool | None = None,
     ) -> None:
         from pymkv.TypeTrack import get_track_extension
 
