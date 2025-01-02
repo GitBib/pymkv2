@@ -305,6 +305,10 @@ class MKVFile:
                 command.extend(["--commentary-flag", f"{track.track_id!s}:1"])
             else:
                 command.extend(["--commentary-flag", f"{track.track_id!s}:0"])
+            if track.compression is not None:
+                command.extend(
+                    ["--compression", f'{track.track_id!s}:{"zlib" if track.compression else "none"}'],
+                )
 
             # remove extra tracks
             if track.track_type == "audio":

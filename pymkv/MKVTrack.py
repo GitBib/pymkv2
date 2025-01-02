@@ -57,6 +57,7 @@ class MKVTrack:
     :class:`~pymkv.MKVTrack` objects are video, audio, or subtitles. Tracks can be standalone files or a single track
     within an MKV file, both can be handled by pymkv. An :class:`~pymkv.MKVTrack` object can be added to an
     :class:`~pymkv.MKVFile` and will be included when the MKV is muxed.
+
     Parameters
     ----------
     file_path : str
@@ -86,6 +87,9 @@ class MKVTrack:
         *mkvextract_path* to the executable location.
     tag_entries : int, optional
         The number of tag entries.
+    compression : bool, optional
+        Determines if the track should be compressed when muxed into an MKV file.
+
     Attributes
     ----------
     mkvmerge_path : list
@@ -98,6 +102,8 @@ class MKVTrack:
         Determines if the track should be the default track of its type when muxed into an MKV file.
     forced_track : bool
         Determines if the track should be a forced track when muxed into an MKV file.
+    compression : bool
+        Determines if the track should be compressed when muxed into an MKV file.
     no_chapters : bool
         If chapters exist in the track file, don't include them when this :class:`~pymkv.MKVTrack` object is a track
         in an :class:`~pymkv.MKVFile` mux operation. This option has no effect on standalone track files, only tracks
@@ -134,6 +140,7 @@ class MKVTrack:
         sync: int | None = None,
         existing_info: dict[str, Any] | None = None,
         tag_entries: int = 0,
+        compression: bool | None = None,
     ) -> None:
         from pymkv.TypeTrack import get_track_extension
 
@@ -166,6 +173,7 @@ class MKVTrack:
         self.flag_hearing_impaired = flag_hearing_impaired
         self.flag_visual_impaired = flag_visual_impaired
         self.flag_original = flag_original
+        self.compression = compression
         self._tag_entries = tag_entries
 
         # exclusions
