@@ -51,7 +51,7 @@ def create_srt_file_with_random_text(path: Path, subtitles_count: int = 5) -> No
     with Path.open(path, "w", encoding="utf-8") as file:
         for i in range(1, subtitles_count + 1):
             start = f"00:00:{i:02},000"  # Generate start time
-            end = f"00:00:{i+1:02},000"  # Generate end time
+            end = f"00:00:{i + 1:02},000"  # Generate end time
             text = generate_random_text()  # Generate random subtitle text
             file.write(f"{i}\n{start} --> {end}\n{text}\n\n")
 
