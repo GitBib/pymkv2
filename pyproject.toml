@@ -41,6 +41,7 @@ pytest-cov = "^6.0.0"
 pytest-ruff = "^0.4.1"
 pytest-mypy = "^0.10.3"
 mypy = "^1.14.1"
+ruff = "^0.9.0"
 sphinx-material = "^0.0.36"
 
 [tool.poetry.urls]
@@ -140,7 +141,6 @@ ignore = [
   "N999",
   "FBT002",
   "FBT001",
-  "ANN101",
   "S101", # Use of assert detected https://docs.astral.sh/ruff/rules/assert/
   "RUF012", # Mutable class attributes should be annotated with `typing.ClassVar`
   "SIM102", # sometimes it's better to nest
@@ -148,7 +148,7 @@ ignore = [
           # of types for comparison.
           # Deactivated because it can make the code slow:
           # https://github.com/astral-sh/ruff/issues/7871
-   "TCH003", # Ignore moving imports into a type-checking block.
+   "TC003", # Ignore moving imports into a type-checking block.
    "C901" # too complex
 ]
 # Allow fix for all enabled rules (when `--fix`) is provided.

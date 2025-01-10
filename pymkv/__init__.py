@@ -28,10 +28,10 @@ __all__ = (
     "MKVFile",
     "MKVTrack",
     "Timestamp",
+    "checking_file_path",
+    "get_file_info",
     "verify_matroska",
     "verify_mkvmerge",
     "verify_recognized",
     "verify_supported",
-    "checking_file_path",
-    "get_file_info",
 )
