@@ -770,7 +770,7 @@ class MKVFile:
         """
         # check if in timestamps form
         ts_flat: list[str | int] = MKVFile.flatten(timestamps)
-        if len(ts_flat) == 0:
+        if not ts_flat:
             msg = f'"{timestamps}" are not properly formatted timestamps'
             raise ValueError(msg)
         if None in ts_flat:
@@ -814,7 +814,7 @@ class MKVFile:
         """
         # check if in frames form
         frames_flat: list[int] = MKVFile.flatten(frames)
-        if len(frames_flat) == 0:
+        if not frames_flat:
             msg = f'"{frames}" are not properly formatted frames'
             raise ValueError(msg)
         for f in frames_flat:
@@ -859,7 +859,7 @@ class MKVFile:
             Raised if `timestamp_parts` contains improperly formatted parts.
         """
         ts_flat: list[str | int | Timestamp] = MKVFile.flatten(timestamp_parts)
-        if len(ts_flat) == 0:
+        if not ts_flat:
             msg = f'"{timestamp_parts}" are not properly formatted parts'
             raise ValueError(msg)
 
@@ -917,7 +917,7 @@ class MKVFile:
             Raised if `frame_parts` contains improperly formatted parts.
         """
         f_flat: list[int] = MKVFile.flatten(frame_parts)
-        if len(f_flat) == 0:
+        if not f_flat:
             msg = f'"{frame_parts}" are not properly formatted parts'
             raise ValueError(msg)
         if None in f_flat[1:-1]:
