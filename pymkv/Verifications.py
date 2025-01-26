@@ -1,3 +1,44 @@
+"""
+:mod:`pymkv.Verifications` module provides functions for validating files, paths and MKVToolNix executables.
+
+This module contains utilities for:
+
+- Validating file paths and existence
+- Verifying MKVToolNix installation and availability
+- Checking Matroska file format compatibility
+- Getting detailed media file information
+
+Examples
+--------
+
+Basic path verification::
+
+    >>> from pymkv.Verifications import checking_file_path
+    >>> file_path = checking_file_path("path/to/file.mkv")
+    >>> print(f"Valid file path: {file_path}")
+
+Checking MKVToolNix availability::
+
+    >>> from pymkv.Verifications import verify_mkvmerge
+    >>> if verify_mkvmerge("mkvmerge"):
+    ...     print("MKVToolNix is ready to use")
+
+Full file verification::
+
+    >>> from pymkv.Verifications import verify_matroska, verify_supported
+    >>> file_path = "path/to/file.mkv"
+    >>> if verify_matroska(file_path, "mkvmerge"):
+    ...     if verify_supported(file_path):
+    ...         print("File is a valid and supported Matroska file")
+
+See Also
+--------
+:class:`pymkv.MKVFile`
+    The main class for working with MKV files
+:class:`pymkv.MKVTrack`
+    Class for handling individual MKV tracks
+"""
+
 from __future__ import annotations
 
 import json
@@ -12,10 +53,11 @@ from pymkv.utils import prepare_mkvtoolnix_path
 
 
 def checking_file_path(file_path: str | os.PathLike[Any] | None) -> str:
-    """
+    """Check if a file path exists and is valid.
+
     Parameters
     ----------
-    file_path : str, os.PathLike
+    file_path : str | os.PathLike[Any] | None
         The path to the file that needs to be checked.
 
     Returns
@@ -26,7 +68,7 @@ def checking_file_path(file_path: str | os.PathLike[Any] | None) -> str:
     Raises
     ------
     TypeError
-        If the provided file path is not of type str.
+        If the provided file path is not of type str or PathLike.
     FileNotFoundError
         If the file path does not exist.
     """
@@ -45,26 +87,25 @@ def get_file_info(
     mkvmerge_path: str | os.PathLike | Iterable[str],
     check_path: bool = True,
 ) -> dict[str, Any]:
-    """
-    Get information about a media file using mkvmerge.
+    """Get information about a media file using mkvmerge.
 
-    Parameters:
-    -----------
-    file_path : Union[str, os.PathLike]
+    Parameters
+    ----------
+    file_path : str | os.PathLike[Any]
         The path to the media file to analyze.
-    mkvmerge_path : Union[str, tuple, os.PathLike]
+    mkvmerge_path : str | os.PathLike | Iterable[str]
         The path to the mkvmerge executable or a list of command parts.
     check_path : bool, optional
         Whether to check and validate the file path. Defaults to True.
 
-    Returns:
-    --------
-    Dict
+    Returns
+    -------
+    dict[str, Any]
         A dictionary containing the parsed JSON output from mkvmerge,
         which includes detailed information about the media file.
 
-    Raises:
-    -------
+    Raises
+    ------
     subprocess.CalledProcessError
         If mkvmerge fails to execute or returns a non-zero exit status.
     json.JSONDecodeError
@@ -84,16 +125,17 @@ def get_file_info(
 def verify_mkvmerge(
     mkvmerge_path: str | os.PathLike | Iterable[str] = "mkvmerge",
 ) -> bool:
-    """
+    """Verify if mkvmerge is available at the specified path.
+
     Parameters
     ----------
-    mkvmerge_path : str | None, optional
-        The path to the `mkvmerge` executable. If not provided, the default value is "mkvmerge".
+    mkvmerge_path : str | os.PathLike | Iterable[str], optional
+        The path to the mkvmerge executable. Defaults to "mkvmerge".
 
     Returns
     -------
     bool
-        True, if `mkvmerge_path` is valid and the `mkvmerge` executable is found. False otherwise.
+        True if mkvmerge is available at the specified path, False otherwise.
     """
     try:
         mkvmerge_command = list(prepare_mkvtoolnix_path(mkvmerge_path))
@@ -108,35 +150,35 @@ def verify_matroska(
     file_path: str | os.PathLike[Any],
     mkvmerge_path: str | os.PathLike | Iterable[str] = "mkvmerge",
 ) -> bool:
-    """
+    """Verify if a file is a valid Matroska file.
+
     Parameters
     ----------
-    file_path : str or os.PathLike
+    file_path : str | os.PathLike[Any]
         The path to the Matroska file to be verified.
-
-    mkvmerge_path : str, optional
-        The path to the `mkvmerge` executable. Default is "mkvmerge".
+    mkvmerge_path : str | os.PathLike | Iterable[str], optional
+        The path to the mkvmerge executable. Defaults to "mkvmerge".
 
     Returns
     -------
     bool
-        True if the Matroska file is valid and is of type "Matroska", False otherwise.
+        True if the file is a valid Matroska file, False otherwise.
 
     Raises
     ------
     FileNotFoundError
-        If `mkvmerge` executable is not found at the specified path.
+        If mkvmerge executable is not found at the specified path.
     TypeError
-        If `file_path` is not a string or an instance of `os.PathLike`.
+        If file_path is not a string or PathLike object.
     FileNotFoundError
-        If the specified `file_path` does not exist.
+        If the specified file_path does not exist.
     ValueError
-        If the `file_path` could not be opened using `mkvmerge`.
+        If the file_path could not be opened using mkvmerge.
 
     Notes
     -----
-    This method verifies the validity of a Matroska file by checking if it is of type "Matroska"
-    using the `mkvmerge` command-line tool.
+    This function verifies the validity of a Matroska file by checking if it is of type "Matroska"
+    using the mkvmerge command-line tool.
     """
     if not verify_mkvmerge(mkvmerge_path=mkvmerge_path):
         msg = "mkvmerge is not at the specified path, add it there or change the mkvmerge_path property"
@@ -156,14 +198,14 @@ def verify_file_path_and_mkvmerge(
     file_path: str | os.PathLike[Any],
     mkvmerge_path: str | os.PathLike | Iterable[str] = "mkvmerge",
 ) -> str:
-    """
+    """Verify both the file path and mkvmerge availability.
+
     Parameters
     ----------
-    file_path : Union[str, os.PathLike]
+    file_path : str | os.PathLike[Any]
         The path to the file that needs to be verified.
-
-    mkvmerge_path : str, optional
-        The path to the mkvmerge executable. By default, it is set to "mkvmerge".
+    mkvmerge_path : str | os.PathLike | Iterable[str], optional
+        The path to the mkvmerge executable. Defaults to "mkvmerge".
 
     Returns
     -------
@@ -174,10 +216,13 @@ def verify_file_path_and_mkvmerge(
     ------
     FileNotFoundError
         If mkvmerge is not found at the specified path or if the file_path does not exist.
-
     TypeError
-        If the file_path is not of type str.
+        If the file_path is not of type str or PathLike.
 
+    Notes
+    -----
+    This function combines the verification of both the file path and mkvmerge availability
+    in a single call, which is useful when both checks are needed.
     """
     if not verify_mkvmerge(mkvmerge_path=mkvmerge_path):
         msg = "mkvmerge is not at the specified path, add it there or change the mkvmerge_path property"
@@ -189,19 +234,33 @@ def verify_recognized(
     file_path: str | os.PathLike[Any],
     mkvmerge_path: str | os.PathLike | Iterable[str] = "mkvmerge",
 ) -> bool:
-    """
+    """Verify if the file format is recognized by mkvmerge.
+
     Parameters
     ----------
-    file_path : Union[str, os.PathLike]
+    file_path : str | os.PathLike[Any]
         The path to the file that will be verified.
-
-    mkvmerge_path : str, optional
-        The path to the `mkvmerge` executable. Default is "mkvmerge".
+    mkvmerge_path : str | os.PathLike | Iterable[str], optional
+        The path to the mkvmerge executable. Defaults to "mkvmerge".
 
     Returns
     -------
     bool
-        True if the container format of the file is recognized, False otherwise.
+        True if the container format of the file is recognized by mkvmerge, False otherwise.
+
+    Raises
+    ------
+    ValueError
+        If the file cannot be opened or an error occurs during verification.
+    FileNotFoundError
+        If mkvmerge is not found at the specified path.
+    TypeError
+        If file_path is not of type str or PathLike.
+
+    Notes
+    -----
+    This function checks if mkvmerge can recognize the container format of the specified file,
+    which is a prerequisite for any further operations with the file.
     """
     file_path = verify_file_path_and_mkvmerge(file_path, mkvmerge_path)
     try:
@@ -214,28 +273,37 @@ def verify_recognized(
     return info_json["container"]["recognized"]
 
 
-def verify_supported(  # noqa: ANN201
+def verify_supported(
     file_path: str | os.PathLike[Any],
     mkvmerge_path: str | os.PathLike | Iterable[str] = "mkvmerge",
-):
-    """
+) -> bool:
+    """Verify if the file format is supported by mkvmerge.
+
     Parameters
     ----------
-    file_path : Union[str, os.PathLike]
-        The path of the file to be verified.
-
-    mkvmerge_path : str, optional
-        The path to the `mkvmerge` executable. Defaults to "mkvmerge".
+    file_path : str | os.PathLike[Any]
+        The path to the file that will be verified.
+    mkvmerge_path : str | os.PathLike | Iterable[str], optional
+        The path to the mkvmerge executable. Defaults to "mkvmerge".
 
     Returns
     -------
     bool
-        Whether the container format of the file is supported by `mkvmerge`.
+        True if the container format of the file is supported by mkvmerge, False otherwise.
 
     Raises
     ------
     ValueError
-        If the file cannot be opened or an error occurs during the verification process.
+        If the file cannot be opened or an error occurs during verification.
+    FileNotFoundError
+        If mkvmerge is not found at the specified path.
+    TypeError
+        If file_path is not of type str or PathLike.
+
+    Notes
+    -----
+    This function checks if mkvmerge can fully support the container format of the specified file.
+    A file might be recognized but not fully supported for all operations.
     """
     mkvmerge_path = prepare_mkvtoolnix_path(mkvmerge_path)
     fp = verify_file_path_and_mkvmerge(file_path, mkvmerge_path)

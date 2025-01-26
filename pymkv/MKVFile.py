@@ -10,7 +10,7 @@ Create and mux a new MKV. This example takes an standalone video and audio track
 >>> mkv = MKVFile()
 >>> mkv.add_track('/path/to/track.h264')
 >>> mkv.add_track(MKVTrack('/path/to/another/track.aac'))
->> mkv.mux('/path/to/output.mkv')
+>>> mkv.mux('/path/to/output.mkv')
 
 Generate the mkvmerge command to mux an MKV. This is example is identical to the first example except the command is
 only generated, not executed.
