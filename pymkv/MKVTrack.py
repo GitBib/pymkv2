@@ -10,31 +10,31 @@ Below are some basic examples of how the :class:`~pymkv.MKVTrack` objects can be
 Create a new :class:`~pymkv.MKVTrack` from a track file. This example takes a standalone track file and uses it in an
 :class:`~pymkv.MKVTrack`.
 
->> from pymkv import MKVTrack
->> track1 = MKVTrack("path/to/track.h264")
->> track1.track_name = "Some Name"
->> track1.language = "eng"
+>>> from pymkv import MKVTrack
+>>> track1 = MKVTrack("path/to/track.h264")
+>>> track1.track_name = "Some Name"
+>>> track1.language = "eng"
 
 Create a new :class:`~pymkv.MKVTrack` from an MKV file. This example will take a specific track from an MKV and also
 prevent any global tags from being included if the :class:`~pymkv.MKVTrack` is muxed into an :class:`~pymkv.MKVFile`.
 
->> track2 = MKVTrack("path/to/track.aac")
->> track2.language = "eng"
+>>> track2 = MKVTrack("path/to/track.aac")
+>>> track2.language = "eng"
 
 Create a new :class:`~pymkv.MKVTrack` from an MKV file. This example will take a specific track from an MKV and also
 prevent any global tags from being included if the :class:`~pymkv.MKVTrack` is muxed into an :class:`~pymkv.MKVFile`.
 
->> track3 = MKVTrack("path/to/MKV.mkv", track_id=1)
->> track3.no_global_tags = True
+>>> track3 = MKVTrack("path/to/MKV.mkv", track_id=1)
+>>> track3.no_global_tags = True
 
 Now all these tracks can be added to an :class:`~pymkv.MKVFile` object and muxed together.
 
->> from pymkv import MKVFile
->> file = MKVFile()
->> file.add_track(track1)
->> file.add_track(track2)
->> file.add_track(track3)
->> file.mux("path/to/output.mkv")
+>>> from pymkv import MKVFile
+>>> file = MKVFile()
+>>> file.add_track(track1)
+>>> file.add_track(track2)
+>>> file.add_track(track3)
+>>> file.mux("path/to/output.mkv")
 """
 
 from __future__ import annotations
