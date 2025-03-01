@@ -1,6 +1,6 @@
 # pymkv2
 [![PyPI Version](https://img.shields.io/pypi/v/pymkv2.svg)](https://pypi.python.org/pypi/pymkv2)
-[![License](https://img.shields.io/github/license/gitbib/pymkv.svg)](https://github.com/gitbib/pymkv/LICENSE.txt)
+[![License](https://img.shields.io/github/license/gitbib/pymkv.svg)](https://github.com/GitBib/pymkv2/blob/master/LICENSE.txt)
 [![codecov](https://codecov.io/github/GitBib/pymkv2/branch/master/graph/badge.svg?token=2JDX5HHGUO)](https://codecov.io/github/GitBib/pymkv2)
 [![versions](https://img.shields.io/pypi/pyversions/pymkv2.svg)](https://github.com/GitBib/pymkv2)
 
@@ -8,9 +8,10 @@ pymkv2 is a Python wrapper for mkvmerge and other tools in the MKVToolNix suite.
 splitting, linking, chapters, tags, and attachments through the use of mkvmerge.
 
 ## About pymkv2
-it's a fork of the [project](https://github.com/sheldonkwoodward/pymkv). Pymkv2 is a Python 3 library for manipulating MKV files with mkvmerge. Constructing mkvmerge commands manually can
-quickly become confusing and complex. To remedy this, I decided to write this library to make mkvmerge more
-scriptable and easier to use. Please open new issues for any bugs you find, support is greatly appreciated!
+it's a fork of the [pymkv](https://github.com/sheldonkwoodward/pymkv) project. pymkv2 is a Python 3 library for manipulating MKV files
+with mkvmerge. Constructing mkvmerge commands manually can quickly become confusing and complex. To remedy this, I decided to write
+this library to make mkvmerge more scriptable and easier to use. Please open new issues for any bugs you find,
+support is greatly appreciated!
 
 ## Installation
 mkvmerge must be installed on your computer, it is needed to process files when creating MKV objects. It is also
