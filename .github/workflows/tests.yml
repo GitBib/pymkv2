@@ -53,35 +53,22 @@ jobs:
       - name: Verify MKVToolNix installation (Linux and macOS)
         if: matrix.os != 'windows-latest'
         run: mkvmerge -V
-      - name: Set up Python ${{ matrix.python-version }}
+      - name: Set up Python
         id: setup-python
         uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
-      - name: Install Poetry
-        uses: snok/install-poetry@v1
+      - name: Install uv
+        id: setup-uv
+        uses: astral-sh/setup-uv@v5
         with:
           version: latest
-          virtualenvs-create: true
-          virtualenvs-in-project: true
-          installer-parallel: true
-      - name: Load cached venv
-        id: cached-poetry-dependencies
-        uses: actions/cache@v4
-        with:
-          path: .venv
-          key: venv-pypi-${{ runner.os }}-${{ steps.setup-python.outputs.python-version }}-${{ hashFiles('**/poetry.lock') }}
-      - name: Add Poetry to Path (Windows)
-        if: matrix.os == 'windows-latest'
-        run: |
-          echo "C:\Users\runneradmin\.local\bin" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
-      - name: Install dependencies
-        if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
-        run: poetry install --no-interaction --no-root
+          python-version: ${{ matrix.python-version }}
+          cache-suffix:  ${{ matrix.python-version }}
       - name: Install project
-        run: poetry install --no-interaction
+        run: uv sync --all-extras --dev
       - name: Run tests and collect coverage
-        run: poetry run make
+        run: uv run --frozen make
         shell: bash
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v5
