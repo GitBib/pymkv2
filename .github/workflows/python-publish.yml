@@ -19,17 +19,13 @@ jobs:
           echo "tag=$tag" >> $GITHUB_OUTPUT
     - run: |
         echo "tag=${{ steps.vars.outputs.tag }}"
-    - name: Set up Python
-      uses: actions/setup-python@v5
-      with:
-        python-version: '3.11'
     - name: Install uv
       id: setup-uv
       uses: astral-sh/setup-uv@v5
       with:
         version: latest
-        python-version: ${{ matrix.python-version }}
-        cache-suffix:  ${{ matrix.python-version }}
+        python-version: "3.13"
+        enable-cache: true
     - name: Install project
       run: uv sync --all-extras --dev
     - name: Validate Release Version
