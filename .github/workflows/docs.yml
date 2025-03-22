@@ -16,18 +16,13 @@ jobs:
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
-      - name: Set up python
-        id: setup-python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.11'
       - name: Install uv
         id: setup-uv
         uses: astral-sh/setup-uv@v5
         with:
           version: latest
-          python-version: ${{ matrix.python-version }}
-          cache-suffix:  ${{ matrix.python-version }}
+          python-version: "3.13"
+          enable-cache: true
       - name: Install project
         run: uv sync --all-extras --dev
       - name: Sphinx build
