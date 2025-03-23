@@ -76,7 +76,7 @@ def test_getitem() -> None:
 
 def test_invalid_input() -> None:
     with pytest.raises(TypeError):
-        Timestamp(cast(str, []))  # Invalid type
+        Timestamp(cast("str", []))  # Invalid type
 
     with pytest.raises(ValueError):  # noqa: PT011
         Timestamp("invalid_timestamp")
@@ -90,4 +90,4 @@ def test_ts_property() -> None:
     assert ts.ts == "02:30:00"
 
     with pytest.raises(TypeError):
-        ts.ts = cast(str, [])
+        ts.ts = cast("str", [])

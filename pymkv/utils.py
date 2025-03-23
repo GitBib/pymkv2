@@ -97,6 +97,6 @@ def ensure_info(
                 setattr(self, info_attr, fetch_func(*func_params, **fetch_kwargs))
             return method(self, *args, **kwargs)
 
-        return cast(Callable[..., T], wrapper)
+        return cast("Callable[..., T]", wrapper)
 
     return decorator
