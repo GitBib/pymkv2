@@ -722,7 +722,7 @@ class MKVFile:
             Raised if if `size` is not a bitmath object or an integer.
         """
         if getattr(size, "__module__", None) == bitmath.__name__:
-            size = cast(bitmath.Bitmath, size).bytes
+            size = cast("bitmath.Bitmath", size).bytes
         elif not isinstance(size, int):
             msg = "size is not a bitmath object or integer"
             raise TypeError(msg)
@@ -1187,7 +1187,7 @@ class MKVFile:
                 for subitem in item:
                     yield from _flatten(subitem)
             else:
-                yield cast(T, item)
+                yield cast("T", item)
 
         return list(_flatten(item))
 

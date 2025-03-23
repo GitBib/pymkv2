@@ -250,7 +250,7 @@ class Timestamp:
         Returns:
             int: The hours value.
         """
-        return cast(int, self._hh)
+        return cast("int", self._hh)
 
     @hh.setter
     def hh(self, value: int) -> None:
@@ -270,7 +270,7 @@ class Timestamp:
         Returns:
             int: The minutes value.
         """
-        return cast(int, self._mm)
+        return cast("int", self._mm)
 
     @mm.setter
     def mm(self, value: int) -> None:
@@ -290,7 +290,7 @@ class Timestamp:
         Returns:
             int: The seconds value.
         """
-        return cast(int, self._ss)
+        return cast("int", self._ss)
 
     @ss.setter
     def ss(self, value: int) -> None:
@@ -310,7 +310,7 @@ class Timestamp:
         Returns:
             int: The nanoseconds value.
         """
-        return cast(int, self._nn)
+        return cast("int", self._nn)
 
     @nn.setter
     def nn(self, value: int) -> None:
@@ -417,7 +417,7 @@ class Timestamp:
         assert timestamp_match is not None
         timestamp_groups = timestamp_match.groups()
 
-        timestamp_lst = [cast(str, timestamp_groups[i]) for i in (1, 2, 3, 4)]
+        timestamp_lst = [cast("str", timestamp_groups[i]) for i in (1, 2, 3, 4)]
         timestamp_clean = []
         for ts in timestamp_lst:
             if ts is None:

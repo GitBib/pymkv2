@@ -54,4 +54,4 @@ def test_prepare_mkvmerge_path_with_pathlike() -> None:
 
 def test_prepare_mkvmerge_path_with_invalid_argument() -> None:
     with pytest.raises(ValueError):  # noqa: PT011
-        utils.prepare_mkvtoolnix_path(cast(str, 123))
+        utils.prepare_mkvtoolnix_path(cast("str", 123))

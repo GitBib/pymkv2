@@ -182,7 +182,7 @@ def test_move_track_backward_and_mux(
 
 def test_get_track(get_path_test_file: Path) -> None:
     mkv = MKVFile(get_path_test_file)
-    track = cast(MKVTrack, mkv.get_track(1))
+    track = cast("MKVTrack", mkv.get_track(1))
 
     assert track.track_type == "audio"
 
@@ -204,7 +204,7 @@ def test_added_lang_in_track_and_mux_file(
 ) -> None:
     mkv = MKVFile(get_path_test_file)
     output_file = get_base_path / "file-test.mkv"
-    track = cast(MKVTrack, mkv.get_track(1))
+    track = cast("MKVTrack", mkv.get_track(1))
     track.language_ietf = "TEST"
     with pytest.raises(ValueError):  # noqa: PT011
         mkv.mux(output_file)
