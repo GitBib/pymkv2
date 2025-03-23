@@ -11,6 +11,7 @@ jobs:
     steps:
     - name: Check out repository
       uses: actions/checkout@v4
+
     - name: Get the tag name for the release
       id: vars
       shell: bash
@@ -19,6 +20,7 @@ jobs:
           echo "tag=$tag" >> $GITHUB_OUTPUT
     - run: |
         echo "tag=${{ steps.vars.outputs.tag }}"
+
     - name: Install uv
       id: setup-uv
       uses: astral-sh/setup-uv@v5
@@ -26,8 +28,10 @@ jobs:
         version: latest
         python-version: "3.13"
         enable-cache: true
+
     - name: Install project
       run: uv sync --all-extras --dev
+
     - name: Validate Release Version
       shell: bash
       run: |
@@ -36,6 +40,7 @@ jobs:
         [ "${VERSION}" == "${TAG}" ] || { >&2 echo "Expected ${TAG} got ${VERSION}"; exit 1; }
       env:
         TAG: ${{ steps.vars.outputs.tag }}
+
     - name: publish
       shell: bash
       run: |

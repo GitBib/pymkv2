@@ -25,6 +25,7 @@ jobs:
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
+
       - name: Set up MKVToolNix repository
         if: matrix.os == 'ubuntu-latest'
         run: |
@@ -34,25 +35,31 @@ jobs:
           UBUNTU_CODENAME=$(lsb_release -cs)
           echo "deb [arch=amd64 signed-by=/usr/share/keyrings/gpg-pub-moritzbunkus.gpg] https://mkvtoolnix.download/ubuntu/ $UBUNTU_CODENAME main" | sudo tee /etc/apt/sources.list.d/mkvtoolnix.list
           sudo apt-get -qq update
+
       - name: Install MKVToolNix (Ubuntu)
         if: matrix.os == 'ubuntu-latest'
         run: sudo apt-get -qq install -y mkvtoolnix mkvtoolnix-gui
+
       - name: Install MKVToolNix (macOS)
         if: matrix.os == 'macos-latest'
         run: brew install --quiet  mkvtoolnix
+
       - name: Install MKVToolNix (Windows)
         if: matrix.os == 'windows-latest'
         run: |
           choco install -y --no-progress mkvtoolnix
           echo "C:\Program Files\MKVToolNix" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+
       - name: Verify MKVToolNix installation (Windows)
         if: matrix.os == 'windows-latest'
         run: |
           & "C:\Program Files\MKVToolNix\mkvmerge.exe" -V
         shell: pwsh
+
       - name: Verify MKVToolNix installation (Linux and macOS)
         if: matrix.os != 'windows-latest'
         run: mkvmerge -V
+
       - name: Install uv
         id: setup-uv
         uses: astral-sh/setup-uv@v5
@@ -60,11 +67,14 @@ jobs:
           version: latest
           python-version: ${{ matrix.python-version }}
           enable-cache: true
+
       - name: Install project
         run: uv sync --all-extras --dev
+
       - name: Run tests and collect coverage
         run: uv run --frozen make
         shell: bash
+
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v5
         if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/master' || github.event_name == 'pull_request' || github.event_name == 'workflow_dispatch' }}
@@ -74,6 +84,7 @@ jobs:
           verbose: true
         env:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+
       - name: Publish Test Report
         uses: mikepenz/action-junit-report@v5
         if: success() || failure() # always run even if the previous step fails
