@@ -16,6 +16,7 @@ jobs:
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
+
       - name: Install uv
         id: setup-uv
         uses: astral-sh/setup-uv@v5
@@ -23,11 +24,14 @@ jobs:
           version: latest
           python-version: "3.13"
           enable-cache: true
+
       - name: Install project
         run: uv sync --all-extras --dev
+
       - name: Sphinx build
         run: |
           uv run --frozen sphinx-build docs/source _build
+
       - name: Deploy
         uses: peaceiris/actions-gh-pages@v4
         if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/master' || github.event_name == 'pull_request' || github.event_name == 'workflow_dispatch' }}
