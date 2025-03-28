@@ -145,43 +145,60 @@ class MKVFile:
             if self.title is None and "title" in info_json["container"]["properties"]:
                 self.title = info_json["container"]["properties"]["title"]
 
-            self._global_tag_entries = sum(t["num_entries"] for t in info_json.get("global_tags", []))
+            if self._info_json is not None:
+                self._global_tag_entries = sum(t["num_entries"] for t in self._info_json.get("global_tags", []))
 
-            # dictionary associating track_id to the number of tag entries:
-            track_tag_entries: dict[int, int] = {
-                t["track_id"]: t["num_entries"] for t in self._info_json.get("track_tags", [])
-            }
+                # dictionary associating track_id to the number of tag entries:
+                track_tag_entries: dict[int, int] = {
+                    t["track_id"]: t["num_entries"] for t in self._info_json.get("track_tags", [])
+                }
 
-            # add tracks with info
-            for track in info_json["tracks"]:
-                track_id = track["id"]
-                new_track = MKVTrack(
-                    file_path,
-                    track_id=track_id,
-                    mkvmerge_path=self.mkvmerge_path,
-                    existing_info=self._info_json,
-                    tag_entries=track_tag_entries.get(track_id, 0),
-                )
-                if "track_name" in track["properties"]:
-                    new_track.track_name = track["properties"]["track_name"]
-                if "language" in track["properties"]:
-                    new_track.language = track["properties"]["language"]
-                if "language_ietf" in track["properties"]:
-                    new_track.language_ietf = track["properties"]["language_ietf"]
-                if "default_track" in track["properties"]:
-                    new_track.default_track = track["properties"]["default_track"]
-                if "forced_track" in track["properties"]:
-                    new_track.forced_track = track["properties"]["forced_track"]
-                if "flag_commentary" in track["properties"]:
-                    new_track.flag_commentary = track["properties"]["flag_commentary"]
-                if "flag_hearing_impaired" in track["properties"]:
-                    new_track.flag_hearing_impaired = track["properties"]["flag_hearing_impaired"]
-                if "flag_visual_impaired" in track["properties"]:
-                    new_track.flag_visual_impaired = track["properties"]["flag_visual_impaired"]
-                if "flag_original" in track["properties"]:
-                    new_track.flag_original = track["properties"]["flag_original"]
+                # add tracks with info
+                for track in info_json["tracks"]:
+                    track_id = track["id"]
+                    new_track = MKVTrack(
+                        file_path,
+                        track_id=track_id,
+                        mkvmerge_path=self.mkvmerge_path,
+                        existing_info=self._info_json,
+                        tag_entries=track_tag_entries.get(track_id, 0),
+                    )
+                    if "track_name" in track["properties"]:
+                        new_track.track_name = track["properties"]["track_name"]
+                    if "language" in track["properties"]:
+                        new_track.language = track["properties"]["language"]
+                    if "language_ietf" in track["properties"]:
+                        new_track.language_ietf = track["properties"]["language_ietf"]
+                    if "default_track" in track["properties"]:
+                        new_track.default_track = track["properties"]["default_track"]
+                    if "forced_track" in track["properties"]:
+                        new_track.forced_track = track["properties"]["forced_track"]
+                    if "flag_commentary" in track["properties"]:
+                        new_track.flag_commentary = track["properties"]["flag_commentary"]
+                    if "flag_hearing_impaired" in track["properties"]:
+                        new_track.flag_hearing_impaired = track["properties"]["flag_hearing_impaired"]
+                    if "flag_visual_impaired" in track["properties"]:
+                        new_track.flag_visual_impaired = track["properties"]["flag_visual_impaired"]
+                    if "flag_original" in track["properties"]:
+                        new_track.flag_original = track["properties"]["flag_original"]
 
-                self.add_track(new_track, new_file=False)
+                    self.add_track(new_track, new_file=False)
+
+            if "attachments" in info_json:
+                for attachment in info_json["attachments"]:
+                    attachment_id = attachment["id"]
+                    properties = attachment["properties"]
+                    name = properties.get("name", None)
+                    description = properties.get("description", None)
+                    mime_type = properties.get("mime_type", None)
+
+                    new_attachment = MKVAttachment(file_path)
+                    new_attachment.name = name
+                    new_attachment.description = description
+                    new_attachment.mime_type = mime_type
+                    new_attachment.source_id = attachment_id
+                    new_attachment.source_file = file_path
+                    self.attachments.append(new_attachment)
 
         # split options
         self._split_options: list[str] = []
@@ -332,9 +349,28 @@ class MKVFile:
 
             command.append(track.file_path)
 
-        # add attachments
+        source_files_with_attachments = set()
+        for track in self.tracks:
+            for attachment in getattr(self, "attachments", []):
+                if (
+                    attachment.source_file is not None
+                    and attachment.source_id is not None
+                    and attachment.source_file == track.file_path
+                ):
+                    source_files_with_attachments.add(track.file_path)
+
+        if source_files_with_attachments and self._info_json:
+            all_ids = {attachment["id"] for attachment in self._info_json.get("attachments", [])}
+            kept_ids = {attachment.source_id for attachment in self.attachments if attachment.source_id is not None}
+
+            if excluded_attachment_ids := list(all_ids - kept_ids):
+                excluded_ids_str = ",".join(str(aid) for aid in excluded_attachment_ids)
+                command.extend(("--attachments", f"!{excluded_ids_str}"))
+
         for attachment in self.attachments:
-            # info
+            if attachment.source_file is not None and attachment.source_id is not None:
+                continue
+
             if attachment.name is not None:
                 command.extend(["--attachment-name", attachment.name])
             if attachment.description is not None:
@@ -342,33 +378,27 @@ class MKVFile:
             if attachment.mime_type is not None:
                 command.extend(["--attachment-mime-type", attachment.mime_type])
 
-            # add path
             if not attachment.attach_once:
                 command.extend(["--attach-file", attachment.file_path])
             else:
                 command.extend(["--attach-file-once", attachment.file_path])
 
-        # chapters
         if self._chapter_language is not None:
             command.extend(["--chapter-language", self._chapter_language])
         if self._chapters_file is not None:
             command.extend(["--chapters", self._chapters_file])
 
-        # global tags
         if self._global_tags_file is not None:
             command.extend(["--global-tags", self._global_tags_file])
 
-        # linking
         if self._link_to_previous_file is not None:
             command.extend(["--link-to-previous", f"={self._link_to_previous_file}"])
         if self._link_to_next_file is not None:
             command.extend(["--link-to-next", f"={self._link_to_next_file}"])
 
-        # tracks order
         if track_order:
             command.extend(["--track-order", ",".join(track_order)])
 
-        # split options
         command.extend(self._split_options)
 
         return command if subprocess else " ".join(command)
@@ -1211,3 +1241,49 @@ class MKVFile:
                 track.file_id = unique_file_dict[track.file_path]
         except KeyError as e:
             raise ValueError from e
+
+    def get_attachment(self, attachment_num: int | None = None) -> MKVAttachment | list[MKVAttachment]:
+        """
+        Get an :class:`~pymkv.MKVAttachment` from the :class:`~pymkv.MKVFile` object.
+
+        Parameters
+        ----------
+        attachment_num : int, optional
+            Index of attachment to retrieve. Will return list of :class:`~pymkv.MKVAttachment` objects if argument is
+            not provided.
+
+        Returns
+        -------
+        :class:`~pymkv.MKVAttachment`, list of :class:`~pymkv.MKVAttachment`
+            A list of all :class:`~pymkv.MKVAttachment` objects in an :class:`~pymkv.MKVFile`. Returns a specific
+            :class:`~pymkv.MKVAttachment` if `attachment_num` is specified.
+        """
+        return self.attachments if attachment_num is None else self.attachments[attachment_num]
+
+    def remove_attachment(self, attachment_num: int) -> None:
+        """
+        Remove an attachment from the :class:`~pymkv.MKVFile` object.
+
+        Parameters
+        ----------
+        attachment_num : int
+            The attachment number of the attachment to remove.
+
+        Raises
+        ------
+        IndexError
+            Raised if `attachment_num` is out of range of the attachment list.
+        """
+        if not 0 <= attachment_num < len(self.attachments):
+            msg = "attachment index out of range"
+            raise IndexError(msg)
+        del self.attachments[attachment_num]
+
+    def remove_all_attachments(self) -> None:
+        """
+        Remove all attachments from the :class:`~pymkv.MKVFile` object.
+
+        This will clear the attachments list, effectively removing all attachments
+        that would otherwise be included in the output file.
+        """
+        self.attachments = []
