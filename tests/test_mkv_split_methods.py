@@ -69,7 +69,6 @@ def test_split_timestamps() -> None:
     mkv = MKVFile()
     timestamps: list[str | int] = ["00:05:00", "00:10:00", "00:15:00"]
     mkv.split_timestamps(timestamps)
-    # Assert timestamp format is correct
     assert mkv._split_options == ["--split", "timestamps:05:00,10:00,15:00"]  # noqa: SLF001
 
 
@@ -77,7 +76,6 @@ def test_split_timestamps_with_mixed_types() -> None:
     mkv = MKVFile()
     timestamps: list[str | int] = ["00:05:00", 600, "00:15:00"]  # 600 seconds = 00:10:00
     mkv.split_timestamps(timestamps)
-    # Assert timestamp format is correct
     assert mkv._split_options == ["--split", "timestamps:05:00,10:00,15:00"]  # noqa: SLF001
 
 

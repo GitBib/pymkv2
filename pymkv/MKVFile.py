@@ -806,7 +806,7 @@ class MKVFile:
         if None in ts_flat:
             msg = f'"{timestamps}" are not properly formatted timestamps'
             raise ValueError(msg)
-        for ts_1, ts_2 in zip(ts_flat[:-1], ts_flat[1:], strict=False):
+        for ts_1, ts_2 in zip(ts_flat[:-1], ts_flat[1:]):
             if Timestamp(ts_1) >= Timestamp(ts_2):
                 msg = f'"{timestamps}" are not properly formatted timestamps'
                 raise ValueError(msg)
@@ -851,7 +851,7 @@ class MKVFile:
             if not isinstance(f, int):
                 msg = f'frame "{f}" not an int'
                 raise TypeError(msg)
-        for f_1, f_2 in zip(frames_flat[:-1], frames_flat[1:], strict=False):
+        for f_1, f_2 in zip(frames_flat[:-1], frames_flat[1:]):
             if f_1 >= f_2:
                 msg = f'"{frames}" are not properly formatted frames'
                 raise ValueError(msg)
@@ -897,7 +897,7 @@ class MKVFile:
             msg = f'"{timestamp_parts}" are not properly formatted parts'
             raise ValueError(msg)
 
-        for ts_1, ts_2 in zip(ts_flat[:-1], ts_flat[1:], strict=False):
+        for ts_1, ts_2 in zip(ts_flat[:-1], ts_flat[1:]):
             if None not in (ts_1, ts_2) and Timestamp(ts_1) >= Timestamp(ts_2):
                 msg = f'"{timestamp_parts}" are not properly formatted parts'
                 raise ValueError(msg)
@@ -953,7 +953,7 @@ class MKVFile:
         if None in f_flat[1:-1]:
             msg = f'"{frame_parts}" are not properly formatted parts'
             raise ValueError(msg)
-        for f_1, f_2 in zip(f_flat[:-1], f_flat[1:], strict=False):
+        for f_1, f_2 in zip(f_flat[:-1], f_flat[1:]):
             if None not in (f_1, f_2) and f_1 >= f_2:
                 msg = f'"{frame_parts}" are not properly formatted parts'
                 raise ValueError(msg)
@@ -1013,7 +1013,7 @@ class MKVFile:
             if c < 1:
                 msg = f'"{chapters}" are not properly formatted chapters'
                 raise ValueError(msg)
-        for c_1, c_2 in zip(c_flat[:-1], c_flat[1:], strict=False):
+        for c_1, c_2 in zip(c_flat[:-1], c_flat[1:]):
             if c_1 >= c_2:
                 msg = f'"{chapters}" are not properly formatted chapters'
                 raise ValueError(msg)
