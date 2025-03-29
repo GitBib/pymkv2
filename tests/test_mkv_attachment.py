@@ -51,6 +51,30 @@ def test_repr(temp_file: str) -> None:
     assert "mime_type" in repr_str
 
 
+def test_source_id(temp_file: str) -> None:
+    attachment = MKVAttachment(temp_file)
+    assert attachment.source_id is None
+
+    source_id_value = 5
+    attachment.source_id = source_id_value
+    assert attachment.source_id == source_id_value
+
+    attachment.source_id = None
+    assert attachment.source_id is None
+
+
+def test_source_file(temp_file: str) -> None:
+    attachment = MKVAttachment(temp_file)
+    assert attachment.source_file is None
+
+    source_path = "/path/to/source.mkv"
+    attachment.source_file = source_path
+    assert attachment.source_file == source_path
+
+    attachment.source_file = None
+    assert attachment.source_file is None
+
+
 def test_mime_type_guess(tmp_path: Path) -> None:
     # Test different file types
     file_types = {
