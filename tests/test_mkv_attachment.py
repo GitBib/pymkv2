@@ -102,3 +102,17 @@ def test_file_path_expansion(tmp_path: Path, monkeypatch) -> None:  # noqa: ANN0
 
     attachment = MKVAttachment("~/test_file.txt")
     assert attachment.file_path == str(test_file)
+
+
+def test_attach_once_setter(temp_file: str) -> None:
+    attachment = MKVAttachment(temp_file)
+    assert attachment.attach_once is False
+
+    attachment.attach_once = True
+    assert attachment.attach_once is True
+
+    attachment.attach_once = False
+    assert attachment.attach_once is False
+
+    attachment.attach_once = None
+    assert attachment.attach_once is None
