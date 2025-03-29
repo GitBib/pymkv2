@@ -35,15 +35,6 @@ wheels = [
 ]
 
 [[package]]
-name = "attrs"
-version = "25.3.0"
-source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/5a/b0/1367933a8532ee6ff8d63537de4f1177af4bff9f3e829baf7331f595bb24/attrs-25.3.0.tar.gz", hash = "sha256:75d7cefc7fb576747b2c81b4442d4d4a1ce0900973527c011d1030fd3bf4af1b", size = 812032 }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/77/06/bb80f5f86020c4551da315d78b3ab75e8228f89f0162f2c3a819e407941a/attrs-25.3.0-py3-none-any.whl", hash = "sha256:427318ce031701fea540783410126f03899a97ffc6f61596ad581ac2e40e3bc3", size = 63815 },
-]
-
-[[package]]
 name = "babel"
 version = "2.17.0"
 source = { registry = "https://pypi.org/simple" }
@@ -679,15 +670,15 @@ requires-dist = [
 
 [package.metadata.requires-dev]
 dev = [
-    { name = "mypy", specifier = ">=1.14.1,<2.0.0" },
-    { name = "pre-commit", specifier = ">=4.0.1,<5.0.0" },
+    { name = "mypy", specifier = ">=1.14.1" },
+    { name = "pre-commit", specifier = ">=4.0.1" },
     { name = "pytest", specifier = ">=8.3.4,<9.0.0" },
     { name = "pytest-cov", specifier = ">=6.0.0,<7.0.0" },
-    { name = "pytest-mypy", specifier = ">=0.10.3,<1.0.0" },
-    { name = "pytest-ruff", specifier = ">=0.4.1,<1.0.0" },
-    { name = "ruff", specifier = ">=0.9.0,<1.0.0" },
+    { name = "pytest-mypy", specifier = ">=0.10.3" },
+    { name = "pytest-ruff", specifier = ">=0.4.1" },
+    { name = "ruff", specifier = ">=0.9.0" },
     { name = "sphinx", marker = "python_full_version >= '3.10'", specifier = ">=8.1.3,<9.0.0" },
-    { name = "sphinx-immaterial", marker = "python_full_version >= '3.10'", specifier = ">=0.12.4,<0.14.0" },
+    { name = "sphinx-immaterial", marker = "python_full_version >= '3.10'", specifier = ">=0.12.4" },
 ]
 
 [[package]]
@@ -722,17 +713,16 @@ wheels = [
 
 [[package]]
 name = "pytest-mypy"
-version = "0.10.3"
+version = "1.0.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "attrs" },
     { name = "filelock" },
     { name = "mypy" },
     { name = "pytest" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/85/3a/318c91140f242cafff64ddac97d6999640bc3da9afbf37253475c2208e79/pytest-mypy-0.10.3.tar.gz", hash = "sha256:f8458f642323f13a2ca3e2e61509f7767966b527b4d8adccd5032c3e7b4fd3db", size = 14020 }
+sdist = { url = "https://files.pythonhosted.org/packages/6b/32/378824e189749d88542f3a68c2c5d2c2c11a2a5d1f7358690249bc684457/pytest_mypy-1.0.0.tar.gz", hash = "sha256:e284a2e8d27bc16a3069c34ab601b2f48fceba9bd435d65f69b7d8f41c373d6e", size = 15877 }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/24/02/36a48da6d4168db8fb596c040680665bee89a7bced22ba1eee75920059c4/pytest_mypy-0.10.3-py3-none-any.whl", hash = "sha256:7638d0d3906848fc1810cb2f5cc7fceb4cc5c98524aafcac58f28620e3102053", size = 7110 },
+    { url = "https://files.pythonhosted.org/packages/92/1a/4f103f68396860c144dc03f2982721c6ff363ce642bc256451adfe608df0/pytest_mypy-1.0.0-py3-none-any.whl", hash = "sha256:790e52df3e872e0ade7a76cacf7257aae6d093bebab7837024d418fd01c30ccf", size = 8693 },
 ]
 
 [[package]]
