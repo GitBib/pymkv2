@@ -34,15 +34,15 @@ dependencies = [
 
 [dependency-groups]
 dev = [
-    "pre-commit<5.0.0,>=4.0.1",
+    "pre-commit>=4.0.1",
     "Sphinx<9.0.0,>=8.1.3; python_version >= \"3.10\"",
     "pytest<9.0.0,>=8.3.4",
     "pytest-cov<7.0.0,>=6.0.0",
-    "pytest-ruff<1.0.0,>=0.4.1",
-    "pytest-mypy<1.0.0,>=0.10.3",
-    "mypy<2.0.0,>=1.14.1",
-    "ruff<1.0.0,>=0.9.0",
-    "sphinx-immaterial<0.14.0,>=0.12.4; python_version >= \"3.10\"",
+    "pytest-ruff>=0.4.1",
+    "pytest-mypy>=0.10.3",
+    "mypy>=1.14.1",
+    "ruff>=0.9.0",
+    "sphinx-immaterial>=0.12.4; python_version >= \"3.10\"",
 ]
 
 [project.urls]
