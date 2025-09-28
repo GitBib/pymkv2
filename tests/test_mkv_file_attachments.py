@@ -117,23 +117,26 @@ def test_add_and_remove_attachments_workflow(get_path_test_file: Path, temp_file
     assert attachment_name_found, "New attachment name not found in command"
 
 
-def test_attachment_preservation(get_path_test_file: Path, tmp_path: Path) -> None:
-    info = get_file_info(get_path_test_file, "mkvmerge")
-    has_attachments = "attachments" in info and len(info["attachments"]) > 0
-
-    if not has_attachments:
-        pytest.skip("Test file doesn't contain attachments")
-
+def test_attachment_preservation(get_path_test_file: Path, tmp_path: Path, temp_file: str) -> None:
     mkv = MKVFile(str(get_path_test_file))
 
-    initial_count = len(mkv.attachments)
-    assert initial_count > 0, "Test requires attachments in the file"
+    attachment = MKVAttachment(temp_file, name="NewAttachment")
+    mkv.add_attachment(attachment)
 
-    output_path = str(tmp_path / "output_preserved.mkv")
+    assert len(mkv.attachments) == 1
+
+    output_path = str(tmp_path / "output_attachment.mkv")
+    mkv.mux(output_path)
+
+    mkv = MKVFile(output_path)
+    mkv.remove_attachment(0)
     command = mkv.command(output_path, subprocess=True)
 
-    exclusion_found = any(isinstance(arg, str) and "--attachments" in arg and "!" in arg for arg in command)
-    assert not exclusion_found, "Attachment exclusion flag found when all attachments should be preserved"
+    assert "!1" in command, f"{command}"
+    output_path = str(tmp_path / "output_with_excluded_attachment.mkv")
+    mkv.mux(output_path)
+    mkv = MKVFile(output_path)
+    assert len(mkv.attachments) == 0, f"Attachments should be removed, {mkv.attachments}"
 
 
 def test_attachments_preserved_after_mux(temp_file: str, tmp_path: Path, get_path_test_file: Path) -> None:

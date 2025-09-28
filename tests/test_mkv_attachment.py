@@ -76,7 +76,6 @@ def test_source_file(temp_file: str) -> None:
 
 
 def test_mime_type_guess(tmp_path: Path) -> None:
-    # Test different file types
     file_types = {
         "test.txt": "text/plain",
         "test.jpg": "image/jpeg",

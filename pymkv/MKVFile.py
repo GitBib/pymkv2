@@ -366,6 +366,12 @@ class MKVFile:
             if excluded_attachment_ids := list(all_ids - kept_ids):
                 excluded_ids_str = ",".join(str(aid) for aid in excluded_attachment_ids)
                 command.extend(("--attachments", f"!{excluded_ids_str}"))
+        elif not self.attachments and self._info_json:
+            all_ids = {attachment["id"] for attachment in self._info_json.get("attachments", [])}
+            if all_ids:
+                excluded_ids_str = ",".join(str(aid) for aid in all_ids)
+                command.extend(("--attachments", f"!{excluded_ids_str}"))
+                command.append("--no-attachments")
 
         for attachment in self.attachments:
             if attachment.source_file is not None and attachment.source_id is not None:
