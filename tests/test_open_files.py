@@ -31,7 +31,7 @@ def test_file_not_found() -> None:
 def test_file_not_support() -> None:
     with pytest.raises(
         ValueError,
-        match="The file 'tests/conftest.py' is not a valid Matroska file or is not supported.",
+        match=r"The file 'tests[/\\]conftest\.py' is not a valid Matroska file or is not supported\.",
     ):
         MKVFile("tests/conftest.py")
 
@@ -39,7 +39,7 @@ def test_file_not_support() -> None:
 def test_track_not_support() -> None:
     with pytest.raises(
         ValueError,
-        match="The file 'tests/conftest.py' is not a valid Matroska file or is not supported.",
+        match=r"The file 'tests[/\\]conftest\.py' is not a valid Matroska file or is not supported\.",
     ):
         MKVTrack("tests/conftest.py")
 
