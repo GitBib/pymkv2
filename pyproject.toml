@@ -1,6 +1,6 @@
 [project]
 name = "pymkv2"
-version = "2.1.1"
+version = "2.1.2"
 description = "A Python wrapper for mkvmerge. It provides support for muxing, splitting, linking, chapters, tags, and attachments through the use of mkvmerge."
 authors = [
     {name = "GitBib", email = "job@bnff.website"},
