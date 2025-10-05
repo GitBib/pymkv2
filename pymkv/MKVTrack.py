@@ -142,7 +142,7 @@ class MKVTrack:
         tag_entries: int = 0,
         compression: bool | None = None,
     ) -> None:
-        from pymkv.TypeTrack import get_track_extension
+        from pymkv.TypeTrack import get_track_extension  # noqa: PLC0415
 
         # track info
         self._track_codec: str | None = None
@@ -215,6 +215,8 @@ class MKVTrack:
 
         This method checks if the provided file path is valid and supported by mkvmerge.
         If the file is valid, it sets the file path and resets the track_id to 0.
+        If existing_info is already set, skip the verify_supported check since the file
+        was already verified.
 
         Args:
             file_path (str): The path to the file containing the track.
@@ -223,7 +225,7 @@ class MKVTrack:
             ValueError: If the file is not a valid Matroska file or is not supported.
         """
         fp = checking_file_path(file_path)
-        if not verify_supported(fp, mkvmerge_path=self.mkvmerge_path):
+        if not self._info_json and not verify_supported(fp, mkvmerge_path=self.mkvmerge_path):
             msg = f"The file '{file_path}' is not a valid Matroska file or is not supported."
             raise ValueError(msg)
         self._file_path = fp
