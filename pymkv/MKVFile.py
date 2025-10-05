@@ -279,6 +279,12 @@ class MKVFile:
         if self.no_track_statistics_tags:
             # Do not write tags with track statistics.
             command.append("--disable-track-statistics-tags")
+
+        file_first_occurrence = {}
+        for track in self.tracks:
+            if track.file_path not in file_first_occurrence:
+                file_first_occurrence[track.file_path] = track
+
         track_order = []
         for track in self.tracks:
             # for track_order
@@ -347,31 +353,31 @@ class MKVFile:
             if track.no_attachments:
                 command.append("--no-attachments")
 
+            is_first_occurrence = file_first_occurrence.get(track.file_path) == track
+
+            if (
+                is_first_occurrence
+                and self._info_json
+                and "attachments" in self._info_json
+                and self._info_json["attachments"]
+            ):
+                all_ids = {attachment["id"] for attachment in self._info_json["attachments"]}
+                kept_ids = {
+                    attachment.source_id
+                    for attachment in self.attachments
+                    if attachment.source_id is not None and attachment.source_file == track.file_path
+                }
+
+                if kept_ids and kept_ids != all_ids:
+                    kept_ids_str = ",".join(str(aid) for aid in sorted(kept_ids))
+                    command.extend(("--attachments", kept_ids_str))
+                elif not kept_ids:
+                    command.append("--no-attachments")
+            elif not is_first_occurrence:
+                if self._info_json and "attachments" in self._info_json and self._info_json["attachments"]:
+                    command.append("--no-attachments")
+
             command.append(track.file_path)
-
-        source_files_with_attachments = set()
-        for track in self.tracks:
-            for attachment in getattr(self, "attachments", []):
-                if (
-                    attachment.source_file is not None
-                    and attachment.source_id is not None
-                    and attachment.source_file == track.file_path
-                ):
-                    source_files_with_attachments.add(track.file_path)
-
-        if source_files_with_attachments and self._info_json:
-            all_ids = {attachment["id"] for attachment in self._info_json.get("attachments", [])}
-            kept_ids = {attachment.source_id for attachment in self.attachments if attachment.source_id is not None}
-
-            if excluded_attachment_ids := list(all_ids - kept_ids):
-                excluded_ids_str = ",".join(str(aid) for aid in excluded_attachment_ids)
-                command.extend(("--attachments", f"!{excluded_ids_str}"))
-        elif not self.attachments and self._info_json:
-            all_ids = {attachment["id"] for attachment in self._info_json.get("attachments", [])}
-            if all_ids:
-                excluded_ids_str = ",".join(str(aid) for aid in all_ids)
-                command.extend(("--attachments", f"!{excluded_ids_str}"))
-                command.append("--no-attachments")
 
         for attachment in self.attachments:
             if attachment.source_file is not None and attachment.source_id is not None:
@@ -1255,13 +1261,13 @@ class MKVFile:
         Parameters
         ----------
         attachment_num : int, optional
-            Index of attachment to retrieve. Will return list of :class:`~pymkv.MKVAttachment` objects if argument is
+            Index of attachment to retrieve. Will return a list of :class:`~pymkv.MKVAttachment` objects if argument is
             not provided.
 
         Returns
         -------
         :class:`~pymkv.MKVAttachment`, list of :class:`~pymkv.MKVAttachment`
-            A list of all :class:`~pymkv.MKVAttachment` objects in an :class:`~pymkv.MKVFile`. Returns a specific
+            A list of all :class:`~pymkv.MKVAttachment` objects in a :class:`~pymkv.MKVFile`. Returns a specific
             :class:`~pymkv.MKVAttachment` if `attachment_num` is specified.
         """
         return self.attachments if attachment_num is None else self.attachments[attachment_num]
@@ -1289,7 +1295,7 @@ class MKVFile:
         """
         Remove all attachments from the :class:`~pymkv.MKVFile` object.
 
-        This will clear the attachments list, effectively removing all attachments
+        This will clear the attachment list, effectively removing all attachments
         that would otherwise be included in the output file.
         """
         self.attachments = []

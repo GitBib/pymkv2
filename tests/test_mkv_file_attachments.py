@@ -120,10 +120,11 @@ def test_add_and_remove_attachments_workflow(get_path_test_file: Path, temp_file
 def test_attachment_preservation(get_path_test_file: Path, tmp_path: Path, temp_file: str) -> None:
     mkv = MKVFile(str(get_path_test_file))
 
+    initial_count = len(mkv.attachments)
     attachment = MKVAttachment(temp_file, name="NewAttachment")
     mkv.add_attachment(attachment)
 
-    assert len(mkv.attachments) == 1
+    assert len(mkv.attachments) == initial_count + 1
 
     output_path = str(tmp_path / "output_attachment.mkv")
     mkv.mux(output_path)
@@ -132,7 +133,7 @@ def test_attachment_preservation(get_path_test_file: Path, tmp_path: Path, temp_
     mkv.remove_attachment(0)
     command = mkv.command(output_path, subprocess=True)
 
-    assert "!1" in command, f"{command}"
+    assert "--no-attachments" in command, f"{command}"
     output_path = str(tmp_path / "output_with_excluded_attachment.mkv")
     mkv.mux(output_path)
     mkv = MKVFile(output_path)
@@ -142,13 +143,14 @@ def test_attachment_preservation(get_path_test_file: Path, tmp_path: Path, temp_
 def test_attachments_preserved_after_mux(temp_file: str, tmp_path: Path, get_path_test_file: Path) -> None:
     mkv = MKVFile(str(get_path_test_file))
 
+    initial_count = len(mkv.attachments)
     attachment1 = MKVAttachment(temp_file, name="TestAttachment1")
     attachment2 = MKVAttachment(temp_file, name="TestAttachment2")
 
     mkv.add_attachment(attachment1)
     mkv.add_attachment(attachment2)
 
-    assert len(mkv.attachments) >= ATTACHMENT_COUNT_2
+    assert len(mkv.attachments) == initial_count + ATTACHMENT_COUNT_2
 
     output_path = str(tmp_path / "output_with_attachments.mkv")
 
@@ -168,6 +170,6 @@ def test_attachments_preserved_after_mux(temp_file: str, tmp_path: Path, get_pat
 
     output_mkv = MKVFile(output_path)
 
-    assert len(output_mkv.attachments) == ATTACHMENT_COUNT_2, (
+    assert len(output_mkv.attachments) >= ATTACHMENT_COUNT_2, (
         f"Expected at least 2 attachments, found {output_mkv.attachments}"
     )
