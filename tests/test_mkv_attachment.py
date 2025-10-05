@@ -51,8 +51,31 @@ def test_repr(temp_file: str) -> None:
     assert "mime_type" in repr_str
 
 
+def test_source_id(temp_file: str) -> None:
+    attachment = MKVAttachment(temp_file)
+    assert attachment.source_id is None
+
+    source_id_value = 5
+    attachment.source_id = source_id_value
+    assert attachment.source_id == source_id_value
+
+    attachment.source_id = None
+    assert attachment.source_id is None
+
+
+def test_source_file(temp_file: str) -> None:
+    attachment = MKVAttachment(temp_file)
+    assert attachment.source_file is None
+
+    source_path = "/path/to/source.mkv"
+    attachment.source_file = source_path
+    assert attachment.source_file == source_path
+
+    attachment.source_file = None
+    assert attachment.source_file is None
+
+
 def test_mime_type_guess(tmp_path: Path) -> None:
-    # Test different file types
     file_types = {
         "test.txt": "text/plain",
         "test.jpg": "image/jpeg",
@@ -78,3 +101,17 @@ def test_file_path_expansion(tmp_path: Path, monkeypatch) -> None:  # noqa: ANN0
 
     attachment = MKVAttachment("~/test_file.txt")
     assert attachment.file_path == str(test_file)
+
+
+def test_attach_once_setter(temp_file: str) -> None:
+    attachment = MKVAttachment(temp_file)
+    assert attachment.attach_once is False
+
+    attachment.attach_once = True
+    assert attachment.attach_once is True
+
+    attachment.attach_once = False
+    assert attachment.attach_once is False
+
+    attachment.attach_once = None
+    assert attachment.attach_once is None
