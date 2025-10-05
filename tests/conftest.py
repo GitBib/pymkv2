@@ -3,6 +3,9 @@ from collections.abc import Generator
 from pathlib import Path
 
 import pytest
+from pyinstrument import Profiler
+
+TESTS_ROOT = Path.cwd()
 
 
 @pytest.fixture
@@ -67,3 +70,18 @@ def get_path_test_srt(get_base_path: Path) -> Path:
     srt_path = get_base_path / "test_file.srt"
     create_srt_file_with_random_text(srt_path)
     return srt_path
+
+
+@pytest.fixture(autouse=True)
+def auto_profile(request: pytest.FixtureRequest) -> Generator[None, None, None]:
+    profile_root = TESTS_ROOT / ".profiles"
+    profiler = Profiler()
+    profiler.start()
+
+    yield
+
+    profiler.stop()
+    profile_root.mkdir(exist_ok=True)
+    test_name = request.node.name
+    results_file = profile_root / f"{test_name}.html"
+    profiler.write_html(results_file)

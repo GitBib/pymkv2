@@ -45,6 +45,7 @@ import json
 import os
 import subprocess as sp
 from collections.abc import Iterable, Sequence
+from functools import cache
 from pathlib import Path
 from re import match
 from typing import Any
@@ -122,6 +123,18 @@ def get_file_info(
     return json.loads(sp.check_output(cmds).decode())  # noqa: S603
 
 
+@cache
+def _verify_mkvmerge_cached(mkvmerge_path_tuple: tuple[str, ...]) -> bool:
+    """Internal cached function to verify mkvmerge availability."""
+    try:
+        mkvmerge_command = list(mkvmerge_path_tuple)
+        mkvmerge_command.append("-V")
+        output = sp.check_output(mkvmerge_command).decode()  # noqa: S603
+    except (sp.CalledProcessError, FileNotFoundError):
+        return False
+    return bool(match("mkvmerge.*", output))
+
+
 def verify_mkvmerge(
     mkvmerge_path: str | os.PathLike | Iterable[str] = "mkvmerge",
 ) -> bool:
@@ -137,13 +150,10 @@ def verify_mkvmerge(
     bool
         True if mkvmerge is available at the specified path, False otherwise.
     """
-    try:
-        mkvmerge_command = list(prepare_mkvtoolnix_path(mkvmerge_path))
-        mkvmerge_command.append("-V")
-        output = sp.check_output(mkvmerge_command).decode()  # noqa: S603
-    except (sp.CalledProcessError, FileNotFoundError):
-        return False
-    return bool(match("mkvmerge.*", output))
+    mkvmerge_command = prepare_mkvtoolnix_path(mkvmerge_path)
+    if isinstance(mkvmerge_command, list):
+        mkvmerge_command = tuple(mkvmerge_command)
+    return _verify_mkvmerge_cached(mkvmerge_command)
 
 
 def verify_matroska(

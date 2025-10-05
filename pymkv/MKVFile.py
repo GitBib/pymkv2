@@ -55,7 +55,6 @@ from pymkv.Verifications import (
     checking_file_path,
     get_file_info,
     verify_mkvmerge,
-    verify_supported,
 )
 
 T = TypeVar("T")
@@ -123,10 +122,6 @@ class MKVFile:
             raise FileNotFoundError(msg)
 
         if file_path is not None:
-            if not verify_supported(file_path, mkvmerge_path=self.mkvmerge_path):
-                msg = f"The file '{file_path}' is not a valid Matroska file or is not supported."
-                raise ValueError(msg)
-            # add file title
             file_path = checking_file_path(file_path)
             try:
                 info_json = get_file_info(
@@ -142,6 +137,11 @@ class MKVFile:
                     e.cmd,
                     output=error_output,
                 ) from e
+
+            if not info_json["container"]["supported"]:
+                msg = f"The file '{file_path}' is not a valid Matroska file or is not supported."
+                raise ValueError(msg)
+
             if self.title is None and "title" in info_json["container"]["properties"]:
                 self.title = info_json["container"]["properties"]["title"]
 
