@@ -19,7 +19,7 @@ class MockMKVTrack:
         return self._track_id
 
     @track_id.setter
-    @ensure_info(
+    @ensure_info(  # type: ignore[arg-type]
         "_info_json",
         lambda *args, **kwargs: {"tracks": [{"id": 0}, {"id": 1}]},
         ["file_path", "mkvmerge_path"],
