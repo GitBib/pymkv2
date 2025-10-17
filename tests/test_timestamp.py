@@ -89,5 +89,19 @@ def test_ts_property() -> None:
     ts.ts = "02:30:00"
     assert ts.ts == "02:30:00"
 
+    ts.ts = ts.time
+    assert ts.ts == "02:30:00"
+
     with pytest.raises(TypeError):
         ts.ts = cast("str", [])
+
+
+def test_ts_equals() -> None:
+    ts1 = Timestamp("01:23:45.678")
+    ts2 = Timestamp("01:23:45.678")
+    ts3 = Timestamp("02:30:00")
+
+    assert ts1 == ts2
+    assert ts1 != ts3
+    assert hash(ts1) == hash(ts2)
+    assert hash(ts1) != hash(ts3)
