@@ -43,6 +43,7 @@ import os
 import subprocess as sp
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
+from shlex import quote
 
 from pymkv.ISO639_2 import is_iso639_2
 from pymkv.utils import prepare_mkvtoolnix_path
@@ -134,15 +135,20 @@ class MKVTrack:
         flag_commentary: bool | None = False,
         flag_hearing_impaired: bool | None = False,
         flag_visual_impaired: bool | None = False,
+        flag_text_descriptions: bool | None = False,
         flag_original: bool | None = False,
         mkvmerge_path: str | os.PathLike | Iterable[str] = "mkvmerge",
         mkvextract_path: str | os.PathLike | Iterable[str] = "mkvextract",
+        mkvpropedit_path: str | os.PathLike | Iterable[str] = "mkvpropedit",
         sync: int | None = None,
         existing_info: dict[str, Any] | None = None,
         tag_entries: int = 0,
         compression: bool | None = None,
     ) -> None:
         from pymkv.TypeTrack import get_track_extension  # noqa: PLC0415
+
+        # gather changes to MKV properties for mkvpropedit
+        self._property_changes: list[str] = []
 
         # track info
         self._track_codec: str | None = None
@@ -159,6 +165,7 @@ class MKVTrack:
         self._pts = 0
 
         # flags
+        self._track_name: str | None = None
         self.track_name = track_name
         self._language: str | None = None
         self.language = language
@@ -167,14 +174,17 @@ class MKVTrack:
         self._language_ietf: str | None = None
         self.language_ietf = language_ietf
         self._tags: str | None = None
-        self.default_track = default_track
-        self.forced_track = forced_track
-        self.flag_commentary = flag_commentary
-        self.flag_hearing_impaired = flag_hearing_impaired
-        self.flag_visual_impaired = flag_visual_impaired
-        self.flag_original = flag_original
         self.compression = compression
         self._tag_entries = tag_entries
+        self._flags = {
+            "flag-commentary": flag_commentary,
+            "flag-default": default_track,
+            "flag-forced": forced_track,
+            "flag-hearing-impaired": flag_hearing_impaired,
+            "flag-original": flag_original,
+            "flag-text-descriptions": flag_text_descriptions,
+            "flag-visual-impaired": flag_visual_impaired
+        }
 
         # exclusions
         self.no_chapters = False
@@ -185,6 +195,195 @@ class MKVTrack:
         # mkvextract
         self.mkvextract_path = prepare_mkvtoolnix_path(mkvextract_path)
         self.extension = get_track_extension(self)
+
+        # mkvpropedit
+        self.mkvpropedit_path = prepare_mkvtoolnix_path(mkvpropedit_path)
+
+    @property
+    def track_name(self) -> str:
+        return self._track_name
+
+    @track_name.setter
+    def track_name(self, new_name: str | None) -> None:
+        if self._track_name != new_name:
+            self._track_name = new_name
+            if new_name and new_name != "":
+                self._property_changes.extend( [ "--set", f"name='{ quote( new_name ) }'" ] )
+            else:
+                self._property_changes.extend( [ "--delete", "name" ] )
+
+    def _toggle_flag( self, flag_name: str, flag_value: bool ) -> None:
+        if self._flags[ flag_name ] != flag_value:
+            self._flags[ flag_name ] = flag_value
+            self._property_changes.extend( [ "--set", f"{flag_name}={'1' if flag_value else '0'}" ] )
+
+    @property
+    def default_track(self) -> bool:
+        """
+        Get the current state of the flag-default.
+        This is a compatibility property for the removal of the
+        attribute of the same name.
+
+        Returns:
+            bool: The current state of the flag-default.
+        """
+        return self._flags["flag-default"]
+
+    @default_track.setter
+    def default_track(self, flag: bool) -> None:
+        """
+        Set the state of the flag-default.
+        This is a compatibility property for the removal of the
+        attribute of the same name.
+
+        Args:
+            flag (bool): The new value for flag-default
+        """
+        self._toggle_flag("flag-default", flag)
+
+    @property
+    def forced_track(self) -> bool:
+        """
+        Get the current state of the flag-default.
+        This is a compatibility property for the removal of the
+        attribute of the same name.
+
+        Returns:
+            bool: The current state of the flag-default.
+        """
+        return self._flags["flag-forced"]
+
+    @forced_track.setter
+    def forced_track(self, flag: bool) -> None:
+        """
+        Set the state of the flag-forced.
+        This is a compatibility property for the removal of the
+        attribute of the same name.
+
+        Args:
+            flag (bool): The new value for flag-forced
+        """
+        self._toggle_flag("flag-forced", flag)
+
+    @property
+    def flag_commentary(self) -> bool:
+        """
+        Get the current state of the flag-commentary.
+        This is a compatibility property for the removal of the
+        attribute of the same name.
+
+        Returns:
+            bool: The current state of the flag-commentary.
+        """
+        return self._flags["flag-commentary"]
+
+    @flag_commentary.setter
+    def flag_commentary(self, flag: bool) -> None:
+        """
+        Set the state of the flag-commentary.
+        This is a compatibility property for the removal of the
+        attribute of the same name.
+
+        Args:
+            flag (bool): The new value for flag-commentary
+        """
+        self._toggle_flag("flag-commentary", flag)
+
+    @property
+    def flag_original(self) -> bool:
+        """
+        Get the current state of the flag-original.
+        This is a compatibility property for the removal of the
+        attribute of the same name.
+
+        Returns:
+            bool: The current state of the flag-original.
+        """
+        return self._flags["flag-original"]
+
+    @flag_original.setter
+    def flag_original(self, flag: bool) -> None:
+        """
+        Set the state of the flag-original.
+        This is a compatibility property for the removal of the
+        attribute of the same name.
+
+        Args:
+            flag (bool): The new value for flag-original
+        """
+        self._toggle_flag("flag-original", flag)
+
+    @property
+    def flag_hearing_impaired(self) -> bool:
+        """
+        Get the current state of the flag-hearing-impaired.
+        This is a compatibility property for the removal of the
+        attribute of the same name.
+
+        Returns:
+            bool: The current state of the flag-hearing-impaired.
+        """
+        return self._flags["flag-hearing-impaired"]
+
+    @flag_hearing_impaired.setter
+    def flag_hearing_impaired(self, flag: bool) -> None:
+        """
+        Set the state of the flag-hearing-impaired.
+        This is a compatibility property for the removal of the
+        attribute of the same name.
+
+        Args:
+            flag (bool): The new value for flag-hearing-impaired
+        """
+        self._toggle_flag("flag-hearing-impaired", flag)
+
+    @property
+    def flag_visual_impaired(self) -> bool:
+        """
+        Get the current state of the flag-visual-impaired.
+        This is a compatibility property for the removal of the
+        attribute of the same name.
+
+        Returns:
+            bool: The current state of the flag-visual-impaired.
+        """
+        return self._flags["flag-visual-impaired"]
+
+    @flag_visual_impaired.setter
+    def flag_visual_impaired(self, flag: bool) -> None:
+        """
+        Set the state of the flag-visual-impaired.
+        This is a compatibility property for the removal of the
+        attribute of the same name.
+
+        Args:
+            flag (bool): The new value for flag-visual-impaired
+        """
+        self._toggle_flag("flag-visual-impaired", flag)
+
+    @property
+    def flag_text_descriptions(self) -> bool:
+        """
+        Get the current state of the flag-text-descriptions.
+        This is a compatibility property for the removal of the
+        attribute of the same name.
+
+        Returns:
+            bool: The current state of the flag-text-descriptions.
+        """
+        return self._flags["flag-text-descriptions"]
+
+    @flag_text_descriptions.setter
+    def flag_text_descriptions(self, flag: bool) -> None:
+        """
+        Set the state of the flag-text-descriptions.
+        This is a compatibility property for the removal of the
+        attribute of the same name.
+
+        Args:
+            flag (bool): The new value for flag-text-descriptions
+        """
+        self._toggle_flag("flag-text-descriptions", flag)
 
     def __repr__(self) -> str:
         """
@@ -331,6 +530,10 @@ class MKVTrack:
         """
         if language is None or is_iso639_2(language):
             self._language = language
+            if language and language != "":
+                self._property_changes.extend( [ "--set", f"language={language}" ] )
+            else:
+                self._property_changes.extend( [ "--delete", "language" ] )
         else:
             msg = "not an ISO639-2 language code"
             raise ValueError(msg)
@@ -402,6 +605,7 @@ class MKVTrack:
             language_ietf (str): The language to set in BCP47 format.
         """
         self._language_ietf = language_ietf
+        if language_ietf and language_ietf != "": self._property_changes.extend( [ "--set", f"language-ietf={language_ietf}" ] )
 
     @property
     def tags(self) -> str | None:

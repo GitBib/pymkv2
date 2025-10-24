@@ -55,6 +55,7 @@ from pymkv.Verifications import (
     checking_file_path,
     get_file_info,
     verify_mkvmerge,
+    verify_mkvpropedit,
 )
 
 T = TypeVar("T")
@@ -88,6 +89,8 @@ class MKVFile:
         The path where pymkv looks for the mkvmerge executable. pymkv relies on the mkvmerge executable to parse
         files. By default, it is assumed mkvmerge is in your shell's $PATH variable. If it is not, you need to set
         *mkvmerge_path* to the executable location.
+    mkvpropedit_path : str, optional
+        Same as mkvmerge_path but for mkvpropedit.
 
     Raises
     ------
@@ -100,9 +103,12 @@ class MKVFile:
         file_path: str | os.PathLike | None = None,
         title: str | None = None,
         mkvmerge_path: str | os.PathLike | Iterable[str] = "mkvmerge",
+        mkvpropedit_path: str | os.PathLike | Iterable[str] = "mkvpropedit",
     ) -> None:
         self.mkvmerge_path: tuple[str, ...] = prepare_mkvtoolnix_path(mkvmerge_path)
+        self.mkvpropedit_path: tuple[str, ...] = prepare_mkvtoolnix_path(mkvpropedit_path)
         self.title = title
+        self._file_path: str | None = None
         self._chapters_file: str | None = None
         self._chapter_language: str | None = None
         self._global_tags_file: str | None = None
@@ -113,12 +119,17 @@ class MKVFile:
         self._number_file = 0
         self._info_json: dict[str, Any] | None = None
         self._global_tag_entries = 0
+        self._property_changes: list[str] = []
 
         # exclusions
         self.no_track_statistics_tags = False
 
         if not verify_mkvmerge(mkvmerge_path=self.mkvmerge_path):
             msg = "mkvmerge is not at the specified path, add it there or changed mkvmerge_path property"
+            raise FileNotFoundError(msg)
+
+        if not verify_mkvpropedit(mkvpropedit_path=self.mkvpropedit_path):
+            msg = "mkvpropedit is not at the specified path, add it there or changed mkvpropedit_path property"
             raise FileNotFoundError(msg)
 
         if file_path is not None:
@@ -130,6 +141,7 @@ class MKVFile:
                     check_path=False,
                 )
                 self._info_json = info_json
+                self._file_path = file_path
             except sp.CalledProcessError as e:
                 error_output = e.output.decode()
                 raise sp.CalledProcessError(
@@ -161,25 +173,35 @@ class MKVFile:
                     mkvmerge_path=self.mkvmerge_path,
                     existing_info=self._info_json,
                     tag_entries=track_tag_entries.get(track_id, 0),
+                    track_name = track["properties"]["track_name"] if "track_name" in track["properties"] else None,
+                    language = track["properties"]["language"] if "language" in track["properties"] else None,
+                    language_ietf = track["properties"]["language_ietf"] if "language_ietf" in track["properties"] else None,
+                    default_track = track["properties"]["default_track"] if "default_track" in track["properties"] else False,
+                    forced_track = track["properties"]["forced_track"] if "forced_track" in track["properties"] else False,
+                    flag_commentary = track["properties"]["flag_commentary"] if "flag_commentary" in track["properties"] else False,
+                    flag_hearing_impaired = track["properties"]["flag_hearing_impaired"] if "flag_hearing_impaired" in track["properties"] else False,
+                    flag_visual_impaired = track["properties"]["flag_visual_impaired"] if "flag_visual_impaired" in track["properties"] else False,
+                    flag_text_descriptions = track["properties"]["flag_text_descriptions"] if "flag_text_descriptions" in track["properties"] else False,
+                    flag_original = track["properties"]["flag_original"] if "flag_original" in track["properties"] else False,
                 )
-                if "track_name" in track["properties"]:
-                    new_track.track_name = track["properties"]["track_name"]
-                if "language" in track["properties"]:
-                    new_track.language = track["properties"]["language"]
-                if "language_ietf" in track["properties"]:
-                    new_track.language_ietf = track["properties"]["language_ietf"]
-                if "default_track" in track["properties"]:
-                    new_track.default_track = track["properties"]["default_track"]
-                if "forced_track" in track["properties"]:
-                    new_track.forced_track = track["properties"]["forced_track"]
-                if "flag_commentary" in track["properties"]:
-                    new_track.flag_commentary = track["properties"]["flag_commentary"]
-                if "flag_hearing_impaired" in track["properties"]:
-                    new_track.flag_hearing_impaired = track["properties"]["flag_hearing_impaired"]
-                if "flag_visual_impaired" in track["properties"]:
-                    new_track.flag_visual_impaired = track["properties"]["flag_visual_impaired"]
-                if "flag_original" in track["properties"]:
-                    new_track.flag_original = track["properties"]["flag_original"]
+#                if "track_name" in track["properties"]:
+#                    new_track.track_name = track["properties"]["track_name"]
+#                if "language" in track["properties"]:
+#                    new_track.language = track["properties"]["language"]
+#                if "language_ietf" in track["properties"]:
+#                    new_track.language_ietf = track["properties"]["language_ietf"]
+#                if "default_track" in track["properties"]:
+#                    new_track.default_track = track["properties"]["default_track"]
+#                if "forced_track" in track["properties"]:
+#                    new_track.forced_track = track["properties"]["forced_track"]
+#                if "flag_commentary" in track["properties"]:
+#                    new_track.flag_commentary = track["properties"]["flag_commentary"]
+#                if "flag_hearing_impaired" in track["properties"]:
+#                    new_track.flag_hearing_impaired = track["properties"]["flag_hearing_impaired"]
+#                if "flag_visual_impaired" in track["properties"]:
+#                    new_track.flag_visual_impaired = track["properties"]["flag_visual_impaired"]
+#                if "flag_original" in track["properties"]:
+#                    new_track.flag_original = track["properties"]["flag_original"]
 
                 self.add_track(new_track, new_file=False)
 
@@ -233,6 +255,26 @@ class MKVFile:
             int: The number of entries.
         """
         return self._global_tag_entries
+
+    def set_title(
+        self,
+        title: str | None,
+    ) -> None:
+        """
+        Changes or removes the title in the segment info section of the
+        MKVFile.
+
+        Parameters
+        ----------
+        title : str | None
+            The title to use for the MKVFile. If set to None or an empty string, the value will be deleted.
+        """
+        if title == None or title == "":
+            self.title = None
+            self._property_changes.extend( [ "--delete", "title" ] )
+        else:
+            self.title = title
+            self._propery_changes.extend( [ "--set", f"title='{title}'" ] )
 
     def command(  # noqa: PLR0912,PLR0915
         self,
@@ -297,6 +339,10 @@ class MKVFile:
                 command.extend(["--visual-impaired-flag", f"{track.track_id!s}:1"])
             else:
                 command.extend(["--visual-impaired-flag", f"{track.track_id!s}:0"])
+            if track.flag_text_descriptions:
+                command.extend(["--text-descriptions-flag", f"{track.track_id!s}:1"])
+            else:
+                command.extend(["--text-descriptions-flag", f"{track.track_id!s}:0"])
             if track.flag_original:
                 command.extend(["--original-flag", f"{track.track_id!s}:1"])
             else:
@@ -401,6 +447,91 @@ class MKVFile:
         """
         output_path = str(Path(output_path).expanduser())
         args = self.command(output_path, subprocess=True)
+
+        stdout = sp.DEVNULL if silent else None
+        stderr = sp.PIPE
+
+        proc = sp.Popen(args, stdout=stdout, stderr=stderr)  # noqa: S603
+        _, err = proc.communicate()
+
+        if proc.returncode != 0:
+            # Handle warnings (exit code 1) if ignore_warning is True
+            if proc.returncode == 1 and ignore_warning:
+                logging.warning("Process completed with warnings, but ignored as per the setting.")
+                return proc.returncode
+
+            # For other non-zero exit codes, raise an exception
+            error_message = f"Command failed with non-zero exit status {proc.returncode}"
+            if err:
+                error_details = err.decode()
+                error_message += f"\nError Output:\n{error_details}"
+                logging.error(error_details)
+            logging.error(
+                "Non-zero exit status when running %s (%s)",
+                args,
+                proc.returncode,
+            )
+            raise ValueError(error_message)
+
+        return proc.returncode
+
+    def propedit(
+        self,
+        subprocess: bool = False,
+    ) -> str | list:
+        """
+        Generates an mkvpropedit command based on the configured :class:`~pymkv.MKVFile`.
+
+        Parameters
+        ----------
+        subprocess : bool
+            Will return the command as a list so it can be used easily with the :mod:`subprocess` module.
+
+        Returns
+        -------
+        str, list of str
+            The full command to mux the :class:`~pymkv.MKVFile` as a string containing spaces. Will be returned as a
+            list of strings with no spaces if `subprocess` is True.
+        """
+        command = [ *self.mkvpropedit_path, self._file_path ]
+        if len( self._property_changes ) > 0:
+            command.extend( [ "--edit", "info" ] )
+            command += self._property_changes
+        for track in self.tracks:
+            if len(track._property_changes) > 0:
+                command.extend( [ "--edit", f"track:{(track.track_id + 1)!s}" ] )
+                command += track._property_changes
+        return command if subprocess else " ".join(command)
+
+    def update(
+        self,
+        silent: bool = False,
+        ignore_warning: bool = False
+    ) -> int:
+        """
+        Applies the updates to the MKV properties.
+
+        Parameters
+        ----------
+        silent : bool, optional
+            By default the mkvpropedit output will be shown unless silent is True.
+        ignore_warning : bool, optional
+            If set to True, the update process will ignore any warnings (exit code 1) from mkvpropedit.
+        Returns
+        -------
+        inf of Any
+            return code
+
+        Raises
+        ------
+        ValueError
+            Raised if the external mkvpropedit command fails with a non-zero exit status
+            (except for warnings when ignore_warning is True). This includes scenarios
+            such as invalid command arguments, errors in processing the :class:`~pymkv.MKVFile`,
+            or issues with output file writing. The error message provides details about
+            the failure based on the output of the command.
+        """
+        args = self.propedit( subprocess=True )
 
         stdout = sp.DEVNULL if silent else None
         stderr = sp.PIPE
@@ -1011,6 +1142,7 @@ class MKVFile:
             Raised if file at `file_path` cannot be verified as an MKV.
         """
         self._link_to_previous_file = checking_file_path(file_path)
+        self._property_changes.extend( [ "--set", f"prev-filename='{ quote( self._link_to_previous_file ) }'" ] )
 
     def link_to_next(self, file_path: str) -> None:
         """
@@ -1029,6 +1161,7 @@ class MKVFile:
             Raised if file at `file_path` cannot be verified as an MKV.
         """
         self._link_to_next_file = checking_file_path(file_path)
+        self._property_changes.extend( [ "--set", f"next-filename='{ quote( self._link_to_next_file ) }'" ] )
 
     def link_to_none(self) -> None:
         """
@@ -1039,6 +1172,8 @@ class MKVFile:
         """
         self._link_to_previous_file = None
         self._link_to_next_file = None
+        self._property_changes.extend( [ "--delete", " prev-filename" ] )
+        self._property_changes.extend( [ "--delete", " next-filename" ] )
 
     def chapters(self, file_path: str, language: str | None = None) -> None:
         """
