@@ -1,0 +1,2956 @@
+
+
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+      
+        <link rel="prev" href="MKVFile.html">
+      
+      
+        <link rel="next" href="MKVAttachment.html">
+      
+      
+      <link rel="icon" href="">
+    
+    
+      
+        <title>MKVTrack - pymkv2 2.1.1 documentation</title>
+      
+    
+    
+      
+        
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+        <link rel="stylesheet" type="text/css" href="../_static/sphinx_immaterial_theme.acf80fe7f4d9ef9e2.min.css?v=9e56d0d2" />
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="blue" data-md-color-accent="light-blue">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#pymkv.MKVTrack" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../index.html" title="pymkv2 2.1.1 documentation" class="md-header__button md-logo" aria-label="pymkv2 2.1.1 documentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            pymkv2 2.1.1 documentation
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              MKVTrack
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="blue" data-md-color-accent="light-blue"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 2a7 7 0 0 1 7 7c0 2.38-1.19 4.47-3 5.74V17a1 1 0 0 1-1 1H9a1 1 0 0 1-1-1v-2.26C6.19 13.47 5 11.38 5 9a7 7 0 0 1 7-7M9 21v-1h6v1a1 1 0 0 1-1 1h-4a1 1 0 0 1-1-1m3-17a5 5 0 0 0-5 5c0 2.05 1.23 3.81 3 4.58V16h4v-2.42c1.77-.77 3-2.53 3-4.58a5 5 0 0 0-5-5"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="blue" data-md-color-accent="light-blue"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 2a7 7 0 0 0-7 7c0 2.38 1.19 4.47 3 5.74V17a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1v-2.26c1.81-1.27 3-3.36 3-5.74a7 7 0 0 0-7-7M9 21a1 1 0 0 0 1 1h4a1 1 0 0 0 1-1v-1H9z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      <label class="md-header__button md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+      </label>
+      <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+          <a href="javascript:void(0)" class="md-search__icon md-icon" title="Share" aria-label="Share" data-clipboard data-clipboard-text="" data-md-component="search-share" tabindex="-1">
+            
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9a3 3 0 0 0-3 3 3 3 0 0 0 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.15c-.05.21-.08.43-.08.66 0 1.61 1.31 2.91 2.92 2.91s2.92-1.3 2.92-2.91A2.92 2.92 0 0 0 18 16.08"/></svg>
+          </a>
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/GitBib/pymkv2" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 496 512"><!--! Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M165.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M244.8 8C106.1 8 0 113.3 0 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C428.2 457.8 496 362.9 496 252 496 113.3 383.5 8 244.8 8M97.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    pymkv2
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../index.html" title="pymkv2 2.1.1 documentation" class="md-nav__button md-logo" aria-label="pymkv2 2.1.1 documentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+    </a>
+    pymkv2 2.1.1 documentation
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/GitBib/pymkv2" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 496 512"><!--! Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M165.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M244.8 8C106.1 8 0 113.3 0 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C428.2 457.8 496 362.9 496 252 496 113.3 383.5 8 244.8 8M97.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    pymkv2
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="MKVFile.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    <span>MKVFile</span>
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    <span>MKVTrack</span>
+    
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="#" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    <span>MKVTrack</span>
+    
+  </span>
+  
+
+      </a>
+      
+        
+
+  
+
+<nav class="md-nav md-nav--secondary">
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      <span>MKVTrack</span>
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#pymkv.MKVTrack" class="md-nav__link">
+    
+      <span aria-label="Python class" class="objinfo-icon objinfo-icon__data" title="Python class">C</span>
+    
+    <span class="md-ellipsis">
+      <span title="pymkv.MKVTrack (Python class) — A class that represents a track for an MKVFile object. MKVTrack objects are video, audio, or subtitles. Tracks can be standalone files or a single track within an MKV file, both can be handled by pymkv. An MKVTrack object can be added to an MKVFile and will be included when the MKV is muxed."><span>pymkv.<wbr>MKVTrack</span></span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="pymkv.MKVTrack">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#pymkv.MKVTrack-parameters" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span>Parameters</span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Parameters">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#pymkv.MKVTrack.__init__.file_path" class="md-nav__link">
+    
+      <span aria-label="Python parameter" class="objinfo-icon objinfo-icon__sub-data" title="Python parameter">p</span>
+    
+    <span class="md-ellipsis">
+      <span title="pymkv.MKVTrack.__init__.file_path (Python parameter) — Path to the track file."><span>file_<wbr>path</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pymkv.MKVTrack.__init__.track_id" class="md-nav__link">
+    
+      <span aria-label="Python parameter" class="objinfo-icon objinfo-icon__sub-data" title="Python parameter">p</span>
+    
+    <span class="md-ellipsis">
+      <span title="pymkv.MKVTrack.__init__.track_id (Python parameter) — The id of the track to be used from the file."><span>track_<wbr>id</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pymkv.MKVTrack.__init__.track_name" class="md-nav__link">
+    
+      <span aria-label="Python parameter" class="objinfo-icon objinfo-icon__sub-data" title="Python parameter">p</span>
+    
+    <span class="md-ellipsis">
+      <span title="pymkv.MKVTrack.__init__.track_name (Python parameter) — The name that will be given to the track when muxed into a file."><span>track_<wbr>name</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pymkv.MKVTrack.__init__.language" class="md-nav__link">
+    
+      <span aria-label="Python parameter" class="objinfo-icon objinfo-icon__sub-data" title="Python parameter">p</span>
+    
+    <span class="md-ellipsis">
+      <span title="pymkv.MKVTrack.__init__.language (Python parameter) — The language of the track."><span>language</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pymkv.MKVTrack.__init__.language_ietf" class="md-nav__link">
+    
+      <span aria-label="Python parameter" class="objinfo-icon objinfo-icon__sub-data" title="Python parameter">p</span>
+    
+    <span class="md-ellipsis">
+      <span title="pymkv.MKVTrack.__init__.language_ietf (Python parameter) — The language of the track."><span>language_<wbr>ietf</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pymkv.MKVTrack.__init__.default_track" class="md-nav__link">
+    
+      <span aria-label="Python parameter" class="objinfo-icon objinfo-icon__sub-data" title="Python parameter">p</span>
+    
+    <span class="md-ellipsis">
+      <span title="pymkv.MKVTrack.__init__.default_track (Python parameter) — Determines if the track should be the default track of its type when muxed into an MKV file."><span>default_<wbr>track</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pymkv.MKVTrack.__init__.forced_track" class="md-nav__link">
+    
+      <span aria-label="Python parameter" class="objinfo-icon objinfo-icon__sub-data" title="Python parameter">p</span>
+    
+    <span class="md-ellipsis">
+      <span title="pymkv.MKVTrack.__init__.forced_track (Python parameter) — Determines if the track should be a forced track when muxed into an MKV file."><span>forced_<wbr>track</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pymkv.MKVTrack.__init__.mkvmerge_path" class="md-nav__link">
+    
+      <span aria-label="Python parameter" class="objinfo-icon objinfo-icon__sub-data" title="Python parameter">p</span>
+    
+    <span class="md-ellipsis">
+      <span title="pymkv.MKVTrack.__init__.mkvmerge_path (Python parameter) — The path where pymkv looks for the mkvmerge executable."><span>mkvmerge_<wbr>path</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pymkv.MKVTrack.__init__.mkvextract_path" class="md-nav__link">
+    
+      <span aria-label="Python parameter" class="objinfo-icon objinfo-icon__sub-data" title="Python parameter">p</span>
+    
+    <span class="md-ellipsis">
+      <span title="pymkv.MKVTrack.__init__.mkvextract_path (Python parameter) — The path where pymkv looks for the mkvextract executable."><span>mkvextract_<wbr>path</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pymkv.MKVTrack.__init__.tag_entries" class="md-nav__link">
+    
+      <span aria-label="Python parameter" class="objinfo-icon objinfo-icon__sub-data" title="Python parameter">p</span>
+    
+    <span class="md-ellipsis">
+      <span title="pymkv.MKVTrack.__init__.tag_entries (Python parameter) — The number of tag entries."><span>tag_<wbr>entries</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pymkv.MKVTrack.__init__.compression" class="md-nav__link">
+    
+      <span aria-label="Python parameter" class="objinfo-icon objinfo-icon__sub-data" title="Python parameter">p</span>
+    
+    <span class="md-ellipsis">
+      <span title="pymkv.MKVTrack.__init__.compression (Python parameter) — Determines if the track should be compressed when muxed into an MKV file."><span>compression</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pymkv.MKVTrack.mkvmerge_path" class="md-nav__link">
+    
+      <span aria-label="Python attribute" class="objinfo-icon objinfo-icon__alias" title="Python attribute">A</span>
+    
+    <span class="md-ellipsis">
+      <span title="pymkv.MKVTrack.mkvmerge_path (Python attribute) — The path of the mkvmerge executable."><span>mkvmerge_<wbr>path</span></span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="mkvmerge_path">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#pymkv.MKVTrack.mkvmerge_path-type" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span>Type</span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pymkv.MKVTrack.mkvextract_path" class="md-nav__link">
+    
+      <span aria-label="Python attribute" class="objinfo-icon objinfo-icon__alias" title="Python attribute">A</span>
+    
+    <span class="md-ellipsis">
+      <span title="pymkv.MKVTrack.mkvextract_path (Python attribute) — The path of the mkvextract executable."><span>mkvextract_<wbr>path</span></span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="mkvextract_path">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#pymkv.MKVTrack.mkvextract_path-type" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span>Type</span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pymkv.MKVTrack.track_name" class="md-nav__link">
+    
+      <span aria-label="Python attribute" class="objinfo-icon objinfo-icon__alias" title="Python attribute">A</span>
+    
+    <span class="md-ellipsis">
+      <span title="pymkv.MKVTrack.track_name (Python attribute) — The name that will be given to the track when muxed into a file."><span>track_<wbr>name</span></span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="track_name">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#pymkv.MKVTrack.track_name-type" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span>Type</span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pymkv.MKVTrack.default_track" class="md-nav__link">
+    
+      <span aria-label="Python attribute" class="objinfo-icon objinfo-icon__alias" title="Python attribute">A</span>
+    
+    <span class="md-ellipsis">
+      <span title="pymkv.MKVTrack.default_track (Python attribute) — Determines if the track should be the default track of its type when muxed into an MKV file."><span>default_<wbr>track</span></span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="default_track">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#pymkv.MKVTrack.default_track-type" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span>Type</span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pymkv.MKVTrack.forced_track" class="md-nav__link">
+    
+      <span aria-label="Python attribute" class="objinfo-icon objinfo-icon__alias" title="Python attribute">A</span>
+    
+    <span class="md-ellipsis">
+      <span title="pymkv.MKVTrack.forced_track (Python attribute) — Determines if the track should be a forced track when muxed into an MKV file."><span>forced_<wbr>track</span></span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="forced_track">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#pymkv.MKVTrack.forced_track-type" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span>Type</span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pymkv.MKVTrack.compression" class="md-nav__link">
+    
+      <span aria-label="Python attribute" class="objinfo-icon objinfo-icon__alias" title="Python attribute">A</span>
+    
+    <span class="md-ellipsis">
+      <span title="pymkv.MKVTrack.compression (Python attribute) — Determines if the track should be compressed when muxed into an MKV file."><span>compression</span></span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="compression">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#pymkv.MKVTrack.compression-type" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span>Type</span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pymkv.MKVTrack.no_chapters" class="md-nav__link">
+    
+      <span aria-label="Python attribute" class="objinfo-icon objinfo-icon__alias" title="Python attribute">A</span>
+    
+    <span class="md-ellipsis">
+      <span title="pymkv.MKVTrack.no_chapters (Python attribute) — If chapters exist in the track file, don&#39;t include them when this MKVTrack object is a track in an MKVFile mux operation. This option has no effect on standalone track files, only tracks that are already part of an MKV file."><span>no_<wbr>chapters</span></span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="no_chapters">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#pymkv.MKVTrack.no_chapters-type" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span>Type</span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pymkv.MKVTrack.no_global_tags" class="md-nav__link">
+    
+      <span aria-label="Python attribute" class="objinfo-icon objinfo-icon__alias" title="Python attribute">A</span>
+    
+    <span class="md-ellipsis">
+      <span title="pymkv.MKVTrack.no_global_tags (Python attribute) — If global tags exist in the track file, don&#39;t include them when this MKVTrack object is a track in an MKVFile mux operation. This option has no effect on standalone track files, only tracks that are already part of an MKV file."><span>no_<wbr>global_<wbr>tags</span></span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="no_global_tags">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#pymkv.MKVTrack.no_global_tags-type" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span>Type</span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pymkv.MKVTrack.no_track_tags" class="md-nav__link">
+    
+      <span aria-label="Python attribute" class="objinfo-icon objinfo-icon__alias" title="Python attribute">A</span>
+    
+    <span class="md-ellipsis">
+      <span title="pymkv.MKVTrack.no_track_tags (Python attribute) — If track tags exist in the specified track within the track file, don&#39;t include them when this MKVTrack object is a track in an MKVFile mux operation. This option has no effect on standalone track files, only tracks that are already part of an MKV file."><span>no_<wbr>track_<wbr>tags</span></span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="no_track_tags">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#pymkv.MKVTrack.no_track_tags-type" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span>Type</span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pymkv.MKVTrack.no_attachments" class="md-nav__link">
+    
+      <span aria-label="Python attribute" class="objinfo-icon objinfo-icon__alias" title="Python attribute">A</span>
+    
+    <span class="md-ellipsis">
+      <span title="pymkv.MKVTrack.no_attachments (Python attribute) — If attachments exist in the track file, don&#39;t include them when this MKVTrack object is a track in an MKVFile mux operation. This option has no effect on standalone track files, only tracks that are already part of an MKV file."><span>no_<wbr>attachments</span></span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="no_attachments">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#pymkv.MKVTrack.no_attachments-type" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span>Type</span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pymkv.MKVTrack.extract" class="md-nav__link">
+    
+      <span aria-label="Python method" class="objinfo-icon objinfo-icon__procedure" title="Python method">M</span>
+    
+    <span class="md-ellipsis">
+      <span title="pymkv.MKVTrack.extract (Python method) — Extract the track as a file."><span>extract</span></span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="extract">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#pymkv.MKVTrack.extract-parameters" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span>Parameters</span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Parameters">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#pymkv.MKVTrack.extract.output_path" class="md-nav__link">
+    
+      <span aria-label="Python parameter" class="objinfo-icon objinfo-icon__sub-data" title="Python parameter">p</span>
+    
+    <span class="md-ellipsis">
+      <span title="pymkv.MKVTrack.extract.output_path (Python parameter) — The path to be used as the output file"><span>output_<wbr>path</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pymkv.MKVTrack.extract.silent" class="md-nav__link">
+    
+      <span aria-label="Python parameter" class="objinfo-icon objinfo-icon__sub-data" title="Python parameter">p</span>
+    
+    <span class="md-ellipsis">
+      <span title="pymkv.MKVTrack.extract.silent (Python parameter) — By default the mkvmerge output will be shown unless silent is True."><span>silent</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pymkv.MKVTrack.extract-returns" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span>Returns</span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pymkv.MKVTrack.extract-return-type" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span>Return type</span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pymkv.MKVTrack.file_id" class="md-nav__link">
+    
+      <span aria-label="Python property" class="objinfo-icon objinfo-icon__alias" title="Python property">P</span>
+    
+    <span class="md-ellipsis">
+      <span title="pymkv.MKVTrack.file_id (Python property) — Get the ID of the file the track belongs to."><span>file_<wbr>id</span></span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="file_id">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#pymkv.MKVTrack.file_id-returns" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span>Returns</span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pymkv.MKVTrack.file_id-return-type" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span>Return type</span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pymkv.MKVTrack.file_id-raises" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span>Raises</span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pymkv.MKVTrack.file_path" class="md-nav__link">
+    
+      <span aria-label="Python property" class="objinfo-icon objinfo-icon__alias" title="Python property">P</span>
+    
+    <span class="md-ellipsis">
+      <span title="pymkv.MKVTrack.file_path (Python property) — Get the path to the track or MKV file containing the desired track."><span>file_<wbr>path</span></span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="file_path">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#pymkv.MKVTrack.file_path-returns" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span>Returns</span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pymkv.MKVTrack.file_path-return-type" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span>Return type</span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pymkv.MKVTrack.file_path-raises" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span>Raises</span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pymkv.MKVTrack.language" class="md-nav__link">
+    
+      <span aria-label="Python property" class="objinfo-icon objinfo-icon__alias" title="Python property">P</span>
+    
+    <span class="md-ellipsis">
+      <span title="pymkv.MKVTrack.language (Python property) — Get the language of the track."><span>language</span></span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="language">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#pymkv.MKVTrack.language-returns" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span>Returns</span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pymkv.MKVTrack.language-return-type" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span>Return type</span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pymkv.MKVTrack.language-raises" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span>Raises</span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pymkv.MKVTrack.language_ietf" class="md-nav__link">
+    
+      <span aria-label="Python property" class="objinfo-icon objinfo-icon__alias" title="Python property">P</span>
+    
+    <span class="md-ellipsis">
+      <span title="pymkv.MKVTrack.language_ietf (Python property) — Get the language of the track with BCP47 format."><span>language_<wbr>ietf</span></span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="language_ietf">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#pymkv.MKVTrack.language_ietf-returns" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span>Returns</span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pymkv.MKVTrack.language_ietf-return-type" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span>Return type</span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pymkv.MKVTrack.language_ietf-raises" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span>Raises</span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pymkv.MKVTrack.pts" class="md-nav__link">
+    
+      <span aria-label="Python property" class="objinfo-icon objinfo-icon__alias" title="Python property">P</span>
+    
+    <span class="md-ellipsis">
+      <span title="pymkv.MKVTrack.pts (Python property) — Get the Presentation Timestamp (PTS) of the track."><span>pts</span></span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="pts">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#pymkv.MKVTrack.pts-returns" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span>Returns</span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pymkv.MKVTrack.pts-return-type" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span>Return type</span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pymkv.MKVTrack.sync" class="md-nav__link">
+    
+      <span aria-label="Python property" class="objinfo-icon objinfo-icon__alias" title="Python property">P</span>
+    
+    <span class="md-ellipsis">
+      <span title="pymkv.MKVTrack.sync (Python property) — Get the synchronization offset for the track."><span>sync</span></span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="sync">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#pymkv.MKVTrack.sync-returns" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span>Returns</span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pymkv.MKVTrack.sync-return-type" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span>Return type</span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pymkv.MKVTrack.tag_entries" class="md-nav__link">
+    
+      <span aria-label="Python property" class="objinfo-icon objinfo-icon__alias" title="Python property">P</span>
+    
+    <span class="md-ellipsis">
+      <span title="pymkv.MKVTrack.tag_entries (Python property) — Gets the number of existing tag entries in the track."><span>tag_<wbr>entries</span></span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="tag_entries">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#pymkv.MKVTrack.tag_entries-returns" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span>Returns</span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pymkv.MKVTrack.tag_entries-return-type" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span>Return type</span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pymkv.MKVTrack.tags" class="md-nav__link">
+    
+      <span aria-label="Python property" class="objinfo-icon objinfo-icon__alias" title="Python property">P</span>
+    
+    <span class="md-ellipsis">
+      <span title="pymkv.MKVTrack.tags (Python property) — Get the tags file to include with the track."><span>tags</span></span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="tags">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#pymkv.MKVTrack.tags-returns" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span>Returns</span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pymkv.MKVTrack.tags-return-type" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span>Return type</span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pymkv.MKVTrack.tags-raises" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span>Raises</span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pymkv.MKVTrack.track_codec" class="md-nav__link">
+    
+      <span aria-label="Python property" class="objinfo-icon objinfo-icon__alias" title="Python property">P</span>
+    
+    <span class="md-ellipsis">
+      <span title="pymkv.MKVTrack.track_codec (Python property) — Get the codec of the track."><span>track_<wbr>codec</span></span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="track_codec">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#pymkv.MKVTrack.track_codec-returns" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span>Returns</span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pymkv.MKVTrack.track_codec-return-type" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span>Return type</span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pymkv.MKVTrack.track_id" class="md-nav__link">
+    
+      <span aria-label="Python property" class="objinfo-icon objinfo-icon__alias" title="Python property">P</span>
+    
+    <span class="md-ellipsis">
+      <span title="pymkv.MKVTrack.track_id (Python property) — Get the ID of the track within the file."><span>track_<wbr>id</span></span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="track_id">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#pymkv.MKVTrack.track_id-returns" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span>Returns</span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pymkv.MKVTrack.track_id-return-type" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span>Return type</span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pymkv.MKVTrack.track_id-raises" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span>Raises</span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pymkv.MKVTrack.track_type" class="md-nav__link">
+    
+      <span aria-label="Python property" class="objinfo-icon objinfo-icon__alias" title="Python property">P</span>
+    
+    <span class="md-ellipsis">
+      <span title="pymkv.MKVTrack.track_type (Python property) — Get the type of the track."><span>track_<wbr>type</span></span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="track_type">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#pymkv.MKVTrack.track_type-returns" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span>Returns</span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pymkv.MKVTrack.track_type-return-type" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span>Return type</span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="MKVAttachment.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    <span>MKVAttachment</span>
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="Timestamp.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    <span>Timestamp</span>
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="Verifications.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    <span>Verifications</span>
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+  
+
+<nav class="md-nav md-nav--secondary">
+  
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      <span>MKVTrack</span>
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#pymkv.MKVTrack" class="md-nav__link">
+    
+      <span aria-label="Python class" class="objinfo-icon objinfo-icon__data" title="Python class">C</span>
+    
+    <span class="md-ellipsis">
+      <span title="pymkv.MKVTrack (Python class) — A class that represents a track for an MKVFile object. MKVTrack objects are video, audio, or subtitles. Tracks can be standalone files or a single track within an MKV file, both can be handled by pymkv. An MKVTrack object can be added to an MKVFile and will be included when the MKV is muxed."><span>pymkv.<wbr>MKVTrack</span></span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="pymkv.MKVTrack">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#pymkv.MKVTrack-parameters" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span>Parameters</span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Parameters">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#pymkv.MKVTrack.__init__.file_path" class="md-nav__link">
+    
+      <span aria-label="Python parameter" class="objinfo-icon objinfo-icon__sub-data" title="Python parameter">p</span>
+    
+    <span class="md-ellipsis">
+      <span title="pymkv.MKVTrack.__init__.file_path (Python parameter) — Path to the track file."><span>file_<wbr>path</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pymkv.MKVTrack.__init__.track_id" class="md-nav__link">
+    
+      <span aria-label="Python parameter" class="objinfo-icon objinfo-icon__sub-data" title="Python parameter">p</span>
+    
+    <span class="md-ellipsis">
+      <span title="pymkv.MKVTrack.__init__.track_id (Python parameter) — The id of the track to be used from the file."><span>track_<wbr>id</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pymkv.MKVTrack.__init__.track_name" class="md-nav__link">
+    
+      <span aria-label="Python parameter" class="objinfo-icon objinfo-icon__sub-data" title="Python parameter">p</span>
+    
+    <span class="md-ellipsis">
+      <span title="pymkv.MKVTrack.__init__.track_name (Python parameter) — The name that will be given to the track when muxed into a file."><span>track_<wbr>name</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pymkv.MKVTrack.__init__.language" class="md-nav__link">
+    
+      <span aria-label="Python parameter" class="objinfo-icon objinfo-icon__sub-data" title="Python parameter">p</span>
+    
+    <span class="md-ellipsis">
+      <span title="pymkv.MKVTrack.__init__.language (Python parameter) — The language of the track."><span>language</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pymkv.MKVTrack.__init__.language_ietf" class="md-nav__link">
+    
+      <span aria-label="Python parameter" class="objinfo-icon objinfo-icon__sub-data" title="Python parameter">p</span>
+    
+    <span class="md-ellipsis">
+      <span title="pymkv.MKVTrack.__init__.language_ietf (Python parameter) — The language of the track."><span>language_<wbr>ietf</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pymkv.MKVTrack.__init__.default_track" class="md-nav__link">
+    
+      <span aria-label="Python parameter" class="objinfo-icon objinfo-icon__sub-data" title="Python parameter">p</span>
+    
+    <span class="md-ellipsis">
+      <span title="pymkv.MKVTrack.__init__.default_track (Python parameter) — Determines if the track should be the default track of its type when muxed into an MKV file."><span>default_<wbr>track</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pymkv.MKVTrack.__init__.forced_track" class="md-nav__link">
+    
+      <span aria-label="Python parameter" class="objinfo-icon objinfo-icon__sub-data" title="Python parameter">p</span>
+    
+    <span class="md-ellipsis">
+      <span title="pymkv.MKVTrack.__init__.forced_track (Python parameter) — Determines if the track should be a forced track when muxed into an MKV file."><span>forced_<wbr>track</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pymkv.MKVTrack.__init__.mkvmerge_path" class="md-nav__link">
+    
+      <span aria-label="Python parameter" class="objinfo-icon objinfo-icon__sub-data" title="Python parameter">p</span>
+    
+    <span class="md-ellipsis">
+      <span title="pymkv.MKVTrack.__init__.mkvmerge_path (Python parameter) — The path where pymkv looks for the mkvmerge executable."><span>mkvmerge_<wbr>path</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pymkv.MKVTrack.__init__.mkvextract_path" class="md-nav__link">
+    
+      <span aria-label="Python parameter" class="objinfo-icon objinfo-icon__sub-data" title="Python parameter">p</span>
+    
+    <span class="md-ellipsis">
+      <span title="pymkv.MKVTrack.__init__.mkvextract_path (Python parameter) — The path where pymkv looks for the mkvextract executable."><span>mkvextract_<wbr>path</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pymkv.MKVTrack.__init__.tag_entries" class="md-nav__link">
+    
+      <span aria-label="Python parameter" class="objinfo-icon objinfo-icon__sub-data" title="Python parameter">p</span>
+    
+    <span class="md-ellipsis">
+      <span title="pymkv.MKVTrack.__init__.tag_entries (Python parameter) — The number of tag entries."><span>tag_<wbr>entries</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pymkv.MKVTrack.__init__.compression" class="md-nav__link">
+    
+      <span aria-label="Python parameter" class="objinfo-icon objinfo-icon__sub-data" title="Python parameter">p</span>
+    
+    <span class="md-ellipsis">
+      <span title="pymkv.MKVTrack.__init__.compression (Python parameter) — Determines if the track should be compressed when muxed into an MKV file."><span>compression</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pymkv.MKVTrack.mkvmerge_path" class="md-nav__link">
+    
+      <span aria-label="Python attribute" class="objinfo-icon objinfo-icon__alias" title="Python attribute">A</span>
+    
+    <span class="md-ellipsis">
+      <span title="pymkv.MKVTrack.mkvmerge_path (Python attribute) — The path of the mkvmerge executable."><span>mkvmerge_<wbr>path</span></span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="mkvmerge_path">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#pymkv.MKVTrack.mkvmerge_path-type" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span>Type</span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pymkv.MKVTrack.mkvextract_path" class="md-nav__link">
+    
+      <span aria-label="Python attribute" class="objinfo-icon objinfo-icon__alias" title="Python attribute">A</span>
+    
+    <span class="md-ellipsis">
+      <span title="pymkv.MKVTrack.mkvextract_path (Python attribute) — The path of the mkvextract executable."><span>mkvextract_<wbr>path</span></span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="mkvextract_path">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#pymkv.MKVTrack.mkvextract_path-type" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span>Type</span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pymkv.MKVTrack.track_name" class="md-nav__link">
+    
+      <span aria-label="Python attribute" class="objinfo-icon objinfo-icon__alias" title="Python attribute">A</span>
+    
+    <span class="md-ellipsis">
+      <span title="pymkv.MKVTrack.track_name (Python attribute) — The name that will be given to the track when muxed into a file."><span>track_<wbr>name</span></span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="track_name">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#pymkv.MKVTrack.track_name-type" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span>Type</span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pymkv.MKVTrack.default_track" class="md-nav__link">
+    
+      <span aria-label="Python attribute" class="objinfo-icon objinfo-icon__alias" title="Python attribute">A</span>
+    
+    <span class="md-ellipsis">
+      <span title="pymkv.MKVTrack.default_track (Python attribute) — Determines if the track should be the default track of its type when muxed into an MKV file."><span>default_<wbr>track</span></span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="default_track">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#pymkv.MKVTrack.default_track-type" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span>Type</span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pymkv.MKVTrack.forced_track" class="md-nav__link">
+    
+      <span aria-label="Python attribute" class="objinfo-icon objinfo-icon__alias" title="Python attribute">A</span>
+    
+    <span class="md-ellipsis">
+      <span title="pymkv.MKVTrack.forced_track (Python attribute) — Determines if the track should be a forced track when muxed into an MKV file."><span>forced_<wbr>track</span></span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="forced_track">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#pymkv.MKVTrack.forced_track-type" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span>Type</span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pymkv.MKVTrack.compression" class="md-nav__link">
+    
+      <span aria-label="Python attribute" class="objinfo-icon objinfo-icon__alias" title="Python attribute">A</span>
+    
+    <span class="md-ellipsis">
+      <span title="pymkv.MKVTrack.compression (Python attribute) — Determines if the track should be compressed when muxed into an MKV file."><span>compression</span></span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="compression">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#pymkv.MKVTrack.compression-type" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span>Type</span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pymkv.MKVTrack.no_chapters" class="md-nav__link">
+    
+      <span aria-label="Python attribute" class="objinfo-icon objinfo-icon__alias" title="Python attribute">A</span>
+    
+    <span class="md-ellipsis">
+      <span title="pymkv.MKVTrack.no_chapters (Python attribute) — If chapters exist in the track file, don&#39;t include them when this MKVTrack object is a track in an MKVFile mux operation. This option has no effect on standalone track files, only tracks that are already part of an MKV file."><span>no_<wbr>chapters</span></span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="no_chapters">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#pymkv.MKVTrack.no_chapters-type" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span>Type</span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pymkv.MKVTrack.no_global_tags" class="md-nav__link">
+    
+      <span aria-label="Python attribute" class="objinfo-icon objinfo-icon__alias" title="Python attribute">A</span>
+    
+    <span class="md-ellipsis">
+      <span title="pymkv.MKVTrack.no_global_tags (Python attribute) — If global tags exist in the track file, don&#39;t include them when this MKVTrack object is a track in an MKVFile mux operation. This option has no effect on standalone track files, only tracks that are already part of an MKV file."><span>no_<wbr>global_<wbr>tags</span></span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="no_global_tags">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#pymkv.MKVTrack.no_global_tags-type" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span>Type</span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pymkv.MKVTrack.no_track_tags" class="md-nav__link">
+    
+      <span aria-label="Python attribute" class="objinfo-icon objinfo-icon__alias" title="Python attribute">A</span>
+    
+    <span class="md-ellipsis">
+      <span title="pymkv.MKVTrack.no_track_tags (Python attribute) — If track tags exist in the specified track within the track file, don&#39;t include them when this MKVTrack object is a track in an MKVFile mux operation. This option has no effect on standalone track files, only tracks that are already part of an MKV file."><span>no_<wbr>track_<wbr>tags</span></span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="no_track_tags">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#pymkv.MKVTrack.no_track_tags-type" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span>Type</span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pymkv.MKVTrack.no_attachments" class="md-nav__link">
+    
+      <span aria-label="Python attribute" class="objinfo-icon objinfo-icon__alias" title="Python attribute">A</span>
+    
+    <span class="md-ellipsis">
+      <span title="pymkv.MKVTrack.no_attachments (Python attribute) — If attachments exist in the track file, don&#39;t include them when this MKVTrack object is a track in an MKVFile mux operation. This option has no effect on standalone track files, only tracks that are already part of an MKV file."><span>no_<wbr>attachments</span></span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="no_attachments">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#pymkv.MKVTrack.no_attachments-type" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span>Type</span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pymkv.MKVTrack.extract" class="md-nav__link">
+    
+      <span aria-label="Python method" class="objinfo-icon objinfo-icon__procedure" title="Python method">M</span>
+    
+    <span class="md-ellipsis">
+      <span title="pymkv.MKVTrack.extract (Python method) — Extract the track as a file."><span>extract</span></span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="extract">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#pymkv.MKVTrack.extract-parameters" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span>Parameters</span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Parameters">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#pymkv.MKVTrack.extract.output_path" class="md-nav__link">
+    
+      <span aria-label="Python parameter" class="objinfo-icon objinfo-icon__sub-data" title="Python parameter">p</span>
+    
+    <span class="md-ellipsis">
+      <span title="pymkv.MKVTrack.extract.output_path (Python parameter) — The path to be used as the output file"><span>output_<wbr>path</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pymkv.MKVTrack.extract.silent" class="md-nav__link">
+    
+      <span aria-label="Python parameter" class="objinfo-icon objinfo-icon__sub-data" title="Python parameter">p</span>
+    
+    <span class="md-ellipsis">
+      <span title="pymkv.MKVTrack.extract.silent (Python parameter) — By default the mkvmerge output will be shown unless silent is True."><span>silent</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pymkv.MKVTrack.extract-returns" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span>Returns</span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pymkv.MKVTrack.extract-return-type" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span>Return type</span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pymkv.MKVTrack.file_id" class="md-nav__link">
+    
+      <span aria-label="Python property" class="objinfo-icon objinfo-icon__alias" title="Python property">P</span>
+    
+    <span class="md-ellipsis">
+      <span title="pymkv.MKVTrack.file_id (Python property) — Get the ID of the file the track belongs to."><span>file_<wbr>id</span></span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="file_id">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#pymkv.MKVTrack.file_id-returns" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span>Returns</span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pymkv.MKVTrack.file_id-return-type" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span>Return type</span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pymkv.MKVTrack.file_id-raises" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span>Raises</span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pymkv.MKVTrack.file_path" class="md-nav__link">
+    
+      <span aria-label="Python property" class="objinfo-icon objinfo-icon__alias" title="Python property">P</span>
+    
+    <span class="md-ellipsis">
+      <span title="pymkv.MKVTrack.file_path (Python property) — Get the path to the track or MKV file containing the desired track."><span>file_<wbr>path</span></span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="file_path">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#pymkv.MKVTrack.file_path-returns" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span>Returns</span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pymkv.MKVTrack.file_path-return-type" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span>Return type</span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pymkv.MKVTrack.file_path-raises" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span>Raises</span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pymkv.MKVTrack.language" class="md-nav__link">
+    
+      <span aria-label="Python property" class="objinfo-icon objinfo-icon__alias" title="Python property">P</span>
+    
+    <span class="md-ellipsis">
+      <span title="pymkv.MKVTrack.language (Python property) — Get the language of the track."><span>language</span></span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="language">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#pymkv.MKVTrack.language-returns" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span>Returns</span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pymkv.MKVTrack.language-return-type" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span>Return type</span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pymkv.MKVTrack.language-raises" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span>Raises</span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pymkv.MKVTrack.language_ietf" class="md-nav__link">
+    
+      <span aria-label="Python property" class="objinfo-icon objinfo-icon__alias" title="Python property">P</span>
+    
+    <span class="md-ellipsis">
+      <span title="pymkv.MKVTrack.language_ietf (Python property) — Get the language of the track with BCP47 format."><span>language_<wbr>ietf</span></span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="language_ietf">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#pymkv.MKVTrack.language_ietf-returns" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span>Returns</span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pymkv.MKVTrack.language_ietf-return-type" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span>Return type</span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pymkv.MKVTrack.language_ietf-raises" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span>Raises</span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pymkv.MKVTrack.pts" class="md-nav__link">
+    
+      <span aria-label="Python property" class="objinfo-icon objinfo-icon__alias" title="Python property">P</span>
+    
+    <span class="md-ellipsis">
+      <span title="pymkv.MKVTrack.pts (Python property) — Get the Presentation Timestamp (PTS) of the track."><span>pts</span></span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="pts">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#pymkv.MKVTrack.pts-returns" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span>Returns</span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pymkv.MKVTrack.pts-return-type" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span>Return type</span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pymkv.MKVTrack.sync" class="md-nav__link">
+    
+      <span aria-label="Python property" class="objinfo-icon objinfo-icon__alias" title="Python property">P</span>
+    
+    <span class="md-ellipsis">
+      <span title="pymkv.MKVTrack.sync (Python property) — Get the synchronization offset for the track."><span>sync</span></span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="sync">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#pymkv.MKVTrack.sync-returns" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span>Returns</span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pymkv.MKVTrack.sync-return-type" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span>Return type</span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pymkv.MKVTrack.tag_entries" class="md-nav__link">
+    
+      <span aria-label="Python property" class="objinfo-icon objinfo-icon__alias" title="Python property">P</span>
+    
+    <span class="md-ellipsis">
+      <span title="pymkv.MKVTrack.tag_entries (Python property) — Gets the number of existing tag entries in the track."><span>tag_<wbr>entries</span></span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="tag_entries">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#pymkv.MKVTrack.tag_entries-returns" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span>Returns</span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pymkv.MKVTrack.tag_entries-return-type" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span>Return type</span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pymkv.MKVTrack.tags" class="md-nav__link">
+    
+      <span aria-label="Python property" class="objinfo-icon objinfo-icon__alias" title="Python property">P</span>
+    
+    <span class="md-ellipsis">
+      <span title="pymkv.MKVTrack.tags (Python property) — Get the tags file to include with the track."><span>tags</span></span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="tags">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#pymkv.MKVTrack.tags-returns" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span>Returns</span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pymkv.MKVTrack.tags-return-type" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span>Return type</span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pymkv.MKVTrack.tags-raises" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span>Raises</span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pymkv.MKVTrack.track_codec" class="md-nav__link">
+    
+      <span aria-label="Python property" class="objinfo-icon objinfo-icon__alias" title="Python property">P</span>
+    
+    <span class="md-ellipsis">
+      <span title="pymkv.MKVTrack.track_codec (Python property) — Get the codec of the track."><span>track_<wbr>codec</span></span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="track_codec">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#pymkv.MKVTrack.track_codec-returns" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span>Returns</span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pymkv.MKVTrack.track_codec-return-type" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span>Return type</span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pymkv.MKVTrack.track_id" class="md-nav__link">
+    
+      <span aria-label="Python property" class="objinfo-icon objinfo-icon__alias" title="Python property">P</span>
+    
+    <span class="md-ellipsis">
+      <span title="pymkv.MKVTrack.track_id (Python property) — Get the ID of the track within the file."><span>track_<wbr>id</span></span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="track_id">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#pymkv.MKVTrack.track_id-returns" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span>Returns</span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pymkv.MKVTrack.track_id-return-type" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span>Return type</span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pymkv.MKVTrack.track_id-raises" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span>Raises</span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pymkv.MKVTrack.track_type" class="md-nav__link">
+    
+      <span aria-label="Python property" class="objinfo-icon objinfo-icon__alias" title="Python property">P</span>
+    
+    <span class="md-ellipsis">
+      <span title="pymkv.MKVTrack.track_type (Python property) — Get the type of the track."><span>track_<wbr>type</span></span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="track_type">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#pymkv.MKVTrack.track_type-returns" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span>Returns</span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pymkv.MKVTrack.track_type-return-type" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span>Return type</span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset" role="main">
+                
+                
+                  
+
+
+  
+  
+
+<h1 id="mkvtrack">MKVTrack<a class="headerlink" href="#mkvtrack" title="Link to this heading">¶</a></h1>
+<p><a class="reference internal" href="#pymkv.MKVTrack" title="pymkv.MKVTrack (Python class) — A class that represents a track for an MKVFile object. MKVTrack objects are video, audio, or subtitles. Tracks can be standalone files or a single track within an MKV file, both can be handled by pymkv. An MKVTrack object can be added to an MKVFile and will be included when the MKV is muxed."><code class="xref py py-class docutils literal notranslate"><span class="pre">MKVTrack</span></code></a> classes are used to represent tracks within an MKV or to be used in an MKV. They can
+represent a video, audio, or subtitle track.</p>
+<p class="example rubric">Examples</p>
+<p>Below are some basic examples of how the <a class="reference internal" href="#pymkv.MKVTrack" title="pymkv.MKVTrack (Python class) — A class that represents a track for an MKVFile object. MKVTrack objects are video, audio, or subtitles. Tracks can be standalone files or a single track within an MKV file, both can be handled by pymkv. An MKVTrack object can be added to an MKVFile and will be included when the MKV is muxed."><code class="xref py py-class docutils literal notranslate"><span class="pre">MKVTrack</span></code></a> objects can be used.</p>
+<p>Create a new <a class="reference internal" href="#pymkv.MKVTrack" title="pymkv.MKVTrack (Python class) — A class that represents a track for an MKVFile object. MKVTrack objects are video, audio, or subtitles. Tracks can be standalone files or a single track within an MKV file, both can be handled by pymkv. An MKVTrack object can be added to an MKVFile and will be included when the MKV is muxed."><code class="xref py py-class docutils literal notranslate"><span class="pre">MKVTrack</span></code></a> from a track file. This example takes a standalone track file and uses it in an
+<a class="reference internal" href="#pymkv.MKVTrack" title="pymkv.MKVTrack (Python class) — A class that represents a track for an MKVFile object. MKVTrack objects are video, audio, or subtitles. Tracks can be standalone files or a single track within an MKV file, both can be handled by pymkv. An MKVTrack object can be added to an MKVFile and will be included when the MKV is muxed."><code class="xref py py-class docutils literal notranslate"><span class="pre">MKVTrack</span></code></a>.</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">pymkv</span><span class="w"> </span><span class="kn">import</span> <span class="n">MKVTrack</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">track1</span> <span class="o">=</span> <span class="n">MKVTrack</span><span class="p">(</span><span class="s2">&quot;path/to/track.h264&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">track1</span><span class="o">.</span><span class="n">track_name</span> <span class="o">=</span> <span class="s2">&quot;Some Name&quot;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">track1</span><span class="o">.</span><span class="n">language</span> <span class="o">=</span> <span class="s2">&quot;eng&quot;</span>
+</code></pre></div>
+</div>
+<p>Create a new <a class="reference internal" href="#pymkv.MKVTrack" title="pymkv.MKVTrack (Python class) — A class that represents a track for an MKVFile object. MKVTrack objects are video, audio, or subtitles. Tracks can be standalone files or a single track within an MKV file, both can be handled by pymkv. An MKVTrack object can be added to an MKVFile and will be included when the MKV is muxed."><code class="xref py py-class docutils literal notranslate"><span class="pre">MKVTrack</span></code></a> from an MKV file. This example will take a specific track from an MKV and also
+prevent any global tags from being included if the <a class="reference internal" href="#pymkv.MKVTrack" title="pymkv.MKVTrack (Python class) — A class that represents a track for an MKVFile object. MKVTrack objects are video, audio, or subtitles. Tracks can be standalone files or a single track within an MKV file, both can be handled by pymkv. An MKVTrack object can be added to an MKVFile and will be included when the MKV is muxed."><code class="xref py py-class docutils literal notranslate"><span class="pre">MKVTrack</span></code></a> is muxed into an <a class="reference internal" href="MKVFile.html#pymkv.MKVFile" title="pymkv.MKVFile (Python class) — A class that represents an MKV file."><code class="xref py py-class docutils literal notranslate"><span class="pre">MKVFile</span></code></a>.</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="n">track2</span> <span class="o">=</span> <span class="n">MKVTrack</span><span class="p">(</span><span class="s2">&quot;path/to/track.aac&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">track2</span><span class="o">.</span><span class="n">language</span> <span class="o">=</span> <span class="s2">&quot;eng&quot;</span>
+</code></pre></div>
+</div>
+<p>Create a new <a class="reference internal" href="#pymkv.MKVTrack" title="pymkv.MKVTrack (Python class) — A class that represents a track for an MKVFile object. MKVTrack objects are video, audio, or subtitles. Tracks can be standalone files or a single track within an MKV file, both can be handled by pymkv. An MKVTrack object can be added to an MKVFile and will be included when the MKV is muxed."><code class="xref py py-class docutils literal notranslate"><span class="pre">MKVTrack</span></code></a> from an MKV file. This example will take a specific track from an MKV and also
+prevent any global tags from being included if the <a class="reference internal" href="#pymkv.MKVTrack" title="pymkv.MKVTrack (Python class) — A class that represents a track for an MKVFile object. MKVTrack objects are video, audio, or subtitles. Tracks can be standalone files or a single track within an MKV file, both can be handled by pymkv. An MKVTrack object can be added to an MKVFile and will be included when the MKV is muxed."><code class="xref py py-class docutils literal notranslate"><span class="pre">MKVTrack</span></code></a> is muxed into an <a class="reference internal" href="MKVFile.html#pymkv.MKVFile" title="pymkv.MKVFile (Python class) — A class that represents an MKV file."><code class="xref py py-class docutils literal notranslate"><span class="pre">MKVFile</span></code></a>.</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="n">track3</span> <span class="o">=</span> <span class="n">MKVTrack</span><span class="p">(</span><span class="s2">&quot;path/to/MKV.mkv&quot;</span><span class="p">,</span> <span class="n">track_id</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">track3</span><span class="o">.</span><span class="n">no_global_tags</span> <span class="o">=</span> <span class="kc">True</span>
+</code></pre></div>
+</div>
+<p>Now all these tracks can be added to an <a class="reference internal" href="MKVFile.html#pymkv.MKVFile" title="pymkv.MKVFile (Python class) — A class that represents an MKV file."><code class="xref py py-class docutils literal notranslate"><span class="pre">MKVFile</span></code></a> object and muxed together.</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">pymkv</span><span class="w"> </span><span class="kn">import</span> <span class="n">MKVFile</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">file</span> <span class="o">=</span> <span class="n">MKVFile</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">file</span><span class="o">.</span><span class="n">add_track</span><span class="p">(</span><span class="n">track1</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">file</span><span class="o">.</span><span class="n">add_track</span><span class="p">(</span><span class="n">track2</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">file</span><span class="o">.</span><span class="n">add_track</span><span class="p">(</span><span class="n">track3</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">file</span><span class="o">.</span><span class="n">mux</span><span class="p">(</span><span class="s2">&quot;path/to/output.mkv&quot;</span><span class="p">)</span>
+</code></pre></div>
+</div>
+<dl class="py class objdesc">
+<dt class="sig sig-object highlight sig-wrap py" id="pymkv.MKVTrack">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pymkv.</span></span><span class="sig-name descname"><span class="pre">MKVTrack</span></span><span class="sig-paren">(</span><span class="sig-param-decl"><em class="sig-param"><a class="n reference internal" href="#pymkv.MKVTrack.__init__.file_path" title="pymkv.MKVTrack.__init__.file_path (Python parameter) — Path to the track file."><span class="n"><span class="pre">file_path</span></span></a><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="desctype"><span class="pre">str</span></span></span></em>, </span><span class="sig-param-decl"><em class="sig-param"><a class="n reference internal" href="#pymkv.MKVTrack.__init__.track_id" title="pymkv.MKVTrack.__init__.track_id (Python parameter) — The id of the track to be used from the file."><span class="n"><span class="pre">track_id</span></span></a><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="desctype"><span class="pre">int</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><code class="code python default_value docutils literal highlight highlight-python"><span class="mi">0</span></code></em>, </span><span class="sig-param-decl"><em class="sig-param"><a class="n reference internal" href="#pymkv.MKVTrack.__init__.track_name" title="pymkv.MKVTrack.__init__.track_name (Python parameter) — The name that will be given to the track when muxed into a file."><span class="n"><span class="pre">track_name</span></span></a><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="desctype"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><code class="code python default_value docutils literal highlight highlight-python"><span class="kc">None</span></code></em>, </span><span class="sig-param-decl"><em class="sig-param"><a class="n reference internal" href="#pymkv.MKVTrack.__init__.language" title="pymkv.MKVTrack.__init__.language (Python parameter) — The language of the track."><span class="n"><span class="pre">language</span></span></a><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="desctype"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><code class="code python default_value docutils literal highlight highlight-python"><span class="kc">None</span></code></em>, </span><span class="sig-param-decl"><em class="sig-param"><a class="n reference internal" href="#pymkv.MKVTrack.__init__.language_ietf" title="pymkv.MKVTrack.__init__.language_ietf (Python parameter) — The language of the track."><span class="n"><span class="pre">language_ietf</span></span></a><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="desctype"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><code class="code python default_value docutils literal highlight highlight-python"><span class="kc">None</span></code></em>, </span><span class="sig-param-decl"><em class="sig-param"><a class="n reference internal" href="#pymkv.MKVTrack.__init__.default_track" title="pymkv.MKVTrack.__init__.default_track (Python parameter) — Determines if the track should be the default track of its type when muxed into an MKV file."><span class="n"><span class="pre">default_track</span></span></a><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="desctype"><span class="pre">bool</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><code class="code python default_value docutils literal highlight highlight-python"><span class="kc">False</span></code></em>, </span><span class="sig-param-decl"><em class="sig-param"><a class="n reference internal" href="#pymkv.MKVTrack.__init__.forced_track" title="pymkv.MKVTrack.__init__.forced_track (Python parameter) — Determines if the track should be a forced track when muxed into an MKV file."><span class="n"><span class="pre">forced_track</span></span></a><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="desctype"><span class="pre">bool</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><code class="code python default_value docutils literal highlight highlight-python"><span class="kc">False</span></code></em>, </span><span class="sig-param-decl"><em class="sig-param"><a class="n reference internal" href="#pymkv.MKVTrack" title="pymkv.MKVTrack.__init__.flag_commentary (Python parameter)"><span class="n"><span class="pre">flag_commentary</span></span></a><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="desctype"><span class="pre">bool</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><code class="code python default_value docutils literal highlight highlight-python"><span class="kc">False</span></code></em>, </span><span class="sig-param-decl"><em class="sig-param"><a class="n reference internal" href="#pymkv.MKVTrack" title="pymkv.MKVTrack.__init__.flag_hearing_impaired (Python parameter)"><span class="n"><span class="pre">flag_hearing_impaired</span></span></a><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="desctype"><span class="pre">bool</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><code class="code python default_value docutils literal highlight highlight-python"><span class="kc">False</span></code></em>, </span><span class="sig-param-decl"><em class="sig-param"><a class="n reference internal" href="#pymkv.MKVTrack" title="pymkv.MKVTrack.__init__.flag_visual_impaired (Python parameter)"><span class="n"><span class="pre">flag_visual_impaired</span></span></a><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="desctype"><span class="pre">bool</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><code class="code python default_value docutils literal highlight highlight-python"><span class="kc">False</span></code></em>, </span><span class="sig-param-decl"><em class="sig-param"><a class="n reference internal" href="#pymkv.MKVTrack" title="pymkv.MKVTrack.__init__.flag_original (Python parameter)"><span class="n"><span class="pre">flag_original</span></span></a><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="desctype"><span class="pre">bool</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><code class="code python default_value docutils literal highlight highlight-python"><span class="kc">False</span></code></em>, </span><span class="sig-param-decl"><em class="sig-param"><a class="n reference internal" href="#pymkv.MKVTrack.__init__.mkvmerge_path" title="pymkv.MKVTrack.__init__.mkvmerge_path (Python parameter) — The path where pymkv looks for the mkvmerge executable."><span class="n"><span class="pre">mkvmerge_path</span></span></a><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="desctype"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">os.PathLike</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Iterable</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><code class="code python default_value docutils literal highlight highlight-python"><span class="s1">&#39;mkvmerge&#39;</span></code></em>, </span><span class="sig-param-decl"><em class="sig-param"><a class="n reference internal" href="#pymkv.MKVTrack.__init__.mkvextract_path" title="pymkv.MKVTrack.__init__.mkvextract_path (Python parameter) — The path where pymkv looks for the mkvextract executable."><span class="n"><span class="pre">mkvextract_path</span></span></a><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="desctype"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">os.PathLike</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Iterable</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><code class="code python default_value docutils literal highlight highlight-python"><span class="s1">&#39;mkvextract&#39;</span></code></em>, </span><span class="sig-param-decl"><em class="sig-param"><a class="n reference internal" href="#pymkv.MKVTrack" title="pymkv.MKVTrack.__init__.sync (Python parameter)"><span class="n"><span class="pre">sync</span></span></a><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="desctype"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><code class="code python default_value docutils literal highlight highlight-python"><span class="kc">None</span></code></em>, </span><span class="sig-param-decl"><em class="sig-param"><a class="n reference internal" href="#pymkv.MKVTrack" title="pymkv.MKVTrack.__init__.existing_info (Python parameter)"><span class="n"><span class="pre">existing_info</span></span></a><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="desctype"><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><code class="code python default_value docutils literal highlight highlight-python"><span class="kc">None</span></code></em>, </span><span class="sig-param-decl"><em class="sig-param"><a class="n reference internal" href="#pymkv.MKVTrack.__init__.tag_entries" title="pymkv.MKVTrack.__init__.tag_entries (Python parameter) — The number of tag entries."><span class="n"><span class="pre">tag_entries</span></span></a><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="desctype"><span class="pre">int</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><code class="code python default_value docutils literal highlight highlight-python"><span class="mi">0</span></code></em>, </span><span class="sig-param-decl"><em class="sig-param"><a class="n reference internal" href="#pymkv.MKVTrack.__init__.compression" title="pymkv.MKVTrack.__init__.compression (Python parameter) — Determines if the track should be compressed when muxed into an MKV file."><span class="n"><span class="pre">compression</span></span></a><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="desctype"><span class="pre">bool</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><code class="code python default_value docutils literal highlight highlight-python"><span class="kc">None</span></code></em></span><span class="sig-paren">)</span><a class="headerlink" href="#pymkv.MKVTrack" title="Link to this definition">¶</a></dt>
+<dd><p>A class that represents a track for an <a class="reference internal" href="MKVFile.html#pymkv.MKVFile" title="pymkv.MKVFile (Python class) — A class that represents an MKV file."><code class="xref py py-class docutils literal notranslate"><span class="pre">MKVFile</span></code></a> object.
+<a class="reference internal" href="#pymkv.MKVTrack" title="pymkv.MKVTrack (Python class) — A class that represents a track for an MKVFile object. MKVTrack objects are video, audio, or subtitles. Tracks can be standalone files or a single track within an MKV file, both can be handled by pymkv. An MKVTrack object can be added to an MKVFile and will be included when the MKV is muxed."><code class="xref py py-class docutils literal notranslate"><span class="pre">MKVTrack</span></code></a> objects are video, audio, or subtitles. Tracks can be standalone files or a single track
+within an MKV file, both can be handled by pymkv. An <a class="reference internal" href="#pymkv.MKVTrack" title="pymkv.MKVTrack (Python class) — A class that represents a track for an MKVFile object. MKVTrack objects are video, audio, or subtitles. Tracks can be standalone files or a single track within an MKV file, both can be handled by pymkv. An MKVTrack object can be added to an MKVFile and will be included when the MKV is muxed."><code class="xref py py-class docutils literal notranslate"><span class="pre">MKVTrack</span></code></a> object can be added to an
+<a class="reference internal" href="MKVFile.html#pymkv.MKVFile" title="pymkv.MKVFile (Python class) — A class that represents an MKV file."><code class="xref py py-class docutils literal notranslate"><span class="pre">MKVFile</span></code></a> and will be included when the MKV is muxed.</p>
+<dl class="field-list simple">
+<dt class="field-odd" id="pymkv.MKVTrack-parameters">Parameters<span class="colon">:</span><a class="headerlink" href="#pymkv.MKVTrack-parameters" title="Permalink to this headline">¶</a></dt>
+<dd class="field-odd"><dl class="simple api-field highlight">
+<dt id="pymkv.MKVTrack.__init__.file_path"><span class="sig-name descname">file_path</span><span class="p"> : </span><span class="desctype"><span class="desctype">str</span></span><a class="headerlink" href="#pymkv.MKVTrack.__init__.file_path" title="Permalink to this definition">¶</a></dt><dd><p>Path to the track file. This can also be an MKV where the <cite>track_id</cite> is the track represented in the MKV.</p>
+</dd>
+<dt id="pymkv.MKVTrack.__init__.track_id"><span class="sig-name descname">track_id</span><span class="p"> : </span><span class="desctype"><span class="desctype">int, optional</span></span><a class="headerlink" href="#pymkv.MKVTrack.__init__.track_id" title="Permalink to this definition">¶</a></dt><dd><p>The id of the track to be used from the file. <cite>track_id</cite> only needs to be set when importing a track from
+an MKV. In this case, you can specify <cite>track_id</cite> to indicate which track from the MKV should be used. If not
+set, it will import the first track. Track 0 is imported by default because mkvmerge sees standalone
+track files as having one track with track_id set as 0.</p>
+</dd>
+<dt id="pymkv.MKVTrack.__init__.track_name"><span class="sig-name descname">track_name</span><span class="p"> : </span><span class="desctype"><span class="desctype">str, optional</span></span><a class="headerlink" href="#pymkv.MKVTrack.__init__.track_name" title="Permalink to this definition">¶</a></dt><dd><p>The name that will be given to the track when muxed into a file.</p>
+</dd>
+<dt id="pymkv.MKVTrack.__init__.language"><span class="sig-name descname">language</span><span class="p"> : </span><span class="desctype"><span class="desctype">str, optional</span></span><a class="headerlink" href="#pymkv.MKVTrack.__init__.language" title="Permalink to this definition">¶</a></dt><dd><p>The language of the track. It must be an ISO639-2 language code.</p>
+</dd>
+<dt id="pymkv.MKVTrack.__init__.language_ietf"><span class="sig-name descname">language_ietf</span><span class="p"> : </span><span class="desctype"><span class="desctype">str, optional</span></span><a class="headerlink" href="#pymkv.MKVTrack.__init__.language_ietf" title="Permalink to this definition">¶</a></dt><dd><p>The language of the track. It must be a BCP47 language code. Has priority over ‘language’.</p>
+</dd>
+<dt id="pymkv.MKVTrack.__init__.default_track"><span class="sig-name descname">default_track</span><span class="p"> : </span><span class="desctype"><span class="desctype">bool, optional</span></span><a class="headerlink" href="#pymkv.MKVTrack.__init__.default_track" title="Permalink to this definition">¶</a></dt><dd><p>Determines if the track should be the default track of its type when muxed into an MKV file.</p>
+</dd>
+<dt id="pymkv.MKVTrack.__init__.forced_track"><span class="sig-name descname">forced_track</span><span class="p"> : </span><span class="desctype"><span class="desctype">bool, optional</span></span><a class="headerlink" href="#pymkv.MKVTrack.__init__.forced_track" title="Permalink to this definition">¶</a></dt><dd><p>Determines if the track should be a forced track when muxed into an MKV file.</p>
+</dd>
+<dt id="pymkv.MKVTrack.__init__.mkvmerge_path"><span class="sig-name descname">mkvmerge_path</span><span class="p"> : </span><span class="desctype"><span class="desctype">str, list, os.PathLike, optional</span></span><a class="headerlink" href="#pymkv.MKVTrack.__init__.mkvmerge_path" title="Permalink to this definition">¶</a></dt><dd><p>The path where pymkv looks for the mkvmerge executable. pymkv relies on the mkvmerge executable to parse
+files. By default, it is assumed mkvmerge is in your shell’s $PATH variable. If it is not, you need to set
+<em>mkvmerge_path</em> to the executable location.</p>
+</dd>
+<dt id="pymkv.MKVTrack.__init__.mkvextract_path"><span class="sig-name descname">mkvextract_path</span><span class="p"> : </span><span class="desctype"><span class="desctype">str, list, os.PathLike, optional</span></span><a class="headerlink" href="#pymkv.MKVTrack.__init__.mkvextract_path" title="Permalink to this definition">¶</a></dt><dd><p>The path where pymkv looks for the mkvextract executable. pymkv relies on the mkvextract executable to extract
+files. By default, it is assumed mkvextract is in your shell’s $PATH variable. If it is not, you need to set
+<em>mkvextract_path</em> to the executable location.</p>
+</dd>
+<dt id="pymkv.MKVTrack.__init__.tag_entries"><span class="sig-name descname">tag_entries</span><span class="p"> : </span><span class="desctype"><span class="desctype">int, optional</span></span><a class="headerlink" href="#pymkv.MKVTrack.__init__.tag_entries" title="Permalink to this definition">¶</a></dt><dd><p>The number of tag entries.</p>
+</dd>
+<dt id="pymkv.MKVTrack.__init__.compression"><span class="sig-name descname">compression</span><span class="p"> : </span><span class="desctype"><span class="desctype">bool, optional</span></span><a class="headerlink" href="#pymkv.MKVTrack.__init__.compression" title="Permalink to this definition">¶</a></dt><dd><p>Determines if the track should be compressed when muxed into an MKV file.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<dl class="py attribute objdesc">
+<dt class="sig sig-object highlight py" id="pymkv.MKVTrack.mkvmerge_path">
+<span class="sig-name descname"><span class="pre">mkvmerge_path</span></span><a class="headerlink" href="#pymkv.MKVTrack.mkvmerge_path" title="Link to this definition">¶</a></dt>
+<dd><p>The path of the mkvmerge executable.</p>
+<dl class="field-list simple">
+<dt class="field-odd" id="pymkv.MKVTrack.mkvmerge_path-type">Type<span class="colon">:</span><a class="headerlink" href="#pymkv.MKVTrack.mkvmerge_path-type" title="Permalink to this headline">¶</a></dt>
+<dd class="field-odd"><p>list</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute objdesc">
+<dt class="sig sig-object highlight py" id="pymkv.MKVTrack.mkvextract_path">
+<span class="sig-name descname"><span class="pre">mkvextract_path</span></span><a class="headerlink" href="#pymkv.MKVTrack.mkvextract_path" title="Link to this definition">¶</a></dt>
+<dd><p>The path of the mkvextract executable.</p>
+<dl class="field-list simple">
+<dt class="field-odd" id="pymkv.MKVTrack.mkvextract_path-type">Type<span class="colon">:</span><a class="headerlink" href="#pymkv.MKVTrack.mkvextract_path-type" title="Permalink to this headline">¶</a></dt>
+<dd class="field-odd"><p>list</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute objdesc">
+<dt class="sig sig-object highlight py" id="pymkv.MKVTrack.track_name">
+<span class="sig-name descname"><span class="pre">track_name</span></span><a class="headerlink" href="#pymkv.MKVTrack.track_name" title="Link to this definition">¶</a></dt>
+<dd><p>The name that will be given to the track when muxed into a file.</p>
+<dl class="field-list simple">
+<dt class="field-odd" id="pymkv.MKVTrack.track_name-type">Type<span class="colon">:</span><a class="headerlink" href="#pymkv.MKVTrack.track_name-type" title="Permalink to this headline">¶</a></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute objdesc">
+<dt class="sig sig-object highlight py" id="pymkv.MKVTrack.default_track">
+<span class="sig-name descname"><span class="pre">default_track</span></span><a class="headerlink" href="#pymkv.MKVTrack.default_track" title="Link to this definition">¶</a></dt>
+<dd><p>Determines if the track should be the default track of its type when muxed into an MKV file.</p>
+<dl class="field-list simple">
+<dt class="field-odd" id="pymkv.MKVTrack.default_track-type">Type<span class="colon">:</span><a class="headerlink" href="#pymkv.MKVTrack.default_track-type" title="Permalink to this headline">¶</a></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute objdesc">
+<dt class="sig sig-object highlight py" id="pymkv.MKVTrack.forced_track">
+<span class="sig-name descname"><span class="pre">forced_track</span></span><a class="headerlink" href="#pymkv.MKVTrack.forced_track" title="Link to this definition">¶</a></dt>
+<dd><p>Determines if the track should be a forced track when muxed into an MKV file.</p>
+<dl class="field-list simple">
+<dt class="field-odd" id="pymkv.MKVTrack.forced_track-type">Type<span class="colon">:</span><a class="headerlink" href="#pymkv.MKVTrack.forced_track-type" title="Permalink to this headline">¶</a></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute objdesc">
+<dt class="sig sig-object highlight py" id="pymkv.MKVTrack.compression">
+<span class="sig-name descname"><span class="pre">compression</span></span><a class="headerlink" href="#pymkv.MKVTrack.compression" title="Link to this definition">¶</a></dt>
+<dd><p>Determines if the track should be compressed when muxed into an MKV file.</p>
+<dl class="field-list simple">
+<dt class="field-odd" id="pymkv.MKVTrack.compression-type">Type<span class="colon">:</span><a class="headerlink" href="#pymkv.MKVTrack.compression-type" title="Permalink to this headline">¶</a></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute objdesc">
+<dt class="sig sig-object highlight py" id="pymkv.MKVTrack.no_chapters">
+<span class="sig-name descname"><span class="pre">no_chapters</span></span><a class="headerlink" href="#pymkv.MKVTrack.no_chapters" title="Link to this definition">¶</a></dt>
+<dd><p>If chapters exist in the track file, don’t include them when this <a class="reference internal" href="#pymkv.MKVTrack" title="pymkv.MKVTrack (Python class) — A class that represents a track for an MKVFile object. MKVTrack objects are video, audio, or subtitles. Tracks can be standalone files or a single track within an MKV file, both can be handled by pymkv. An MKVTrack object can be added to an MKVFile and will be included when the MKV is muxed."><code class="xref py py-class docutils literal notranslate"><span class="pre">MKVTrack</span></code></a> object is a track
+in an <a class="reference internal" href="MKVFile.html#pymkv.MKVFile" title="pymkv.MKVFile (Python class) — A class that represents an MKV file."><code class="xref py py-class docutils literal notranslate"><span class="pre">MKVFile</span></code></a> mux operation. This option has no effect on standalone track files, only tracks
+that are already part of an MKV file.</p>
+<dl class="field-list simple">
+<dt class="field-odd" id="pymkv.MKVTrack.no_chapters-type">Type<span class="colon">:</span><a class="headerlink" href="#pymkv.MKVTrack.no_chapters-type" title="Permalink to this headline">¶</a></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute objdesc">
+<dt class="sig sig-object highlight py" id="pymkv.MKVTrack.no_global_tags">
+<span class="sig-name descname"><span class="pre">no_global_tags</span></span><a class="headerlink" href="#pymkv.MKVTrack.no_global_tags" title="Link to this definition">¶</a></dt>
+<dd><p>If global tags exist in the track file, don’t include them when this <a class="reference internal" href="#pymkv.MKVTrack" title="pymkv.MKVTrack (Python class) — A class that represents a track for an MKVFile object. MKVTrack objects are video, audio, or subtitles. Tracks can be standalone files or a single track within an MKV file, both can be handled by pymkv. An MKVTrack object can be added to an MKVFile and will be included when the MKV is muxed."><code class="xref py py-class docutils literal notranslate"><span class="pre">MKVTrack</span></code></a> object is a track
+in an <a class="reference internal" href="MKVFile.html#pymkv.MKVFile" title="pymkv.MKVFile (Python class) — A class that represents an MKV file."><code class="xref py py-class docutils literal notranslate"><span class="pre">MKVFile</span></code></a> mux operation. This option has no effect on standalone track files, only tracks
+that are already part of an MKV file.</p>
+<dl class="field-list simple">
+<dt class="field-odd" id="pymkv.MKVTrack.no_global_tags-type">Type<span class="colon">:</span><a class="headerlink" href="#pymkv.MKVTrack.no_global_tags-type" title="Permalink to this headline">¶</a></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute objdesc">
+<dt class="sig sig-object highlight py" id="pymkv.MKVTrack.no_track_tags">
+<span class="sig-name descname"><span class="pre">no_track_tags</span></span><a class="headerlink" href="#pymkv.MKVTrack.no_track_tags" title="Link to this definition">¶</a></dt>
+<dd><p>If track tags exist in the specified track within the track file, don’t include them when this
+<a class="reference internal" href="#pymkv.MKVTrack" title="pymkv.MKVTrack (Python class) — A class that represents a track for an MKVFile object. MKVTrack objects are video, audio, or subtitles. Tracks can be standalone files or a single track within an MKV file, both can be handled by pymkv. An MKVTrack object can be added to an MKVFile and will be included when the MKV is muxed."><code class="xref py py-class docutils literal notranslate"><span class="pre">MKVTrack</span></code></a> object is a track in an <a class="reference internal" href="MKVFile.html#pymkv.MKVFile" title="pymkv.MKVFile (Python class) — A class that represents an MKV file."><code class="xref py py-class docutils literal notranslate"><span class="pre">MKVFile</span></code></a> mux operation. This option has no
+effect on standalone track files, only tracks that are already part of an MKV file.</p>
+<dl class="field-list simple">
+<dt class="field-odd" id="pymkv.MKVTrack.no_track_tags-type">Type<span class="colon">:</span><a class="headerlink" href="#pymkv.MKVTrack.no_track_tags-type" title="Permalink to this headline">¶</a></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute objdesc">
+<dt class="sig sig-object highlight py" id="pymkv.MKVTrack.no_attachments">
+<span class="sig-name descname"><span class="pre">no_attachments</span></span><a class="headerlink" href="#pymkv.MKVTrack.no_attachments" title="Link to this definition">¶</a></dt>
+<dd><p>If attachments exist in the track file, don’t include them when this <a class="reference internal" href="#pymkv.MKVTrack" title="pymkv.MKVTrack (Python class) — A class that represents a track for an MKVFile object. MKVTrack objects are video, audio, or subtitles. Tracks can be standalone files or a single track within an MKV file, both can be handled by pymkv. An MKVTrack object can be added to an MKVFile and will be included when the MKV is muxed."><code class="xref py py-class docutils literal notranslate"><span class="pre">MKVTrack</span></code></a> object is a track
+in an <a class="reference internal" href="MKVFile.html#pymkv.MKVFile" title="pymkv.MKVFile (Python class) — A class that represents an MKV file."><code class="xref py py-class docutils literal notranslate"><span class="pre">MKVFile</span></code></a> mux operation. This option has no effect on standalone track files, only tracks
+that are already part of an MKV file.</p>
+<dl class="field-list simple">
+<dt class="field-odd" id="pymkv.MKVTrack.no_attachments-type">Type<span class="colon">:</span><a class="headerlink" href="#pymkv.MKVTrack.no_attachments-type" title="Permalink to this headline">¶</a></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method objdesc">
+<dt class="sig sig-object highlight sig-wrap py" id="pymkv.MKVTrack.extract">
+<span class="sig-name descname"><span class="pre">extract</span></span><span class="sig-paren">(</span><span class="sig-param-decl"><em class="sig-param"><a class="n reference internal" href="#pymkv.MKVTrack.extract.output_path" title="pymkv.MKVTrack.extract.output_path (Python parameter) — The path to be used as the output file"><span class="n"><span class="pre">output_path</span></span></a><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="desctype"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">PathLike</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><code class="code python default_value docutils literal highlight highlight-python"><span class="kc">None</span></code></em>, </span><span class="sig-param-decl"><em class="sig-param"><a class="n reference internal" href="#pymkv.MKVTrack.extract.silent" title="pymkv.MKVTrack.extract.silent (Python parameter) — By default the mkvmerge output will be shown unless silent is True."><span class="n"><span class="pre">silent</span></span></a><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="desctype"><span class="pre">bool</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><code class="code python default_value docutils literal highlight highlight-python"><span class="kc">False</span></code></em></span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="desctype"><span class="pre">str</span></span></span></span><a class="headerlink" href="#pymkv.MKVTrack.extract" title="Link to this definition">¶</a></dt>
+<dd><p>Extract the track as a file.</p>
+<dl class="field-list simple">
+<dt class="field-odd" id="pymkv.MKVTrack.extract-parameters">Parameters<span class="colon">:</span><a class="headerlink" href="#pymkv.MKVTrack.extract-parameters" title="Permalink to this headline">¶</a></dt>
+<dd class="field-odd"><dl class="simple api-field highlight">
+<dt id="pymkv.MKVTrack.extract.output_path"><span class="sig-name descname">output_path</span><span class="p"> : </span><span class="desctype"><span class="desctype">str | os.PathLike | None, optional</span></span><a class="headerlink" href="#pymkv.MKVTrack.extract.output_path" title="Permalink to this definition">¶</a></dt><dd><p>The path to be used as the output file</p>
+</dd>
+<dt><span class="sig-name descname">command.</span><span class="p"> : </span><span class="desctype"><span class="desctype">in the mkvextract</span></span></dt><dd><p></p>
+</dd>
+<dt id="pymkv.MKVTrack.extract.silent"><span class="sig-name descname">silent</span><span class="p"> : </span><span class="desctype"><span class="desctype">bool | None, optional</span></span><a class="headerlink" href="#pymkv.MKVTrack.extract.silent" title="Permalink to this definition">¶</a></dt><dd><p>By default the mkvmerge output will be shown unless silent is True.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even" id="pymkv.MKVTrack.extract-returns">Returns<span class="colon">:</span><a class="headerlink" href="#pymkv.MKVTrack.extract-returns" title="Permalink to this headline">¶</a></dt>
+<dd class="field-even"><p>The path of the extracted file.</p>
+</dd>
+<dt class="field-odd" id="pymkv.MKVTrack.extract-return-type">Return type<span class="colon">:</span><a class="headerlink" href="#pymkv.MKVTrack.extract-return-type" title="Permalink to this headline">¶</a></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property objdesc">
+<dt class="sig sig-object highlight py" id="pymkv.MKVTrack.file_id">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">file_id</span></span><span class="p"> <span class="pre">:</span> </span><span class="desctype"><span class="pre">int</span></span><a class="headerlink" href="#pymkv.MKVTrack.file_id" title="Link to this definition">¶</a></dt>
+<dd><p>Get the ID of the file the track belongs to.</p>
+<p>The file ID represents which file the current track is associated with. This is particularly useful
+when handling multiple files.</p>
+<dl class="field-list simple">
+<dt class="field-odd" id="pymkv.MKVTrack.file_id-returns">Returns<span class="colon">:</span><a class="headerlink" href="#pymkv.MKVTrack.file_id-returns" title="Permalink to this headline">¶</a></dt>
+<dd class="field-odd"><p>The file ID.</p>
+</dd>
+<dt class="field-even" id="pymkv.MKVTrack.file_id-return-type">Return type<span class="colon">:</span><a class="headerlink" href="#pymkv.MKVTrack.file_id-return-type" title="Permalink to this headline">¶</a></dt>
+<dd class="field-even"><p>int</p>
+</dd>
+<dt class="field-odd" id="pymkv.MKVTrack.file_id-raises">Raises<span class="colon">:</span><a class="headerlink" href="#pymkv.MKVTrack.file_id-raises" title="Permalink to this headline">¶</a></dt>
+<dd class="field-odd"><p><strong>IndexError</strong> – If the passed in index is out of range of the file’s tracks.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property objdesc">
+<dt class="sig sig-object highlight py" id="pymkv.MKVTrack.file_path">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">file_path</span></span><span class="p"> <span class="pre">:</span> </span><span class="desctype"><span class="pre">str</span></span><a class="headerlink" href="#pymkv.MKVTrack.file_path" title="Link to this definition">¶</a></dt>
+<dd><p>Get the path to the track or MKV file containing the desired track.</p>
+<dl class="field-list simple">
+<dt class="field-odd" id="pymkv.MKVTrack.file_path-returns">Returns<span class="colon">:</span><a class="headerlink" href="#pymkv.MKVTrack.file_path-returns" title="Permalink to this headline">¶</a></dt>
+<dd class="field-odd"><p>The file path.</p>
+</dd>
+<dt class="field-even" id="pymkv.MKVTrack.file_path-return-type">Return type<span class="colon">:</span><a class="headerlink" href="#pymkv.MKVTrack.file_path-return-type" title="Permalink to this headline">¶</a></dt>
+<dd class="field-even"><p>str</p>
+</dd>
+<dt class="field-odd" id="pymkv.MKVTrack.file_path-raises">Raises<span class="colon">:</span><a class="headerlink" href="#pymkv.MKVTrack.file_path-raises" title="Permalink to this headline">¶</a></dt>
+<dd class="field-odd"><p><strong>ValueError</strong> – If <cite>file_path</cite> is not a supported file type.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property objdesc">
+<dt class="sig sig-object highlight py" id="pymkv.MKVTrack.language">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">language</span></span><span class="p"> <span class="pre">:</span> </span><span class="desctype"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><a class="headerlink" href="#pymkv.MKVTrack.language" title="Link to this definition">¶</a></dt>
+<dd><p>Get the language of the track.</p>
+<dl class="field-list simple">
+<dt class="field-odd" id="pymkv.MKVTrack.language-returns">Returns<span class="colon">:</span><a class="headerlink" href="#pymkv.MKVTrack.language-returns" title="Permalink to this headline">¶</a></dt>
+<dd class="field-odd"><p>The language of the track.</p>
+</dd>
+<dt class="field-even" id="pymkv.MKVTrack.language-return-type">Return type<span class="colon">:</span><a class="headerlink" href="#pymkv.MKVTrack.language-return-type" title="Permalink to this headline">¶</a></dt>
+<dd class="field-even"><p>str</p>
+</dd>
+<dt class="field-odd" id="pymkv.MKVTrack.language-raises">Raises<span class="colon">:</span><a class="headerlink" href="#pymkv.MKVTrack.language-raises" title="Permalink to this headline">¶</a></dt>
+<dd class="field-odd"><p><strong>ValueError</strong> – If the passed in language is not an ISO 639-2 language code.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property objdesc">
+<dt class="sig sig-object highlight py" id="pymkv.MKVTrack.language_ietf">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">language_ietf</span></span><span class="p"> <span class="pre">:</span> </span><span class="desctype"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><a class="headerlink" href="#pymkv.MKVTrack.language_ietf" title="Link to this definition">¶</a></dt>
+<dd><p>Get the language of the track with BCP47 format.</p>
+<dl class="field-list simple">
+<dt class="field-odd" id="pymkv.MKVTrack.language_ietf-returns">Returns<span class="colon">:</span><a class="headerlink" href="#pymkv.MKVTrack.language_ietf-returns" title="Permalink to this headline">¶</a></dt>
+<dd class="field-odd"><p>The language of the track in BCP47 format.</p>
+</dd>
+<dt class="field-even" id="pymkv.MKVTrack.language_ietf-return-type">Return type<span class="colon">:</span><a class="headerlink" href="#pymkv.MKVTrack.language_ietf-return-type" title="Permalink to this headline">¶</a></dt>
+<dd class="field-even"><p>str</p>
+</dd>
+<dt class="field-odd" id="pymkv.MKVTrack.language_ietf-raises">Raises<span class="colon">:</span><a class="headerlink" href="#pymkv.MKVTrack.language_ietf-raises" title="Permalink to this headline">¶</a></dt>
+<dd class="field-odd"><p><strong>ValueError</strong> – If the passed in language is not a BCP47 language code.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property objdesc">
+<dt class="sig sig-object highlight py" id="pymkv.MKVTrack.pts">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">pts</span></span><span class="p"> <span class="pre">:</span> </span><span class="desctype"><span class="pre">int</span></span><a class="headerlink" href="#pymkv.MKVTrack.pts" title="Link to this definition">¶</a></dt>
+<dd><p>Get the Presentation Timestamp (PTS) of the track.</p>
+<p>The PTS in multimedia files indicates the exact time when a frame or audio sample
+should be presented to the user, ensuring accurate synchronization between audio and video streams.</p>
+<dl class="field-list simple">
+<dt class="field-odd" id="pymkv.MKVTrack.pts-returns">Returns<span class="colon">:</span><a class="headerlink" href="#pymkv.MKVTrack.pts-returns" title="Permalink to this headline">¶</a></dt>
+<dd class="field-odd"><p>The PTS value.</p>
+</dd>
+<dt class="field-even" id="pymkv.MKVTrack.pts-return-type">Return type<span class="colon">:</span><a class="headerlink" href="#pymkv.MKVTrack.pts-return-type" title="Permalink to this headline">¶</a></dt>
+<dd class="field-even"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property objdesc">
+<dt class="sig sig-object highlight py" id="pymkv.MKVTrack.sync">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">sync</span></span><span class="p"> <span class="pre">:</span> </span><span class="desctype"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><a class="headerlink" href="#pymkv.MKVTrack.sync" title="Link to this definition">¶</a></dt>
+<dd><p>Get the synchronization offset for the track.</p>
+<p>This property represents the synchronization offset for the track.
+Positive values delay the track, while negative values advance it.</p>
+<dl class="field-list simple">
+<dt class="field-odd" id="pymkv.MKVTrack.sync-returns">Returns<span class="colon">:</span><a class="headerlink" href="#pymkv.MKVTrack.sync-returns" title="Permalink to this headline">¶</a></dt>
+<dd class="field-odd"><p>The current synchronization offset in milliseconds.</p>
+</dd>
+<dt class="field-even" id="pymkv.MKVTrack.sync-return-type">Return type<span class="colon">:</span><a class="headerlink" href="#pymkv.MKVTrack.sync-return-type" title="Permalink to this headline">¶</a></dt>
+<dd class="field-even"><p>int</p>
+</dd>
+</dl>
+<div class="note admonition">
+<p class="admonition-title">Note</p>
+<p>Setting this property allows you to adjust the track timing:
+- Positive values delay the track (shift it later in time)
+- Negative values advance the track (shift it earlier in time)</p>
+</div>
+<p class="example rubric">Example</p>
+<p>track.sync = 1000  # Delay the track by 1 second
+track.sync = -500  # Advance the track by 0.5 seconds</p>
+</dd></dl>
+
+<dl class="py property objdesc">
+<dt class="sig sig-object highlight py" id="pymkv.MKVTrack.tag_entries">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">tag_entries</span></span><span class="p"> <span class="pre">:</span> </span><span class="desctype"><span class="pre">int</span></span><a class="headerlink" href="#pymkv.MKVTrack.tag_entries" title="Link to this definition">¶</a></dt>
+<dd><p>Gets the number of existing tag entries in the track.</p>
+<dl class="field-list simple">
+<dt class="field-odd" id="pymkv.MKVTrack.tag_entries-returns">Returns<span class="colon">:</span><a class="headerlink" href="#pymkv.MKVTrack.tag_entries-returns" title="Permalink to this headline">¶</a></dt>
+<dd class="field-odd"><p>The number of entries.</p>
+</dd>
+<dt class="field-even" id="pymkv.MKVTrack.tag_entries-return-type">Return type<span class="colon">:</span><a class="headerlink" href="#pymkv.MKVTrack.tag_entries-return-type" title="Permalink to this headline">¶</a></dt>
+<dd class="field-even"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property objdesc">
+<dt class="sig sig-object highlight py" id="pymkv.MKVTrack.tags">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">tags</span></span><span class="p"> <span class="pre">:</span> </span><span class="desctype"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><a class="headerlink" href="#pymkv.MKVTrack.tags" title="Link to this definition">¶</a></dt>
+<dd><p>Get the tags file to include with the track.</p>
+<dl class="field-list simple">
+<dt class="field-odd" id="pymkv.MKVTrack.tags-returns">Returns<span class="colon">:</span><a class="headerlink" href="#pymkv.MKVTrack.tags-returns" title="Permalink to this headline">¶</a></dt>
+<dd class="field-odd"><p>The path to the tags file.</p>
+</dd>
+<dt class="field-even" id="pymkv.MKVTrack.tags-return-type">Return type<span class="colon">:</span><a class="headerlink" href="#pymkv.MKVTrack.tags-return-type" title="Permalink to this headline">¶</a></dt>
+<dd class="field-even"><p>str</p>
+</dd>
+<dt class="field-odd" id="pymkv.MKVTrack.tags-raises">Raises<span class="colon">:</span><a class="headerlink" href="#pymkv.MKVTrack.tags-raises" title="Permalink to this headline">¶</a></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>FileNotFoundError</strong> – If the passed in file does not exist or is not a file.</p></li>
+<li><p><strong>TypeError</strong> – If the passed in file is not of type str.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property objdesc">
+<dt class="sig sig-object highlight py" id="pymkv.MKVTrack.track_codec">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">track_codec</span></span><span class="p"> <span class="pre">:</span> </span><span class="desctype"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><a class="headerlink" href="#pymkv.MKVTrack.track_codec" title="Link to this definition">¶</a></dt>
+<dd><p>Get the codec of the track.</p>
+<dl class="field-list simple">
+<dt class="field-odd" id="pymkv.MKVTrack.track_codec-returns">Returns<span class="colon">:</span><a class="headerlink" href="#pymkv.MKVTrack.track_codec-returns" title="Permalink to this headline">¶</a></dt>
+<dd class="field-odd"><p>The codec of the track, such as h264 or AAC.</p>
+</dd>
+<dt class="field-even" id="pymkv.MKVTrack.track_codec-return-type">Return type<span class="colon">:</span><a class="headerlink" href="#pymkv.MKVTrack.track_codec-return-type" title="Permalink to this headline">¶</a></dt>
+<dd class="field-even"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property objdesc">
+<dt class="sig sig-object highlight py" id="pymkv.MKVTrack.track_id">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">track_id</span></span><span class="p"> <span class="pre">:</span> </span><span class="desctype"><span class="pre">int</span></span><a class="headerlink" href="#pymkv.MKVTrack.track_id" title="Link to this definition">¶</a></dt>
+<dd><p>Get the ID of the track within the file.</p>
+<dl class="field-list simple">
+<dt class="field-odd" id="pymkv.MKVTrack.track_id-returns">Returns<span class="colon">:</span><a class="headerlink" href="#pymkv.MKVTrack.track_id-returns" title="Permalink to this headline">¶</a></dt>
+<dd class="field-odd"><p>The track ID.</p>
+</dd>
+<dt class="field-even" id="pymkv.MKVTrack.track_id-return-type">Return type<span class="colon">:</span><a class="headerlink" href="#pymkv.MKVTrack.track_id-return-type" title="Permalink to this headline">¶</a></dt>
+<dd class="field-even"><p>int</p>
+</dd>
+<dt class="field-odd" id="pymkv.MKVTrack.track_id-raises">Raises<span class="colon">:</span><a class="headerlink" href="#pymkv.MKVTrack.track_id-raises" title="Permalink to this headline">¶</a></dt>
+<dd class="field-odd"><p><strong>IndexError</strong> – If the passed in index is out of range of the file’s tracks.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property objdesc">
+<dt class="sig sig-object highlight py" id="pymkv.MKVTrack.track_type">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">track_type</span></span><span class="p"> <span class="pre">:</span> </span><span class="desctype"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><a class="headerlink" href="#pymkv.MKVTrack.track_type" title="Link to this definition">¶</a></dt>
+<dd><p>Get the type of the track.</p>
+<dl class="field-list simple">
+<dt class="field-odd" id="pymkv.MKVTrack.track_type-returns">Returns<span class="colon">:</span><a class="headerlink" href="#pymkv.MKVTrack.track_type-returns" title="Permalink to this headline">¶</a></dt>
+<dd class="field-odd"><p>The type of track, such as video or audio.</p>
+</dd>
+<dt class="field-even" id="pymkv.MKVTrack.track_type-return-type">Return type<span class="colon">:</span><a class="headerlink" href="#pymkv.MKVTrack.track_type-return-type" title="Permalink to this headline">¶</a></dt>
+<dd class="field-even"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+
+
+
+
+
+
+  
+  
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+  <script>var tabs=__md_get("__tabs");if(Array.isArray(tabs))e:for(var set of document.querySelectorAll(".tabbed-set")){var labels=set.querySelector(".tabbed-labels");for(var tab of tabs)for(var label of labels.getElementsByTagName("label"))if(label.innerText.trim()===tab){var input=document.getElementById(label.htmlFor);input.checked=!0;continue e}}</script>
+
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  
+  
+  <div class="md-footer-meta md-typeset">
+    
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-footer-copyright__highlight">
+        &#169; Copyright 2025, Sheldon Woodward &amp; GitBib.
+        
+    </div>
+  
+    Created using
+    <a href="https://www.sphinx-doc.org/" target="_blank" rel="noopener">Sphinx</a>
+    8.2.3.
+     and
+    <a href="https://github.com/jbms/sphinx-immaterial/" target="_blank" rel="noopener">Sphinx-Immaterial</a>
+  
+</div>
+      
+        <div class="md-social">
+  
+    
+    
+    
+    
+    <a href="https://github.com/GitBib/pymkv2" target="_blank" rel="noopener" title="Source on github.com" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 496 512"><!--! Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M165.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M244.8 8C106.1 8 0 113.3 0 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C428.2 457.8 496 362.9 496 252 496 113.3 383.5 8 244.8 8M97.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+    </a>
+  
+    
+    
+    
+    
+      
+      
+    
+    <a href="https://pypi.org/project/pymkv2/" target="_blank" rel="noopener" title="pypi.org" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M439.8 200.5c-7.7-30.9-22.3-54.2-53.4-54.2h-40.1v47.4c0 36.8-31.2 67.8-66.8 67.8H172.7c-29.2 0-53.4 25-53.4 54.3v101.8c0 29 25.2 46 53.4 54.3 33.8 9.9 66.3 11.7 106.8 0 26.9-7.8 53.4-23.5 53.4-54.3v-40.7H226.2v-13.6h160.2c31.1 0 42.6-21.7 53.4-54.2 11.2-33.5 10.7-65.7 0-108.6M286.2 404c11.1 0 20.1 9.1 20.1 20.3 0 11.3-9 20.4-20.1 20.4-11 0-20.1-9.2-20.1-20.4.1-11.3 9.1-20.3 20.1-20.3M167.8 248.1h106.8c29.7 0 53.4-24.5 53.4-54.3V91.9c0-29-24.4-50.7-53.4-55.6-35.8-5.9-74.7-5.6-106.8.1-45.2 8-53.4 24.7-53.4 55.6v40.7h106.9v13.6h-147c-31.1 0-58.3 18.7-66.8 54.2-9.8 40.7-10.2 66.1 0 108.6 7.6 31.6 25.7 54.2 56.8 54.2H101v-48.8c0-35.3 30.5-66.4 66.8-66.4m-6.7-142.6c-11.1 0-20.1-9.1-20.1-20.3.1-11.3 9-20.4 20.1-20.4 11 0 20.1 9.2 20.1 20.4s-9 20.3-20.1 20.3"/></svg>
+    </a>
+  
+</div>
+      
+    </div>
+    
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    <script id="__config" type="application/json">{"base": "..", "features": ["navigation.expand", "navigation.sections", "navigation.top", "search.share", "toc.follow", "toc.sticky", "content.tabs.link", "announce.dismiss"], "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
+    
+      
+        <script src="../_static/sphinx_immaterial_theme.32136f45f91ae6956.min.js?v=a7a9472a"></script>
+    
+  </body>
+</html>
