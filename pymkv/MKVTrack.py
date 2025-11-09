@@ -223,8 +223,8 @@ class MKVTrack:
 
     @track_name.setter
     def track_name(self, new_name: str | None) -> None:
-        print( f"({self.track_id}) Current name = { self._track_name }" )
-        print( f"({self.track_id}) New name = { new_name }" )
+#        print( f"({self.track_id}) Current name = { self._track_name }" )
+#        print( f"({self.track_id}) New name = { new_name }" )
         if self._track_name != new_name:
             self._track_name = new_name
             if self.__record_changes:

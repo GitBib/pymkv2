@@ -297,7 +297,18 @@ class MKVFile:
             self.title = title
             self._propery_changes.extend( [ "--set", f"title='{title}'" ] )
 
-    def command(  # noqa: PLR0912,PLR0915
+    def command(
+        self,
+        output_path: str | None = None,
+        subprocess: bool = False,
+        mkvtool: str = 'merge'
+    ) -> str | list:
+        if 'propedit' == mkvtool:
+            return self.command_propedit( subprocess = subprocess )
+        else: # if mkvtool == 'merge' or anything else currently undefined
+            return self.command_merge( output_path = output_path, subprocess = subprocess )
+
+    def command_merge(  # noqa: PLR0912,PLR0915
         self,
         output_path: str,
         subprocess: bool = False,
@@ -440,63 +451,7 @@ class MKVFile:
 
         return command if subprocess else " ".join(command)
 
-    def mux(self, output_path: str | os.PathLike, silent: bool = False, ignore_warning: bool = False) -> int:
-        """
-        Mixes the specified :class:`~pymkv.MKVFile`.
-
-        Parameters
-        ----------
-        output_path : str
-            The path to be used as the output file in the mkvmerge command.
-        silent : bool, optional
-            By default the mkvmerge output will be shown unless silent is True.
-        ignore_warning : bool, optional
-            If set to True, the muxing process will ignore any warnings (exit code 1) from mkvmerge.
-        Returns
-        -------
-        int of Any
-            return code
-
-        Raises
-        ------
-        ValueError
-            Raised if the external mkvmerge command fails with a non-zero exit status
-            (except for warnings when ignore_warning is True). This includes scenarios
-            such as invalid command arguments, errors in processing the :class:`~pymkv.MKVFile`,
-            or issues with output file writing. The error message provides details about
-            the failure based on the output of the command.
-        """
-        output_path = str(Path(output_path).expanduser())
-        args = self.command(output_path, subprocess=True)
-
-        stdout = sp.DEVNULL if silent else None
-        stderr = sp.PIPE
-
-        proc = sp.Popen(args, stdout=stdout, stderr=stderr)  # noqa: S603
-        _, err = proc.communicate()
-
-        if proc.returncode != 0:
-            # Handle warnings (exit code 1) if ignore_warning is True
-            if proc.returncode == 1 and ignore_warning:
-                logging.warning("Process completed with warnings, but ignored as per the setting.")
-                return proc.returncode
-
-            # For other non-zero exit codes, raise an exception
-            error_message = f"Command failed with non-zero exit status {proc.returncode}"
-            if err:
-                error_details = err.decode()
-                error_message += f"\nError Output:\n{error_details}"
-                logging.error(error_details)
-            logging.error(
-                "Non-zero exit status when running %s (%s)",
-                args,
-                proc.returncode,
-            )
-            raise ValueError(error_message)
-
-        return proc.returncode
-
-    def propedit(
+    def command_propedit(
         self,
         subprocess: bool = False,
     ) -> str | list:
@@ -524,35 +479,54 @@ class MKVFile:
                 command += track.property_changes
         return command if subprocess else " ".join(command)
 
-    def update(
+    def mux(
         self,
+        output_path: str | os.PathLike,
         silent: bool = False,
         ignore_warning: bool = False
     ) -> int:
         """
-        Applies the updates to the MKV properties.
+        Compatibility stub to just forward arguments to run_command()
+        """
+        return self.command( output_path = output_path, silent = silent, ignore_warning = ignore_warning, mkvtool = 'merge' )
+
+    def run_command(
+        self,
+        output_path: str | os.PathLike | None = None,
+        silent: bool = False,
+        ignore_warning: bool = False,
+        mkvtool: str = 'merge'
+    ) -> int:
+        """
+        Mixes the specified :class:`~pymkv.MKVFile`.
 
         Parameters
         ----------
+        output_path : str
+            The path to be used as the output file in the mkvmerge command.
         silent : bool, optional
-            By default the mkvpropedit output will be shown unless silent is True.
+            By default the mkvmerge output will be shown unless silent is True.
         ignore_warning : bool, optional
-            If set to True, the update process will ignore any warnings (exit code 1) from mkvpropedit.
+            If set to True, the muxing process will ignore any warnings (exit code 1) from mkvmerge.
         Returns
         -------
-        inf of Any
+        int of Any
             return code
 
         Raises
         ------
         ValueError
-            Raised if the external mkvpropedit command fails with a non-zero exit status
+            Raised if the external mkvmerge command fails with a non-zero exit status
             (except for warnings when ignore_warning is True). This includes scenarios
             such as invalid command arguments, errors in processing the :class:`~pymkv.MKVFile`,
             or issues with output file writing. The error message provides details about
             the failure based on the output of the command.
         """
-        args = self.propedit( subprocess=True )
+        if 'propedit' == mkvtool:
+            args = self.command( subprocess = True, mkvtool = 'propedit' )
+        else: # if mkvtool == 'merge' or anything else currently undefined
+            output_path = str(Path(output_path).expanduser())
+            args = self.command( output_path = output_path, subprocess = True, mkvtool = 'merge' )
 
         stdout = sp.DEVNULL if silent else None
         stderr = sp.PIPE
