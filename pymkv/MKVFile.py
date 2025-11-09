@@ -105,6 +105,11 @@ class MKVFile:
         mkvmerge_path: str | os.PathLike | Iterable[str] = "mkvmerge",
         mkvpropedit_path: str | os.PathLike | Iterable[str] = "mkvpropedit",
     ) -> None:
+        # gather changes to MKV properties for mkvpropedit
+        self.__property_changes: list[str] = []
+        # … but not yet
+        self.__record_changes: bool = False
+
         self.mkvmerge_path: tuple[str, ...] = prepare_mkvtoolnix_path(mkvmerge_path)
         self.mkvpropedit_path: tuple[str, ...] = prepare_mkvtoolnix_path(mkvpropedit_path)
         self.title = title
@@ -119,7 +124,6 @@ class MKVFile:
         self._number_file = 0
         self._info_json: dict[str, Any] | None = None
         self._global_tag_entries = 0
-        self._property_changes: list[str] = []
 
         # exclusions
         self.no_track_statistics_tags = False
@@ -173,40 +177,36 @@ class MKVFile:
                     mkvmerge_path=self.mkvmerge_path,
                     existing_info=self._info_json,
                     tag_entries=track_tag_entries.get(track_id, 0),
-                    track_name = track["properties"]["track_name"] if "track_name" in track["properties"] else None,
-                    language = track["properties"]["language"] if "language" in track["properties"] else None,
-                    language_ietf = track["properties"]["language_ietf"] if "language_ietf" in track["properties"] else None,
-                    default_track = track["properties"]["default_track"] if "default_track" in track["properties"] else False,
-                    forced_track = track["properties"]["forced_track"] if "forced_track" in track["properties"] else False,
-                    flag_commentary = track["properties"]["flag_commentary"] if "flag_commentary" in track["properties"] else False,
-                    flag_hearing_impaired = track["properties"]["flag_hearing_impaired"] if "flag_hearing_impaired" in track["properties"] else False,
-                    flag_visual_impaired = track["properties"]["flag_visual_impaired"] if "flag_visual_impaired" in track["properties"] else False,
-                    flag_text_descriptions = track["properties"]["flag_text_descriptions"] if "flag_text_descriptions" in track["properties"] else False,
-                    flag_original = track["properties"]["flag_original"] if "flag_original" in track["properties"] else False,
                 )
-#                if "track_name" in track["properties"]:
-#                    new_track.track_name = track["properties"]["track_name"]
-#                if "language" in track["properties"]:
-#                    new_track.language = track["properties"]["language"]
-#                if "language_ietf" in track["properties"]:
-#                    new_track.language_ietf = track["properties"]["language_ietf"]
-#                if "default_track" in track["properties"]:
-#                    new_track.default_track = track["properties"]["default_track"]
-#                if "forced_track" in track["properties"]:
-#                    new_track.forced_track = track["properties"]["forced_track"]
-#                if "flag_commentary" in track["properties"]:
-#                    new_track.flag_commentary = track["properties"]["flag_commentary"]
-#                if "flag_hearing_impaired" in track["properties"]:
-#                    new_track.flag_hearing_impaired = track["properties"]["flag_hearing_impaired"]
-#                if "flag_visual_impaired" in track["properties"]:
-#                    new_track.flag_visual_impaired = track["properties"]["flag_visual_impaired"]
-#                if "flag_original" in track["properties"]:
-#                    new_track.flag_original = track["properties"]["flag_original"]
+                if "track_name" in track["properties"]:
+                    new_track.track_name = track["properties"]["track_name"]
+                if "language" in track["properties"]:
+                    new_track.language = track["properties"]["language"]
+                if "language_ietf" in track["properties"]:
+                    new_track.language_ietf = track["properties"]["language_ietf"]
+                if "default_track" in track["properties"]:
+                    new_track.default_track = track["properties"]["default_track"]
+                if "forced_track" in track["properties"]:
+                    new_track.forced_track = track["properties"]["forced_track"]
+                if "flag_commentary" in track["properties"]:
+                    new_track.flag_commentary = track["properties"]["flag_commentary"]
+                if "flag_hearing_impaired" in track["properties"]:
+                    new_track.flag_hearing_impaired = track["properties"]["flag_hearing_impaired"]
+                if "flag_visual_impaired" in track["properties"]:
+                    new_track.flag_visual_impaired = track["properties"]["flag_visual_impaired"]
+                if "flag_text_descriptions" in track["properties"]:
+                    new_track.flag_text_descriptions = track["properties"]["flag_text_descriptions"]
+                if "flag_original" in track["properties"]:
+                    new_track.flag_original = track["properties"]["flag_original"]
 
                 self.add_track(new_track, new_file=False)
 
         # split options
         self._split_options: list[str] = []
+
+        # On __init__ end switch on recording of changes done by object
+        # consumer
+        self.__record_changes = True
 
     def __repr__(self) -> str:
         """
@@ -216,6 +216,27 @@ class MKVFile:
             str: A string representation of the object's attributes.
         """
         return repr(self.__dict__)
+
+    @property
+    def record_changes(self) -> bool:
+        return self.__record_changes
+
+    @record_changes.setter
+    def record_changes(self, state: bool) -> bool:
+        self.__record_changes = state
+
+    @property
+    def property_changes( self, include_tracks = False ) -> list[str]:
+        property_changes = []
+        if len( self.__property_changes ) > 0:
+            property_changes.extend( [ "--edit", "info" ] )
+            property_changes += self.__property_changes
+        if include_tracks:
+            for track in self.tracks:
+                if len(track.property_changes) > 0:
+                    property_changes.extend( [ "--edit", f"track:{(track.track_id + 1)!s}" ] )
+                    property_changes += track.property_changes
+        return self.property_changes
 
     @property
     def chapter_language(self) -> str | None:
@@ -271,7 +292,7 @@ class MKVFile:
         """
         if title == None or title == "":
             self.title = None
-            self._property_changes.extend( [ "--delete", "title" ] )
+            self.__property_changes.extend( [ "--delete", "title" ] )
         else:
             self.title = title
             self._propery_changes.extend( [ "--set", f"title='{title}'" ] )
@@ -494,13 +515,13 @@ class MKVFile:
             list of strings with no spaces if `subprocess` is True.
         """
         command = [ *self.mkvpropedit_path, self._file_path ]
-        if len( self._property_changes ) > 0:
+        if len( self.__property_changes ) > 0:
             command.extend( [ "--edit", "info" ] )
-            command += self._property_changes
+            command += self.__property_changes
         for track in self.tracks:
-            if len(track._property_changes) > 0:
+            if len(track.property_changes) > 0:
                 command.extend( [ "--edit", f"track:{(track.track_id + 1)!s}" ] )
-                command += track._property_changes
+                command += track.property_changes
         return command if subprocess else " ".join(command)
 
     def update(
@@ -1142,7 +1163,7 @@ class MKVFile:
             Raised if file at `file_path` cannot be verified as an MKV.
         """
         self._link_to_previous_file = checking_file_path(file_path)
-        self._property_changes.extend( [ "--set", f"prev-filename='{ quote( self._link_to_previous_file ) }'" ] )
+        self.__property_changes.extend( [ "--set", f"prev-filename='{ quote( self._link_to_previous_file ) }'" ] )
 
     def link_to_next(self, file_path: str) -> None:
         """
@@ -1161,7 +1182,7 @@ class MKVFile:
             Raised if file at `file_path` cannot be verified as an MKV.
         """
         self._link_to_next_file = checking_file_path(file_path)
-        self._property_changes.extend( [ "--set", f"next-filename='{ quote( self._link_to_next_file ) }'" ] )
+        self.__property_changes.extend( [ "--set", f"next-filename='{ quote( self._link_to_next_file ) }'" ] )
 
     def link_to_none(self) -> None:
         """
@@ -1172,8 +1193,8 @@ class MKVFile:
         """
         self._link_to_previous_file = None
         self._link_to_next_file = None
-        self._property_changes.extend( [ "--delete", " prev-filename" ] )
-        self._property_changes.extend( [ "--delete", " next-filename" ] )
+        self.__property_changes.extend( [ "--delete", " prev-filename" ] )
+        self.__property_changes.extend( [ "--delete", " next-filename" ] )
 
     def chapters(self, file_path: str, language: str | None = None) -> None:
         """
