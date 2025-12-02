@@ -15,7 +15,7 @@ jobs:
     if: github.event_name == 'push' || !github.event.pull_request.draft
     steps:
       - name: Check out repository
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
 
       - name: Install uv
         id: setup-uv
