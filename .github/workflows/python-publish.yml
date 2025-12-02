@@ -10,7 +10,7 @@ jobs:
     if: github.event_name == 'release'
     steps:
     - name: Check out repository
-      uses: actions/checkout@v5
+      uses: actions/checkout@v6
 
     - name: Get the tag name for the release
       id: vars
