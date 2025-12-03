@@ -156,6 +156,39 @@ def verify_mkvmerge(
     return _verify_mkvmerge_cached(mkvmerge_command)
 
 
+@cache
+def _verify_mkvpropedit_cached(mkvpropedit_path_tuple: tuple[str, ...]) -> bool:
+    """Internal cached function to verify mkvpropedit availability."""
+    try:
+        mkvpropedit_command = list(mkvpropedit_path_tuple)
+        mkvpropedit_command.append("-V")
+        output = sp.check_output(mkvpropedit_command).decode()  # noqa: S603
+    except (sp.CalledProcessError, FileNotFoundError):
+        return False
+    return bool(match("mkvpropedit.*", output))
+
+
+def verify_mkvpropedit(
+    mkvpropedit_path: str | os.PathLike | Iterable[str] = "mkvpropedit",
+) -> bool:
+    """Verify if mkvpropedit is available at the specified path.
+
+    Parameters
+    ----------
+    mkvpropedit_path : str | os.PathLike | Iterable[str], optional
+        The path to the mkvpropedit executable. Defaults to "mkvpropedit".
+
+    Returns
+    -------
+    bool
+        True if mkvpropedit is available at the specified path, False otherwise.
+    """
+    mkvpropedit_command = prepare_mkvtoolnix_path(mkvpropedit_path)
+    if isinstance(mkvpropedit_command, list):
+        mkvpropedit_command = tuple(mkvpropedit_command)
+    return _verify_mkvpropedit_cached(mkvpropedit_command)
+
+
 def verify_matroska(
     file_path: str | os.PathLike[Any],
     mkvmerge_path: str | os.PathLike | Iterable[str] = "mkvmerge",
