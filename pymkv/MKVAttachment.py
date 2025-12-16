@@ -196,26 +196,17 @@ class MKVAttachment:
 
         # Determine output path
         if output_path is None:
-            # Extract to same directory as source file
-            source_dir = Path(self.file_path).parent
-            output_file = source_dir / (self.file_name or f"attachment_{self.attachment_id}")
+            output_path = Path(self.file_path).parent / (self.file_name or f"attachment_{self.attachment_id}")
         else:
-            output_path_obj = Path(output_path).expanduser()
-            if output_path_obj.is_dir():
-                # If output_path is a directory, use original filename
-                output_file = output_path_obj / (self.file_name or f"attachment_{self.attachment_id}")
-            else:
-                # Use the provided file path
-                output_file = output_path_obj
-
-        output_file_str = str(output_file)
+            output_path = Path(output_path) / (self.file_name or f"attachment_{self.attachment_id}")
+        output_path = str(output_path.expanduser())
 
         # Build mkvextract command
         command = [
             *self.mkvextract_path,
             "attachments",
             str(self.file_path),
-            f"{self.attachment_id}:{output_file_str}",
+            f"{self.attachment_id}:{output_path}",
         ]
 
         if silent:
@@ -227,4 +218,4 @@ class MKVAttachment:
         else:
             sp.run(command, check=True, capture_output=True)  # noqa: S603
 
-        return output_file_str
+        return output_path
