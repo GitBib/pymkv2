@@ -183,6 +183,22 @@ class MKVFile:
 
                 self.add_track(new_track, new_file=False)
 
+            # add attachments with info
+            for attachment_info in info_json.get("attachments", []):
+                attachment_id = attachment_info["id"]
+                new_attachment = MKVAttachment(
+                    file_path=file_path,
+                    attachment_id=attachment_id,
+                    mkvextract_path=self.mkvmerge_path[0].replace("mkvmerge", "mkvextract"),
+                    name=attachment_info.get("file_name"),
+                    description=attachment_info.get("description"),
+                    file_name=attachment_info.get("file_name"),
+                    size=attachment_info.get("size"),
+                )
+                if "content_type" in attachment_info:
+                    new_attachment.mime_type = attachment_info["content_type"]
+                self.attachments.append(new_attachment)
+
         # split options
         self._split_options: list[str] = []
 
@@ -334,6 +350,16 @@ class MKVFile:
 
         # add attachments
         for attachment in self.attachments:
+            # Skip existing attachments from the source file (they don't have a separate file_path)
+            # Only add new attachments that have a file_path pointing to a file to attach
+            if attachment.attachment_id is not None:
+                # This is an existing attachment from the source MKV, skip it
+                continue
+
+            if attachment.file_path is None:
+                # This attachment doesn't have a file to attach, skip it
+                continue
+
             # info
             if attachment.name is not None:
                 command.extend(["--attachment-name", attachment.name])
