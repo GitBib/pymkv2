@@ -23,6 +23,8 @@ functionality that is missing or an error in the docs, please open a new issue `
     pymkv/MKVAttachment
     pymkv/Timestamp
     pymkv/Verifications
+    pymkv/models
+
 
 Install
 -------

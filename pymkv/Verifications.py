@@ -14,22 +14,22 @@ Examples
 Basic path verification::
 
     >>> from pymkv.Verifications import checking_file_path
-    >>> file_path = checking_file_path("path/to/file.mkv")
-    >>> print(f"Valid file path: {file_path}")
+    >>> file_path = checking_file_path("path/to/file.mkv")  # doctest: +SKIP
+    >>> print(f"Valid file path: {file_path}")  # doctest: +SKIP
 
 Checking MKVToolNix availability::
 
-    >>> from pymkv.Verifications import verify_mkvmerge
-    >>> if verify_mkvmerge("mkvmerge"):
-    ...     print("MKVToolNix is ready to use")
+    >>> from pymkv.Verifications import verify_mkvmerge # doctest: +SKIP
+    >>> if verify_mkvmerge("mkvmerge"): # doctest: +SKIP
+    ...     print("MKVToolNix is ready to use") # doctest: +SKIP
 
 Full file verification::
 
-    >>> from pymkv.Verifications import verify_matroska, verify_supported
-    >>> file_path = "path/to/file.mkv"
-    >>> if verify_matroska(file_path, "mkvmerge"):
-    ...     if verify_supported(file_path):
-    ...         print("File is a valid and supported Matroska file")
+    >>> from pymkv.Verifications import verify_matroska, verify_supported # doctest: +SKIP
+    >>> file_path = "path/to/file.mkv" # doctest: +SKIP
+    >>> if verify_matroska(file_path, "mkvmerge"): # doctest: +SKIP
+    ...     if verify_supported(file_path): # doctest: +SKIP
+    ...         print("File is a valid and supported Matroska file") # doctest: +SKIP
 
 See Also
 --------
@@ -41,7 +41,6 @@ See Also
 
 from __future__ import annotations
 
-import json
 import os
 import subprocess as sp
 from collections.abc import Iterable, Sequence
@@ -50,6 +49,9 @@ from pathlib import Path
 from re import match
 from typing import Any
 
+import msgspec
+
+from pymkv.models import MkvMergeOutput
 from pymkv.utils import prepare_mkvtoolnix_path
 
 
@@ -87,7 +89,7 @@ def get_file_info(
     file_path: str | os.PathLike[Any],
     mkvmerge_path: str | os.PathLike | Iterable[str],
     check_path: bool = True,
-) -> dict[str, Any]:
+) -> MkvMergeOutput:
     """Get information about a media file using mkvmerge.
 
     Parameters
@@ -101,26 +103,54 @@ def get_file_info(
 
     Returns
     -------
-    dict[str, Any]
-        A dictionary containing the parsed JSON output from mkvmerge,
+    MkvMergeOutput
+        A struct containing the parsed JSON output from mkvmerge,
         which includes detailed information about the media file.
 
     Raises
     ------
     subprocess.CalledProcessError
         If mkvmerge fails to execute or returns a non-zero exit status.
-    json.JSONDecodeError
+    msgspec.ValidationError, msgspec.DecodeError
         If the output from mkvmerge cannot be parsed as JSON.
     FileNotFoundError
         If check_path is True and the file does not exist.
     TypeError
         If check_path is True and file_path is not a string or PathLike object.
     """
+    return msgspec.json.decode(
+        get_file_info_raw(file_path, mkvmerge_path, check_path=check_path),
+        type=MkvMergeOutput,
+        strict=False,
+    )
+
+
+def get_file_info_raw(
+    file_path: str | os.PathLike[Any],
+    mkvmerge_path: str | os.PathLike | Iterable[str],
+    check_path: bool = True,
+) -> bytes:
+    """Get raw information about a media file using mkvmerge.
+
+    Parameters
+    ----------
+    file_path : str | os.PathLike[Any]
+        The path to the media file to analyze.
+    mkvmerge_path : str | os.PathLike | Iterable[str]
+        The path to the mkvmerge executable or a list of command parts.
+    check_path : bool, optional
+        Whether to check and validate the file path. Defaults to True.
+
+    Returns
+    -------
+    bytes
+        The raw stdout bytes from mkvmerge -J.
+    """
     if check_path:
         file_path = checking_file_path(file_path)
 
     cmds = [*prepare_mkvtoolnix_path(mkvmerge_path), "-J", file_path]
-    return json.loads(sp.check_output(cmds).decode())  # noqa: S603
+    return sp.check_output(cmds)  # noqa: S603
 
 
 @cache
@@ -196,12 +226,12 @@ def verify_matroska(
     try:
         if isinstance(mkvmerge_path, Sequence) and not isinstance(mkvmerge_path, str):
             mkvmerge_path = tuple(mkvmerge_path)
-        info_json: dict[str, Any] = get_file_info(file_path, mkvmerge_path)
+        info = get_file_info(file_path, mkvmerge_path)
 
     except sp.CalledProcessError as e:
         msg = f'"{file_path}" could not be opened'
         raise ValueError(msg) from e
-    return info_json["container"]["type"] == "Matroska"
+    return info.container.type == "Matroska"
 
 
 def verify_file_path_and_mkvmerge(
@@ -276,11 +306,11 @@ def verify_recognized(
     try:
         if isinstance(mkvmerge_path, list):
             mkvmerge_path = tuple(mkvmerge_path)
-        info_json = get_file_info(file_path, mkvmerge_path, check_path=False)
+        info = get_file_info(file_path, mkvmerge_path, check_path=False)
     except sp.CalledProcessError as e:
         msg = f'"{file_path}" could not be opened'
         raise ValueError(msg) from e
-    return info_json["container"]["recognized"]
+    return info.container.recognized
 
 
 def verify_supported(
@@ -320,8 +350,8 @@ def verify_supported(
     try:
         if isinstance(mkvmerge_path, list):
             mkvmerge_path = tuple(mkvmerge_path)
-        info_json = get_file_info(fp, mkvmerge_path, check_path=False)
+        info = get_file_info(fp, mkvmerge_path, check_path=False)
     except sp.CalledProcessError as e:
         msg = f'"{file_path}" could not be opened'
         raise ValueError(msg) from e
-    return info_json["container"]["supported"]
+    return info.container.supported
