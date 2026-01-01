@@ -1,7 +1,12 @@
 import subprocess as sp
+import sys
 from unittest.mock import MagicMock, patch
 
 from pymkv import MKVFile
+
+# pymkv.MKVFile is a class, effectively hiding the module of the same name.
+# We need the module to patch 'verify_mkvmerge' which is a global in that module.
+MKVFileModule = sys.modules["pymkv.MKVFile"]
 
 
 def test_mux_progress_handler() -> None:
@@ -32,7 +37,7 @@ def test_mux_progress_handler() -> None:
 
     # Patch 'verify_mkvmerge' locally to avoid initialization running a subprocess
     with (
-        patch("pymkv.MKVFile.verify_mkvmerge", return_value=True),
+        patch.object(MKVFileModule, "verify_mkvmerge", return_value=True),
         patch("subprocess.Popen", return_value=process_mock) as mock_popen,
     ):
         mkv = MKVFile()
@@ -66,7 +71,7 @@ def test_mux_progress_handler_no_progress() -> None:
         progress_values.append(percent)
 
     with (
-        patch("pymkv.MKVFile.verify_mkvmerge", return_value=True),
+        patch.object(MKVFileModule, "verify_mkvmerge", return_value=True),
         patch("subprocess.Popen", return_value=process_mock),
     ):
         mkv = MKVFile()
