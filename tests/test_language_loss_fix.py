@@ -1,3 +1,4 @@
+import sys
 from unittest.mock import MagicMock, patch
 
 from pymkv import MKVFile, MKVTrack
@@ -5,9 +6,9 @@ from pymkv import MKVFile, MKVTrack
 
 def test_language_loss_fix() -> None:
     with (
-        patch("pymkv.MKVTrack.get_file_info") as mock_info,
-        patch("pymkv.MKVTrack.verify_supported", return_value=True),
-        patch("pymkv.MKVTrack.checking_file_path", side_effect=lambda x: x),
+        patch.object(sys.modules["pymkv.MKVTrack"], "get_file_info") as mock_info,
+        patch.object(sys.modules["pymkv.MKVTrack"], "verify_supported", return_value=True),
+        patch.object(sys.modules["pymkv.MKVTrack"], "checking_file_path", side_effect=lambda x: x),
     ):
         mock_info.return_value.tracks = [MagicMock(id=0, codec="V_MS/VFW/FOURCC", type="video", start_pts=0)]
 
@@ -31,10 +32,10 @@ def test_language_loss_fix() -> None:
 
 def test_track_options_command_generation() -> None:
     with (
-        patch("pymkv.MKVTrack.get_file_info") as mock_info,
-        patch("pymkv.MKVTrack.verify_supported", return_value=True),
-        patch("pymkv.MKVFile.verify_mkvmerge", return_value=True),
-        patch("pymkv.MKVTrack.checking_file_path", side_effect=lambda x: x),
+        patch.object(sys.modules["pymkv.MKVTrack"], "get_file_info") as mock_info,
+        patch.object(sys.modules["pymkv.MKVTrack"], "verify_supported", return_value=True),
+        patch.object(sys.modules["pymkv.MKVFile"], "verify_mkvmerge", return_value=True),
+        patch.object(sys.modules["pymkv.MKVTrack"], "checking_file_path", side_effect=lambda x: x),
     ):
         mock_info.return_value.tracks = [
             MagicMock(id=0, codec="V_MS/VFW/FOURCC", type="video", start_pts=0),
