@@ -236,7 +236,7 @@ def test_track_repr(dummy_mkv: Path) -> None:
     ):
         t = MKVTrack(str(dummy_mkv))
         rep = repr(t)
-        assert str(dummy_mkv) in rep
+        assert repr(str(dummy_mkv)) in rep
         assert "MKVTrack" in str(type(t))
 
 
