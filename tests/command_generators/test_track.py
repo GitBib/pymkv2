@@ -52,7 +52,6 @@ def test_track_options_grouping(mock_mkv: MagicMock, mock_track_cleaner: Any) ->
     mock_track_cleaner(subtitle_track)
 
     audio_track.language = "eng"
-    audio_track.effective_language = "eng"
 
     args = gen_to_list(opts, mock_mkv)
 

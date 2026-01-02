@@ -16,8 +16,8 @@ class TrackOptions(CommandGeneratorBase):
 
     property_flags = {
         "track_name": ("--track-name", False),
-        "language_ietf": ("--language", False),  # Handled via effective_language now
-        "language": ("--language", False),  # Handled via effective_language now
+        "language_ietf": ("--language", False),
+        "language": ("--language", False),
         "tags": ("--tags", False),
         "default_track": ("--default-track", True),
         "forced_track": ("--forced-track", True),
@@ -107,12 +107,10 @@ class TrackOptions(CommandGeneratorBase):
             yield file_path
 
     def _generate_properties(self, track: MKVTrack) -> Iterator[str]:
-        # Language (Precedence handled by effective_language)
-        if track.effective_language:
+        if track.language:
             yield "--language"
-            yield f"{track.track_id}:{track.effective_language}"
+            yield f"{track.track_id}:{track.language}"
 
-        # Standard Properties
         for attr, (flag, is_bool) in self.property_flags.items():
             if attr in ("language", "language_ietf"):
                 continue
