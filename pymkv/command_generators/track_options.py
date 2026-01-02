@@ -111,6 +111,10 @@ class TrackOptions(CommandGeneratorBase):
             yield "--language"
             yield f"{track.track_id}:{track.language}"
 
+        if track.language_ietf:
+            yield "--language"
+            yield f"{track.track_id}:{track.language_ietf}"
+
         for attr, (flag, is_bool) in self.property_flags.items():
             if attr in ("language", "language_ietf"):
                 continue

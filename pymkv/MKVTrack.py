@@ -109,6 +109,12 @@ class MKVTrack:
         The path of the mkvextract executable.
     track_name : str
         The name that will be given to the track when muxed into a file.
+    language : str
+        The language of the track in ISO639-2 format.
+    language_ietf : str
+        The language of the track in BCP47 format.
+    effective_language : str
+        The prioritized language of the track (IETF BCP47 first, then ISO 639-2).
     default_track : bool
         Determines if the track should be the default track of its type when muxed into an MKV file.
     forced_track : bool
@@ -343,8 +349,6 @@ class MKVTrack:
         """
         if language is None or is_iso639_2(language):
             self._language = language
-            # Clear IETF language to ensure this legacy language takes precedence
-            self._language_ietf = None
         else:
             msg = "not an ISO639-2 language code"
             raise ValueError(msg)
@@ -416,11 +420,16 @@ class MKVTrack:
             language_ietf (str): The language to set in BCP47 format.
         """
         self._language_ietf = language_ietf
-        # Clear legacy language logic? No, let's keep it simple.
-        # Actually, if we set IETF, we should probably clear legacy or derived.
-        # But for symmetry with the user's issue (legacy set -> IETF stale):
-        if language_ietf is not None:
-            self._language = None
+
+    @property
+    def effective_language(self) -> str | None:
+        """
+        Get the prioritized language of the track (IETF BCP47 first, then ISO 639-2).
+
+        Returns:
+            str: The language of the track.
+        """
+        return self.language_ietf or self.language
 
     @property
     def tags(self) -> str | None:
