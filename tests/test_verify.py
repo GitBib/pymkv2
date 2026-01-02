@@ -51,7 +51,16 @@ def test_verify_matroska_various_types(
     get_path_test_file: Path,
 ) -> None:
     with patch("pymkv.Verifications.get_file_info") as mock_get_file_info:
-        mock_get_file_info.return_value = {"container": {"type": file_type}}
+        # Mock definition to simulate MkvMergeOutput struct
+        class MockInfo:
+            class Container:
+                def __init__(self, type_str: str) -> None:
+                    self.type = type_str
+
+            def __init__(self, type_str: str = "Matroska") -> None:
+                self.container = self.Container(type_str)
+
+        mock_get_file_info.return_value = MockInfo(file_type)
         assert verify_matroska(get_path_test_file) is expected
 
 
@@ -72,8 +81,15 @@ def test_verify_matroska_mkvmerge_path_types(
         patch("pymkv.Verifications.verify_mkvmerge") as mock_verify_mkvmerge,
         patch("pymkv.Verifications.get_file_info") as mock_get_file_info,
     ):
+        # Mock definition to simulate MkvMergeOutput struct
+        class MockInfo:
+            class Container:
+                type = "Matroska"
+
+            container = Container()
+
         mock_verify_mkvmerge.return_value = True
-        mock_get_file_info.return_value = {"container": {"type": "Matroska"}}
+        mock_get_file_info.return_value = MockInfo()
         assert verify_matroska(get_path_test_file, mkvmerge_path) is True
         mock_verify_mkvmerge.assert_called_once_with(mkvmerge_path=mkvmerge_path)
 

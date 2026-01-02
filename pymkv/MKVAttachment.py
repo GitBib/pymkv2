@@ -9,19 +9,19 @@ Below are some basic examples of how the :class:`~pymkv.MKVAttachment` objects c
 Create a new :class:`~pymkv.MKVAttachment` and add it to an :class:`~pymkv.MKVFile`.
 
 >>> from pymkv import MKVAttachment
->>> attachment = MKVAttachment('path/to/attachment.jpg', name='NAME')
->>> attachment.description = 'DESCRIPTION'
+>>> attachment = MKVAttachment('path/to/attachment.jpg', name='NAME')  # doctest: +SKIP
+>>> attachment.description = 'DESCRIPTION'  # doctest: +SKIP
 
 Attachments can also be added directly to an :class:`~pymkv.MKVFile`.
 
 >>> from pymkv import MKVFile
->>> mkv = MKVFile('path/to/file.mkv')
->>> mkv.add_attachment('path/to/other/attachment.png')
+>>> mkv = MKVFile('path/to/file.mkv')  # doctest: +SKIP
+>>> mkv.add_attachment('path/to/other/attachment.png')  # doctest: +SKIP
 
 Now, the MKV can be muxed with both attachments.
 
->>> mkv.add_attachment(attachment)
->>> mkv.mux('path/to/output.mkv')
+>>> mkv.add_attachment(attachment)  # doctest: +SKIP
+>>> mkv.mux('path/to/output.mkv')  # doctest: +SKIP
 """
 
 from __future__ import annotations

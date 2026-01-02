@@ -60,6 +60,10 @@ class Timestamp:
             self._ss = 0 if ss is None else ss
             self._nn = 0 if nn is None else nn
 
+    def __hash__(self) -> int:
+        """Returns a hash value for the Timestamp object."""
+        return self.time
+
     def __eq__(self, other: object) -> bool:
         """
         Compares the Timestamp object with another Timestamp object for equality.
@@ -225,7 +229,7 @@ class Timestamp:
         return timestamp_string
 
     @ts.setter
-    def ts(self, timestamp: Timestamp) -> None:
+    def ts(self, timestamp: Timestamp | int | str) -> None:
         """
         Set a new timestamp.
 
@@ -321,6 +325,16 @@ class Timestamp:
             value (int): The new nanoseconds value. If greater than or equal to 1,000,000,000, it will be set to 0.
         """
         self._nn = value if value < 1000000000 else 0  # noqa: PLR2004
+
+    @property
+    def time(self) -> int:
+        """
+        Get the total time in seconds represented by the timestamp.
+
+        Returns:
+            int: The total time in seconds.
+        """
+        return self.hh * 3600 + self.mm * 60 + self.ss + self.nn // 1000000000
 
     @property
     def form(self) -> str:

@@ -1,5 +1,6 @@
 from pathlib import Path
 
+import msgspec
 import pytest
 
 from pymkv import MKVAttachment, MKVFile
@@ -66,7 +67,7 @@ def test_remove_all_attachments(temp_file: str) -> None:
 
 
 def test_init_with_attachments(get_path_test_file: Path) -> None:
-    info = get_file_info(get_path_test_file, "mkvmerge")
+    info = msgspec.to_builtins(get_file_info(get_path_test_file, "mkvmerge"))
     has_attachments = "attachments" in info and len(info["attachments"]) > 0
 
     mkv = MKVFile(str(get_path_test_file))
@@ -158,7 +159,7 @@ def test_attachments_preserved_after_mux(temp_file: str, tmp_path: Path, get_pat
 
     assert Path(output_path).exists(), "Output file was not created"
 
-    output_info = get_file_info(output_path, "mkvmerge")
+    output_info = msgspec.to_builtins(get_file_info(output_path, "mkvmerge"))
 
     assert "attachments" in output_info, "No attachments found in output file"
     assert len(output_info["attachments"]) >= ATTACHMENT_COUNT_2, "Not all attachments were preserved"

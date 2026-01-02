@@ -8,47 +8,62 @@ Create and mux a new MKV. This example takes an standalone video and audio track
 
 >>> from pymkv import MKVFile
 >>> mkv = MKVFile()
->>> mkv.add_track('/path/to/track.h264')
->>> mkv.add_track(MKVTrack('/path/to/another/track.aac'))
->>> mkv.mux('/path/to/output.mkv')
+>>> mkv.add_track('/path/to/track.h264')  # doctest: +SKIP
+>>> mkv.add_track(MKVTrack('/path/to/track.aac'))  # doctest: +SKIP
+>>> mkv.mux('/path/to/output.mkv')  # doctest: +SKIP
 
 Generate the mkvmerge command to mux an MKV. This is example is identical to the first example except the command is
 only generated, not executed.
 
->>> mkv = MKVFile()
->>> mkv.add_track('/path/to/track.h264')
->>> mkv.add_track(MKVTrack('/path/to/another/track.aac'))
->>> mkv.command('/path/to/output.mkv')
+>>> mkv = MKVFile()  # doctest: +SKIP
+>>> mkv.add_track('/path/to/track.h264')  # doctest: +SKIP
+>>> mkv.add_track(MKVTrack('/path/to/another/track.aac'))  # doctest: +SKIP
+>>> mkv.command('/path/to/output.mkv')  # doctest: +SKIP
 
 Import an existing MKV and remove a track. This example will import an MKV that already exists on your filesystem,
 remove a track and allow you to mux that change into a new file.
 
->>> mkv = MKVFile('/path/to/file.mkv')
->>> mkv.remove_track(0)
->>> mkv.mux('/path/to/output.mkv')
+>>> mkv = MKVFile('/path/to/file.mkv')  # doctest: +SKIP
+>>> mkv.get_track(0).track_name = 'Some Name'  # doctest: +SKIP
+>>> mkv.mux('/path/to/output.mkv')  # doctest: +SKIP
 
 Combine two MKVs. This example takes two existing MKVs and combines their tracks into a single MKV file.
 
->>> mkv1 = MKVFile('/path/to/file1.mkv')
->>> mkv2 = MKVFile('/path/to/file2.mkv')
->>> mkv1.add_file(mkv2)
->>> mkv1.mux('/path/to/output.mkv')
+>>> mkv1 = MKVFile('/path/to/file1.mkv')  # doctest: +SKIP
+>>> mkv2 = MKVFile('/path/to/file2.mkv')  # doctest: +SKIP
+>>> mkv1.add_file(mkv2)  # doctest: +SKIP
+>>> mkv1.mux('/path/to/output.mkv')  # doctest: +SKIP
 """
 
 from __future__ import annotations
 
+import itertools
 import logging
 import os
+import re
 import subprocess as sp
-from collections.abc import Iterable, Sequence
+from collections.abc import Callable, Iterable, Sequence
 from pathlib import Path
 from typing import Any, TypeVar, cast
 
 import bitmath
+import msgspec
 
+from pymkv.command_generators import (
+    AttachmentOptions,
+    BaseOptions,
+    ChapterOptions,
+    CommandGeneratorBase,
+    GlobalOptions,
+    LinkingOptions,
+    SplitOptions,
+    TrackOptions,
+    TrackOrderOptions,
+)
 from pymkv.ISO639_2 import is_iso639_2
 from pymkv.MKVAttachment import MKVAttachment
 from pymkv.MKVTrack import MKVTrack
+from pymkv.models import TrackProperties
 from pymkv.Timestamp import Timestamp
 from pymkv.utils import prepare_mkvtoolnix_path
 from pymkv.Verifications import (
@@ -124,73 +139,78 @@ class MKVFile:
         if file_path is not None:
             file_path = checking_file_path(file_path)
             try:
-                info_json = get_file_info(
+                # Get raw output and decode using msgspec
+                # Get info using get_file_info which returns MkvMergeOutput
+                info_struct = get_file_info(
                     file_path,
                     self.mkvmerge_path,
                     check_path=False,
                 )
-                self._info_json = info_json
-            except sp.CalledProcessError as e:
-                error_output = e.output.decode()
-                raise sp.CalledProcessError(
-                    e.returncode,
-                    e.cmd,
-                    output=error_output,
-                ) from e
+                # Keep compatibility with MKVTrack which might expect dict for now,
+                # or we can refactor MKVTrack later.
+                # For now let's keep _info_json as dict for properties that rely on it,
+                # but use the struct for our logic.
+                # Actually, self._info_json is typed as dict[str, Any] | None.
+                # Let's convert it to dict for storage if we want to maintain type compatibility strictly
+                # or update the type hint.
+                # Ideally, we should switch fully. But for this step let's use the struct for logic.
+                self._info_json = msgspec.to_builtins(info_struct)
+            except (sp.CalledProcessError, msgspec.ValidationError) as e:
+                # Wrap msgspec validation error or process error
+                if isinstance(e, sp.CalledProcessError):
+                    error_output = e.output.decode()
+                    raise sp.CalledProcessError(
+                        e.returncode,
+                        e.cmd,
+                        output=error_output,
+                    ) from e
+                msg = f"Invalid JSON or schema from mkvmerge: {e}"
+                raise ValueError(msg) from e
 
-            if not info_json["container"]["supported"]:
+            if not info_struct.container.supported:
                 msg = f"The file '{file_path}' is not a valid Matroska file or is not supported."
                 raise ValueError(msg)
 
-            if self.title is None and "title" in info_json["container"]["properties"]:
-                self.title = info_json["container"]["properties"]["title"]
+            if self.title is None and info_struct.container.properties.title:
+                self.title = info_struct.container.properties.title
 
-            if self._info_json is not None:
-                self._global_tag_entries = sum(t["num_entries"] for t in self._info_json.get("global_tags", []))
+            self._global_tag_entries = sum(t.num_entries for t in info_struct.global_tags)
 
-                # dictionary associating track_id to the number of tag entries:
-                track_tag_entries: dict[int, int] = {
-                    t["track_id"]: t["num_entries"] for t in self._info_json.get("track_tags", [])
-                }
+            # dictionary associating track_id to the number of tag entries:
+            # We used info_json.get("track_tags", []) before. Struct has track_tags list.
+            track_tag_entries: dict[int, int] = {
+                t.track_id: t.num_entries for t in info_struct.track_tags if t.track_id is not None
+            }
 
-                # add tracks with info
-                for track in info_json["tracks"]:
-                    track_id = track["id"]
-                    new_track = MKVTrack(
-                        file_path,
-                        track_id=track_id,
-                        mkvmerge_path=self.mkvmerge_path,
-                        existing_info=self._info_json,
-                        tag_entries=track_tag_entries.get(track_id, 0),
-                    )
-                    if "track_name" in track["properties"]:
-                        new_track.track_name = track["properties"]["track_name"]
-                    if "language" in track["properties"]:
-                        new_track.language = track["properties"]["language"]
-                    if "language_ietf" in track["properties"]:
-                        new_track.language_ietf = track["properties"]["language_ietf"]
-                    if "default_track" in track["properties"]:
-                        new_track.default_track = track["properties"]["default_track"]
-                    if "forced_track" in track["properties"]:
-                        new_track.forced_track = track["properties"]["forced_track"]
-                    if "flag_commentary" in track["properties"]:
-                        new_track.flag_commentary = track["properties"]["flag_commentary"]
-                    if "flag_hearing_impaired" in track["properties"]:
-                        new_track.flag_hearing_impaired = track["properties"]["flag_hearing_impaired"]
-                    if "flag_visual_impaired" in track["properties"]:
-                        new_track.flag_visual_impaired = track["properties"]["flag_visual_impaired"]
-                    if "flag_original" in track["properties"]:
-                        new_track.flag_original = track["properties"]["flag_original"]
+            # add tracks with info
+            for track_info in info_struct.tracks:
+                track_id = track_info.id
+                new_track = MKVTrack(
+                    file_path,
+                    track_id=track_id,
+                    mkvmerge_path=self.mkvmerge_path,
+                    existing_info=info_struct,
+                    tag_entries=track_tag_entries.get(track_id, 0),
+                )
 
-                    self.add_track(new_track, new_file=False)
+                # Declarative mapping using msgspec struct fields
+                props = track_info.properties
+                # Iterate over defined fields in TrackProperties
+                for field_info in msgspec.structs.fields(TrackProperties):
+                    field_name = field_info.name
+                    value = getattr(props, field_name)
+                    if value is not None:
+                        setattr(new_track, field_name, value)
 
-            if "attachments" in info_json:
-                for attachment in info_json["attachments"]:
-                    attachment_id = attachment["id"]
-                    properties = attachment["properties"]
-                    name = properties.get("name", None)
-                    description = properties.get("description", None)
-                    mime_type = properties.get("mime_type", None)
+                self.add_track(new_track, new_file=False)
+
+            if info_struct.attachments:
+                for attachment in info_struct.attachments:
+                    attachment_id = attachment.id
+                    properties = attachment.properties
+                    name = properties.name
+                    description = properties.description
+                    mime_type = properties.mime_type
 
                     new_attachment = MKVAttachment(file_path)
                     new_attachment.name = name
@@ -251,11 +271,11 @@ class MKVFile:
         """
         return self._global_tag_entries
 
-    def command(  # noqa: PLR0912,PLR0915
+    def command(
         self,
         output_path: str,
         subprocess: bool = False,
-    ) -> str | list:
+    ) -> str | list[str]:
         """
         Generates an mkvmerge command based on the configured :class:`~pymkv.MKVFile`.
 
@@ -272,150 +292,55 @@ class MKVFile:
             The full command to mux the :class:`~pymkv.MKVFile` as a string containing spaces. Will be returned as a
             list of strings with no spaces if `subprocess` is True.
         """
-        output_path = str(Path(output_path).expanduser())
-        command = [*self.mkvmerge_path, "-o", output_path]
-        if self.title is not None:
-            command.extend(["--title", self.title])
-        if self.no_track_statistics_tags:
-            # Do not write tags with track statistics.
-            command.append("--disable-track-statistics-tags")
+        """
+        Generates an mkvmerge command based on the configured :class:`~pymkv.MKVFile`.
 
-        file_first_occurrence = {}
+        Parameters
+        ----------
+        output_path : str
+            The path to be used as the output file in the mkvmerge command.
+        subprocess : bool
+            Will return the command as a list so it can be used easily with the :mod:`subprocess` module.
+
+        Returns
+        -------
+        str, list of str
+            The full command to mux the :class:`~pymkv.MKVFile` as a string containing spaces. Will be returned as a
+            list of strings with no spaces if `subprocess` is True.
+        """
+        self.output_path = str(Path(output_path).expanduser())
+
+        # Pre-assign file IDs
+        unique_file_dict: dict[str, int] = {}
         for track in self.tracks:
-            if track.file_path not in file_first_occurrence:
-                file_first_occurrence[track.file_path] = track
+            if track.file_path not in unique_file_dict:
+                unique_file_dict[track.file_path] = len(unique_file_dict)
+            track.file_id = unique_file_dict[track.file_path]
 
-        track_order = []
-        for track in self.tracks:
-            # for track_order
-            track_order.append(f"{track.file_id}:{track.track_id}")
-            # flags
-            if track.track_name is not None:
-                command.extend(
-                    ["--track-name", f"{track.track_id!s}:{track.track_name}"],
-                )
-            if track.language_ietf is not None:
-                command.extend(
-                    ["--language", f"{track.track_id!s}:{track.language_ietf}"],
-                )
-            elif track.language is not None:
-                command.extend(["--language", f"{track.track_id!s}:{track.language}"])
-            if track.sync is not None:
-                command.extend(["--sync", f"{track.track_id!s}:{track.sync}"])
-            if track.tags is not None:
-                command.extend(["--tags", f"{track.track_id!s}:{track.tags}"])
-            if track.default_track:
-                command.extend(["--default-track", f"{track.track_id!s}:1"])
-            else:
-                command.extend(["--default-track", f"{track.track_id!s}:0"])
-            if track.forced_track:
-                command.extend(["--forced-track", f"{track.track_id!s}:1"])
-            else:
-                command.extend(["--forced-track", f"{track.track_id!s}:0"])
-            if track.flag_hearing_impaired:
-                command.extend(["--hearing-impaired-flag", f"{track.track_id!s}:1"])
-            else:
-                command.extend(["--hearing-impaired-flag", f"{track.track_id!s}:0"])
-            if track.flag_visual_impaired:
-                command.extend(["--visual-impaired-flag", f"{track.track_id!s}:1"])
-            else:
-                command.extend(["--visual-impaired-flag", f"{track.track_id!s}:0"])
-            if track.flag_original:
-                command.extend(["--original-flag", f"{track.track_id!s}:1"])
-            else:
-                command.extend(["--original-flag", f"{track.track_id!s}:0"])
-            if track.flag_commentary:
-                command.extend(["--commentary-flag", f"{track.track_id!s}:1"])
-            else:
-                command.extend(["--commentary-flag", f"{track.track_id!s}:0"])
-            if track.compression is not None:
-                command.extend(
-                    ["--compression", f"{track.track_id!s}:{'zlib' if track.compression else 'none'}"],
-                )
+        pipeline: list[CommandGeneratorBase] = [
+            BaseOptions(),
+            GlobalOptions(),
+            TrackOptions(),
+            AttachmentOptions(),
+            ChapterOptions(),
+            LinkingOptions(),
+            TrackOrderOptions(),
+            SplitOptions(),
+        ]
 
-            # remove extra tracks
-            if track.track_type == "audio":
-                command.append("-D")
-                command.extend(["-a", str(track.track_id), "-S"])
-            elif track.track_type == "subtitles":
-                command.extend(("-D", "-A", "-s", str(track.track_id)))
-            elif track.track_type == "video":
-                command.extend(["-d", str(track.track_id), "-A", "-S"])
-            else:
-                command.extend(("-D", "-A", "-S"))
-            # exclusions
-            if track.no_chapters:
-                command.append("--no-chapters")
-            if track.no_global_tags:
-                command.append("--no-global-tags")
-            if track.no_track_tags:
-                command.append("--no-track-tags")
-            if track.no_attachments:
-                command.append("--no-attachments")
+        command_args = list(self.mkvmerge_path)
+        generated_args = list(itertools.chain.from_iterable(p.generate(self) for p in pipeline))
+        command_args.extend(generated_args)
 
-            is_first_occurrence = file_first_occurrence.get(track.file_path) == track
+        return command_args if subprocess else " ".join(command_args)
 
-            if (
-                is_first_occurrence
-                and self._info_json
-                and "attachments" in self._info_json
-                and self._info_json["attachments"]
-            ):
-                all_ids = {attachment["id"] for attachment in self._info_json["attachments"]}
-                kept_ids = {
-                    attachment.source_id
-                    for attachment in self.attachments
-                    if attachment.source_id is not None and attachment.source_file == track.file_path
-                }
-
-                if kept_ids and kept_ids != all_ids:
-                    kept_ids_str = ",".join(str(aid) for aid in sorted(kept_ids))
-                    command.extend(("--attachments", kept_ids_str))
-                elif not kept_ids:
-                    command.append("--no-attachments")
-            elif not is_first_occurrence:
-                if self._info_json and "attachments" in self._info_json and self._info_json["attachments"]:
-                    command.append("--no-attachments")
-
-            command.append(track.file_path)
-
-        for attachment in self.attachments:
-            if attachment.source_file is not None and attachment.source_id is not None:
-                continue
-
-            if attachment.name is not None:
-                command.extend(["--attachment-name", attachment.name])
-            if attachment.description is not None:
-                command.extend(["--attachment-description", attachment.description])
-            if attachment.mime_type is not None:
-                command.extend(["--attachment-mime-type", attachment.mime_type])
-
-            if not attachment.attach_once:
-                command.extend(["--attach-file", attachment.file_path])
-            else:
-                command.extend(["--attach-file-once", attachment.file_path])
-
-        if self._chapter_language is not None:
-            command.extend(["--chapter-language", self._chapter_language])
-        if self._chapters_file is not None:
-            command.extend(["--chapters", self._chapters_file])
-
-        if self._global_tags_file is not None:
-            command.extend(["--global-tags", self._global_tags_file])
-
-        if self._link_to_previous_file is not None:
-            command.extend(["--link-to-previous", f"={self._link_to_previous_file}"])
-        if self._link_to_next_file is not None:
-            command.extend(["--link-to-next", f"={self._link_to_next_file}"])
-
-        if track_order:
-            command.extend(["--track-order", ",".join(track_order)])
-
-        command.extend(self._split_options)
-
-        return command if subprocess else " ".join(command)
-
-    def mux(self, output_path: str | os.PathLike, silent: bool = False, ignore_warning: bool = False) -> int:
+    def mux(
+        self,
+        output_path: str | os.PathLike,
+        silent: bool = False,
+        ignore_warning: bool = False,
+        progress_handler: Callable[[int], None] | None = None,
+    ) -> int:
         """
         Mixes the specified :class:`~pymkv.MKVFile`.
 
@@ -427,27 +352,62 @@ class MKVFile:
             By default the mkvmerge output will be shown unless silent is True.
         ignore_warning : bool, optional
             If set to True, the muxing process will ignore any warnings (exit code 1) from mkvmerge.
+        progress_handler : Callable[[int], None], optional
+            A callback function that will be called with the current progress percentage (0-100).
+
         Returns
         -------
-        int of Any
+        int
             return code
 
         Raises
         ------
         ValueError
             Raised if the external mkvmerge command fails with a non-zero exit status
-            (except for warnings when ignore_warning is True). This includes scenarios
-            such as invalid command arguments, errors in processing the :class:`~pymkv.MKVFile`,
-            or issues with output file writing. The error message provides details about
-            the failure based on the output of the command.
+            (except for warnings when ignore_warning is True).
         """
         output_path = str(Path(output_path).expanduser())
         args = self.command(output_path, subprocess=True)
 
-        stdout = sp.DEVNULL if silent else None
-        stderr = sp.PIPE
+        # stdout needs to be PIPE if we want to capture it for silent mode or progress parsing
+        # If not silent and no progress handler, we can technically let it print to sys.stdout,
+        # but standardized behavior is cleaner: always pipe if we might need to process it.
+        # However, to preserve "not silent" behavior (printing to console) without a handler,
+        # we might want to let it inherit stdout.
+        # Logic:
+        # - if progress_handler: PIPE (must parse)
+        # - elif silent: DEVNULL
+        # - else: None (print to console directly)
 
-        proc = sp.Popen(args, stdout=stdout, stderr=stderr)  # noqa: S603
+        if progress_handler:
+            stdout_target = sp.PIPE
+            text_mode = True
+        elif silent:
+            stdout_target = sp.DEVNULL
+            text_mode = False
+        else:
+            stdout_target = None  # Inherit stdout (print to console)
+            text_mode = False
+
+        stderr_target = sp.PIPE  # Always capture stderr for error reporting
+
+        proc = sp.Popen(  # noqa: S603
+            args,
+            stdout=stdout_target,
+            stderr=stderr_target,
+            text=text_mode,
+            bufsize=1 if text_mode else -1,
+        )
+
+        # Process stdout if handling progress
+        if progress_handler and proc.stdout:
+            progress_re = re.compile(r"Progress:\s*(\d+)%")
+            for line in proc.stdout:
+                if match := progress_re.search(line):
+                    percent = int(match.group(1))
+                    progress_handler(percent)
+
+        # Wait for completion and get stderr
         _, err = proc.communicate()
 
         if proc.returncode != 0:
@@ -459,7 +419,7 @@ class MKVFile:
             # For other non-zero exit codes, raise an exception
             error_message = f"Command failed with non-zero exit status {proc.returncode}"
             if err:
-                error_details = err.decode()
+                error_details = err.decode() if isinstance(err, bytes) else err
                 error_message += f"\nError Output:\n{error_details}"
                 logging.error(error_details)
             logging.error(
@@ -1197,7 +1157,7 @@ class MKVFile:
             track.no_attachments = True
 
     @staticmethod
-    def flatten(item: T | Iterable[T | Iterable[T]]) -> list[T]:
+    def flatten(item: Any) -> list[Any]:  # noqa: ANN401
         """
         Flatten a list or a tuple.
 
@@ -1224,12 +1184,12 @@ class MKVFile:
             A flattened version of `item`.
         """
 
-        def _flatten(item: T | Iterable[T | Iterable[T]]) -> Iterable[T]:
+        def _flatten(item: Any) -> Iterable[Any]:  # noqa: ANN401
             if isinstance(item, Sequence) and not isinstance(item, str):
                 for subitem in item:
                     yield from _flatten(subitem)
             else:
-                yield cast("T", item)
+                yield item
 
         return list(_flatten(item))
 
