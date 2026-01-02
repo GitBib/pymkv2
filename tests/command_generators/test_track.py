@@ -43,6 +43,7 @@ def test_track_options_grouping(mock_mkv: MagicMock, mock_track_cleaner: Any) ->
     subtitle_track.configure_mock(**dict.fromkeys(["track_name", "language", "default_track"], None))
 
     mock_mkv.tracks = [video_track, audio_track, subtitle_track]
+    mock_mkv._info_json = None  # noqa: SLF001
 
     opts = TrackOptions()
 

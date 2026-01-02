@@ -33,6 +33,18 @@ Combine two MKVs. This example takes two existing MKVs and combines their tracks
 >>> mkv2 = MKVFile('/path/to/file2.mkv')  # doctest: +SKIP
 >>> mkv1.add_file(mkv2)  # doctest: +SKIP
 >>> mkv1.mux('/path/to/output.mkv')  # doctest: +SKIP
+>>>
+>>> # Use a progress handler to track muxing progress
+>>> def progress(p):
+...     print(f"Progress: {p}%")
+>>>
+>>> mkv = MKVFile('/path/to/file.mkv')  # doctest: +SKIP
+>>> mkv.mux('/path/to/output.mkv', progress_handler=progress)  # doctest: +SKIP
+>>>
+>>> # Inspect attachments from an existing file
+>>> mkv = MKVFile('/path/to/with_attachments.mkv')  # doctest: +SKIP
+>>> for attachment in mkv.attachments:
+...     print(f"Attachment: {attachment.name}, MIME: {attachment.mime_type}")
 """
 
 from __future__ import annotations
@@ -63,7 +75,7 @@ from pymkv.command_generators import (
 from pymkv.ISO639_2 import is_iso639_2
 from pymkv.MKVAttachment import MKVAttachment
 from pymkv.MKVTrack import MKVTrack
-from pymkv.models import TrackProperties
+from pymkv.models import MkvMergeOutput, TrackProperties
 from pymkv.Timestamp import Timestamp
 from pymkv.utils import prepare_mkvtoolnix_path
 from pymkv.Verifications import (
@@ -126,7 +138,7 @@ class MKVFile:
         self.tracks: list[MKVTrack] = []
         self.attachments: list[MKVAttachment] = []
         self._number_file = 0
-        self._info_json: dict[str, Any] | None = None
+        self._info_json: MkvMergeOutput | None = None
         self._global_tag_entries = 0
 
         # exclusions
@@ -146,15 +158,7 @@ class MKVFile:
                     self.mkvmerge_path,
                     check_path=False,
                 )
-                # Keep compatibility with MKVTrack which might expect dict for now,
-                # or we can refactor MKVTrack later.
-                # For now let's keep _info_json as dict for properties that rely on it,
-                # but use the struct for our logic.
-                # Actually, self._info_json is typed as dict[str, Any] | None.
-                # Let's convert it to dict for storage if we want to maintain type compatibility strictly
-                # or update the type hint.
-                # Ideally, we should switch fully. But for this step let's use the struct for logic.
-                self._info_json = msgspec.to_builtins(info_struct)
+                self._info_json = info_struct
             except (sp.CalledProcessError, msgspec.ValidationError) as e:
                 # Wrap msgspec validation error or process error
                 if isinstance(e, sp.CalledProcessError):
@@ -208,9 +212,9 @@ class MKVFile:
                 for attachment in info_struct.attachments:
                     attachment_id = attachment.id
                     properties = attachment.properties
-                    name = properties.name
-                    description = properties.description
-                    mime_type = properties.mime_type
+                    name = attachment.file_name or properties.name
+                    description = attachment.description or properties.description
+                    mime_type = attachment.content_type or properties.mime_type
 
                     new_attachment = MKVAttachment(file_path)
                     new_attachment.name = name
@@ -222,6 +226,7 @@ class MKVFile:
 
         # split options
         self._split_options: list[str] = []
+        self._progress_handler = None
 
     def __repr__(self) -> str:
         """
@@ -292,22 +297,7 @@ class MKVFile:
             The full command to mux the :class:`~pymkv.MKVFile` as a string containing spaces. Will be returned as a
             list of strings with no spaces if `subprocess` is True.
         """
-        """
-        Generates an mkvmerge command based on the configured :class:`~pymkv.MKVFile`.
 
-        Parameters
-        ----------
-        output_path : str
-            The path to be used as the output file in the mkvmerge command.
-        subprocess : bool
-            Will return the command as a list so it can be used easily with the :mod:`subprocess` module.
-
-        Returns
-        -------
-        str, list of str
-            The full command to mux the :class:`~pymkv.MKVFile` as a string containing spaces. Will be returned as a
-            list of strings with no spaces if `subprocess` is True.
-        """
         self.output_path = str(Path(output_path).expanduser())
 
         # Pre-assign file IDs
@@ -369,16 +359,6 @@ class MKVFile:
         output_path = str(Path(output_path).expanduser())
         args = self.command(output_path, subprocess=True)
 
-        # stdout needs to be PIPE if we want to capture it for silent mode or progress parsing
-        # If not silent and no progress handler, we can technically let it print to sys.stdout,
-        # but standardized behavior is cleaner: always pipe if we might need to process it.
-        # However, to preserve "not silent" behavior (printing to console) without a handler,
-        # we might want to let it inherit stdout.
-        # Logic:
-        # - if progress_handler: PIPE (must parse)
-        # - elif silent: DEVNULL
-        # - else: None (print to console directly)
-
         if progress_handler:
             stdout_target = sp.PIPE
             text_mode = True
@@ -414,20 +394,19 @@ class MKVFile:
             # Handle warnings (exit code 1) if ignore_warning is True
             if proc.returncode == 1 and ignore_warning:
                 logging.warning("Process completed with warnings, but ignored as per the setting.")
-                return proc.returncode
-
-            # For other non-zero exit codes, raise an exception
-            error_message = f"Command failed with non-zero exit status {proc.returncode}"
-            if err:
-                error_details = err.decode() if isinstance(err, bytes) else err
-                error_message += f"\nError Output:\n{error_details}"
-                logging.error(error_details)
-            logging.error(
-                "Non-zero exit status when running %s (%s)",
-                args,
-                proc.returncode,
-            )
-            raise ValueError(error_message)
+            else:
+                # For other non-zero exit codes, raise an exception
+                error_message = f"Command failed with non-zero exit status {proc.returncode}"
+                if err:
+                    error_details = err.decode() if isinstance(err, bytes) else err
+                    error_message += f"\nError Output:\n{error_details}"
+                    logging.error(error_details)
+                logging.error(
+                    "Non-zero exit status when running %s (%s)",
+                    args,
+                    proc.returncode,
+                )
+                raise ValueError(error_message)
 
         return proc.returncode
 

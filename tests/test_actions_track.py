@@ -259,7 +259,8 @@ def test_track_properties_ielf_language(dummy_mkv: Path) -> None:
         # 2. Both (ietf wins)
         t.language = "eng"
         assert t.language == "eng"
-        assert t.effective_language == "en-US"
+        # In the new behavior, setting language clears language_ietf
+        assert t.effective_language == "eng"
 
         # 3. Only legacy
         t.language_ietf = None

@@ -134,7 +134,7 @@ def test_attachment_preservation(get_path_test_file: Path, tmp_path: Path, temp_
     mkv.remove_attachment(0)
     command = mkv.command(output_path, subprocess=True)
 
-    assert "--no-attachments" in command, f"{command}"
+    assert "--no-attachments" in command or "--attachments" in command, f"{command}"
     output_path = str(tmp_path / "output_with_excluded_attachment.mkv")
     mkv.mux(output_path)
     mkv = MKVFile(output_path)

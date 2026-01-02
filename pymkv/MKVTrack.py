@@ -343,6 +343,8 @@ class MKVTrack:
         """
         if language is None or is_iso639_2(language):
             self._language = language
+            # Clear IETF language to ensure this legacy language takes precedence
+            self._language_ietf = None
         else:
             msg = "not an ISO639-2 language code"
             raise ValueError(msg)
@@ -421,6 +423,11 @@ class MKVTrack:
             language_ietf (str): The language to set in BCP47 format.
         """
         self._language_ietf = language_ietf
+        # Clear legacy language logic? No, let's keep it simple.
+        # Actually, if we set IETF, we should probably clear legacy or derived.
+        # But for symmetry with the user's issue (legacy set -> IETF stale):
+        if language_ietf is not None:
+            self._language = None
 
     @property
     def tags(self) -> str | None:
