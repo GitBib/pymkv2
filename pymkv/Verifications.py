@@ -47,7 +47,7 @@ from collections.abc import Iterable, Sequence
 from functools import cache
 from pathlib import Path
 from re import match
-from typing import Any
+from typing import Any, cast
 
 import msgspec
 
@@ -225,7 +225,7 @@ def verify_matroska(
         raise FileNotFoundError(msg)
     try:
         if isinstance(mkvmerge_path, Sequence) and not isinstance(mkvmerge_path, str):
-            mkvmerge_path = tuple(mkvmerge_path)
+            mkvmerge_path = cast("Iterable[str]", tuple(mkvmerge_path))
         info = get_file_info(file_path, mkvmerge_path)
 
     except sp.CalledProcessError as e:
@@ -305,7 +305,7 @@ def verify_recognized(
     file_path = verify_file_path_and_mkvmerge(file_path, mkvmerge_path)
     try:
         if isinstance(mkvmerge_path, list):
-            mkvmerge_path = tuple(mkvmerge_path)
+            mkvmerge_path = cast("Iterable[str]", tuple(mkvmerge_path))
         info = get_file_info(file_path, mkvmerge_path, check_path=False)
     except sp.CalledProcessError as e:
         msg = f'"{file_path}" could not be opened'

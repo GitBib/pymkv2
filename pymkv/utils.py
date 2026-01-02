@@ -36,7 +36,7 @@ def prepare_mkvtoolnix_path(
         # Check if the path exists and is accessible
         return (path,) if Path(path).exists() else tuple(shlex.split(path))
     elif isinstance(path, tuple):
-        return path
+        return cast("tuple[str, ...]", path)
     elif isinstance(path, Sequence):
         return tuple(path)
     else:

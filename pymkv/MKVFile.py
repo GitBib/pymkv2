@@ -33,6 +33,18 @@ Combine two MKVs. This example takes two existing MKVs and combines their tracks
 >>> mkv2 = MKVFile('/path/to/file2.mkv')  # doctest: +SKIP
 >>> mkv1.add_file(mkv2)  # doctest: +SKIP
 >>> mkv1.mux('/path/to/output.mkv')  # doctest: +SKIP
+>>>
+>>> # Use a progress handler to track muxing progress
+>>> def progress(p):
+...     print(f"Progress: {p}%")
+>>>
+>>> mkv = MKVFile('/path/to/file.mkv')  # doctest: +SKIP
+>>> mkv.mux('/path/to/output.mkv', progress_handler=progress)  # doctest: +SKIP
+>>>
+>>> # Inspect attachments from an existing file
+>>> mkv = MKVFile('/path/to/with_attachments.mkv')  # doctest: +SKIP
+>>> for attachment in mkv.attachments:
+...     print(f"Attachment: {attachment.name}, MIME: {attachment.mime_type}")
 """
 
 from __future__ import annotations
@@ -63,7 +75,7 @@ from pymkv.command_generators import (
 from pymkv.ISO639_2 import is_iso639_2
 from pymkv.MKVAttachment import MKVAttachment
 from pymkv.MKVTrack import MKVTrack
-from pymkv.models import TrackProperties
+from pymkv.models import MkvMergeOutput, TrackProperties
 from pymkv.Timestamp import Timestamp
 from pymkv.utils import prepare_mkvtoolnix_path
 from pymkv.Verifications import (
@@ -126,7 +138,7 @@ class MKVFile:
         self.tracks: list[MKVTrack] = []
         self.attachments: list[MKVAttachment] = []
         self._number_file = 0
-        self._info_json: dict[str, Any] | None = None
+        self._info_json: MkvMergeOutput | None = None
         self._global_tag_entries = 0
 
         # exclusions
@@ -146,15 +158,7 @@ class MKVFile:
                     self.mkvmerge_path,
                     check_path=False,
                 )
-                # Keep compatibility with MKVTrack which might expect dict for now,
-                # or we can refactor MKVTrack later.
-                # For now let's keep _info_json as dict for properties that rely on it,
-                # but use the struct for our logic.
-                # Actually, self._info_json is typed as dict[str, Any] | None.
-                # Let's convert it to dict for storage if we want to maintain type compatibility strictly
-                # or update the type hint.
-                # Ideally, we should switch fully. But for this step let's use the struct for logic.
-                self._info_json = msgspec.to_builtins(info_struct)
+                self._info_json = info_struct
             except (sp.CalledProcessError, msgspec.ValidationError) as e:
                 # Wrap msgspec validation error or process error
                 if isinstance(e, sp.CalledProcessError):
@@ -204,8 +208,25 @@ class MKVFile:
 
                 self.add_track(new_track, new_file=False)
 
+            if info_struct.attachments:
+                for attachment in info_struct.attachments:
+                    attachment_id = attachment.id
+                    properties = attachment.properties
+                    name = attachment.file_name or properties.name
+                    description = attachment.description or properties.description
+                    mime_type = attachment.content_type or properties.mime_type
+
+                    new_attachment = MKVAttachment(file_path)
+                    new_attachment.name = name
+                    new_attachment.description = description
+                    new_attachment.mime_type = mime_type
+                    new_attachment.source_id = attachment_id
+                    new_attachment.source_file = file_path
+                    self.attachments.append(new_attachment)
+
         # split options
         self._split_options: list[str] = []
+        self._progress_handler = None
 
     def __repr__(self) -> str:
         """
@@ -276,6 +297,7 @@ class MKVFile:
             The full command to mux the :class:`~pymkv.MKVFile` as a string containing spaces. Will be returned as a
             list of strings with no spaces if `subprocess` is True.
         """
+
         self.output_path = str(Path(output_path).expanduser())
 
         # Pre-assign file IDs
@@ -337,16 +359,6 @@ class MKVFile:
         output_path = str(Path(output_path).expanduser())
         args = self.command(output_path, subprocess=True)
 
-        # stdout needs to be PIPE if we want to capture it for silent mode or progress parsing
-        # If not silent and no progress handler, we can technically let it print to sys.stdout,
-        # but standardized behavior is cleaner: always pipe if we might need to process it.
-        # However, to preserve "not silent" behavior (printing to console) without a handler,
-        # we might want to let it inherit stdout.
-        # Logic:
-        # - if progress_handler: PIPE (must parse)
-        # - elif silent: DEVNULL
-        # - else: None (print to console directly)
-
         if progress_handler:
             stdout_target = sp.PIPE
             text_mode = True
@@ -382,20 +394,19 @@ class MKVFile:
             # Handle warnings (exit code 1) if ignore_warning is True
             if proc.returncode == 1 and ignore_warning:
                 logging.warning("Process completed with warnings, but ignored as per the setting.")
-                return proc.returncode
-
-            # For other non-zero exit codes, raise an exception
-            error_message = f"Command failed with non-zero exit status {proc.returncode}"
-            if err:
-                error_details = err.decode() if isinstance(err, bytes) else err
-                error_message += f"\nError Output:\n{error_details}"
-                logging.error(error_details)
-            logging.error(
-                "Non-zero exit status when running %s (%s)",
-                args,
-                proc.returncode,
-            )
-            raise ValueError(error_message)
+            else:
+                # For other non-zero exit codes, raise an exception
+                error_message = f"Command failed with non-zero exit status {proc.returncode}"
+                if err:
+                    error_details = err.decode() if isinstance(err, bytes) else err
+                    error_message += f"\nError Output:\n{error_details}"
+                    logging.error(error_details)
+                logging.error(
+                    "Non-zero exit status when running %s (%s)",
+                    args,
+                    proc.returncode,
+                )
+                raise ValueError(error_message)
 
         return proc.returncode
 
@@ -746,7 +757,7 @@ class MKVFile:
         if None in ts_flat:
             msg = f'"{timestamps}" are not properly formatted timestamps'
             raise ValueError(msg)
-        for ts_1, ts_2 in zip(ts_flat[:-1], ts_flat[1:], strict=False):
+        for ts_1, ts_2 in zip(ts_flat[:-1], ts_flat[1:]):
             if Timestamp(ts_1) >= Timestamp(ts_2):
                 msg = f'"{timestamps}" are not properly formatted timestamps'
                 raise ValueError(msg)
@@ -791,7 +802,7 @@ class MKVFile:
             if not isinstance(f, int):
                 msg = f'frame "{f}" not an int'
                 raise TypeError(msg)
-        for f_1, f_2 in zip(frames_flat[:-1], frames_flat[1:], strict=False):
+        for f_1, f_2 in zip(frames_flat[:-1], frames_flat[1:]):
             if f_1 >= f_2:
                 msg = f'"{frames}" are not properly formatted frames'
                 raise ValueError(msg)
@@ -837,7 +848,7 @@ class MKVFile:
             msg = f'"{timestamp_parts}" are not properly formatted parts'
             raise ValueError(msg)
 
-        for ts_1, ts_2 in zip(ts_flat[:-1], ts_flat[1:], strict=False):
+        for ts_1, ts_2 in zip(ts_flat[:-1], ts_flat[1:]):
             if None not in (ts_1, ts_2) and Timestamp(ts_1) >= Timestamp(ts_2):
                 msg = f'"{timestamp_parts}" are not properly formatted parts'
                 raise ValueError(msg)
@@ -893,7 +904,7 @@ class MKVFile:
         if None in f_flat[1:-1]:
             msg = f'"{frame_parts}" are not properly formatted parts'
             raise ValueError(msg)
-        for f_1, f_2 in zip(f_flat[:-1], f_flat[1:], strict=False):
+        for f_1, f_2 in zip(f_flat[:-1], f_flat[1:]):
             if None not in (f_1, f_2) and f_1 >= f_2:
                 msg = f'"{frame_parts}" are not properly formatted parts'
                 raise ValueError(msg)
@@ -953,7 +964,7 @@ class MKVFile:
             if c < 1:
                 msg = f'"{chapters}" are not properly formatted chapters'
                 raise ValueError(msg)
-        for c_1, c_2 in zip(c_flat[:-1], c_flat[1:], strict=False):
+        for c_1, c_2 in zip(c_flat[:-1], c_flat[1:]):
             if c_1 >= c_2:
                 msg = f'"{chapters}" are not properly formatted chapters'
                 raise ValueError(msg)
@@ -1125,7 +1136,7 @@ class MKVFile:
             track.no_attachments = True
 
     @staticmethod
-    def flatten(item: T | Iterable[T | Iterable[T]]) -> list[T]:
+    def flatten(item: Any) -> list[Any]:  # noqa: ANN401
         """
         Flatten a list or a tuple.
 
@@ -1152,12 +1163,12 @@ class MKVFile:
             A flattened version of `item`.
         """
 
-        def _flatten(item: T | Iterable[T | Iterable[T]]) -> Iterable[T]:
+        def _flatten(item: Any) -> Iterable[Any]:  # noqa: ANN401
             if isinstance(item, Sequence) and not isinstance(item, str):
                 for subitem in item:
                     yield from _flatten(subitem)
             else:
-                yield cast("T", item)
+                yield item
 
         return list(_flatten(item))
 
@@ -1181,3 +1192,49 @@ class MKVFile:
                 track.file_id = unique_file_dict[track.file_path]
         except KeyError as e:
             raise ValueError from e
+
+    def get_attachment(self, attachment_num: int | None = None) -> MKVAttachment | list[MKVAttachment]:
+        """
+        Get an :class:`~pymkv.MKVAttachment` from the :class:`~pymkv.MKVFile` object.
+
+        Parameters
+        ----------
+        attachment_num : int, optional
+            Index of attachment to retrieve. Will return a list of :class:`~pymkv.MKVAttachment` objects if argument is
+            not provided.
+
+        Returns
+        -------
+        :class:`~pymkv.MKVAttachment`, list of :class:`~pymkv.MKVAttachment`
+            A list of all :class:`~pymkv.MKVAttachment` objects in a :class:`~pymkv.MKVFile`. Returns a specific
+            :class:`~pymkv.MKVAttachment` if `attachment_num` is specified.
+        """
+        return self.attachments if attachment_num is None else self.attachments[attachment_num]
+
+    def remove_attachment(self, attachment_num: int) -> None:
+        """
+        Remove an attachment from the :class:`~pymkv.MKVFile` object.
+
+        Parameters
+        ----------
+        attachment_num : int
+            The attachment number of the attachment to remove.
+
+        Raises
+        ------
+        IndexError
+            Raised if `attachment_num` is out of range of the attachment list.
+        """
+        if not 0 <= attachment_num < len(self.attachments):
+            msg = "attachment index out of range"
+            raise IndexError(msg)
+        del self.attachments[attachment_num]
+
+    def remove_all_attachments(self) -> None:
+        """
+        Remove all attachments from the :class:`~pymkv.MKVFile` object.
+
+        This will clear the attachment list, effectively removing all attachments
+        that would otherwise be included in the output file.
+        """
+        self.attachments = []

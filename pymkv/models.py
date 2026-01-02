@@ -1,7 +1,5 @@
 from __future__ import annotations
 
-from typing import Any
-
 import msgspec
 
 
@@ -121,6 +119,45 @@ class TagEntry(msgspec.Struct):
     track_id: int | None = None
 
 
+class AttachmentProperties(msgspec.Struct):
+    """
+    Properties of an attachment.
+
+    Attributes
+    ----------
+    name : str | None
+        The name of the attachment.
+    description : str | None
+        The description of the attachment.
+    mime_type : str | None
+        The MIME type of the attachment.
+    """
+
+    name: str | None = None
+    description: str | None = None
+    mime_type: str | None = None
+
+
+class AttachmentInfo(msgspec.Struct):
+    """
+    Information about an attachment.
+
+    Attributes
+    ----------
+    id : int
+        The ID of the attachment.
+    properties : AttachmentProperties
+        The properties of the attachment.
+    """
+
+    id: int
+    file_name: str | None = None
+    content_type: str | None = None
+    description: str | None = None
+    size: int = 0
+    properties: AttachmentProperties = msgspec.field(default_factory=AttachmentProperties)
+
+
 class MkvMergeOutput(msgspec.Struct):
     """
     Root structure of `mkvmerge -J` output.
@@ -135,12 +172,15 @@ class MkvMergeOutput(msgspec.Struct):
         List of global tags.
     track_tags : list[TagEntry]
         List of track tags.
-    attachments : list[Any]
+    attachments : list[AttachmentInfo]
         List of attachments.
+    file_name : str | None
+        The file name.
     """
 
     container: ContainerInfo
+    file_name: str | None = None
     tracks: list[TrackInfo] = []
     global_tags: list[TagEntry] = []
     track_tags: list[TagEntry] = []
-    attachments: list[Any] = []
+    attachments: list[AttachmentInfo] = []

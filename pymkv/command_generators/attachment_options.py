@@ -28,6 +28,8 @@ class AttachmentOptions(CommandGeneratorBase):
             The next command line argument token.
         """
         for attachment in mkv_file.attachments:
+            if attachment.source_id is not None:
+                continue
             if attachment.name:
                 yield "--attachment-name"
                 yield attachment.name

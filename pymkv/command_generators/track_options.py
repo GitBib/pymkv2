@@ -89,7 +89,21 @@ class TrackOptions(CommandGeneratorBase):
             else:
                 yield "--no-subtitles"
 
-            # 3. Input file path (once per file)
+            info_json = getattr(mkv_file, "_info_json", None)
+            if info_json and info_json.attachments:
+                kept_ids = {
+                    a.source_id for a in mkv_file.attachments if a.source_id is not None and a.source_file == file_path
+                }
+                all_ids = {a.id for a in info_json.attachments}
+                info_name = info_json.file_name
+
+                if info_name and (str(file_path) in info_name or info_name in str(file_path) or kept_ids):
+                    if kept_ids and kept_ids != all_ids and kept_ids.issubset(all_ids):
+                        yield "--attachments"
+                        yield ",".join(str(aid) for aid in sorted(kept_ids))
+                    elif not kept_ids:
+                        yield "--no-attachments"
+
             yield file_path
 
     def _generate_properties(self, track: MKVTrack) -> Iterator[str]:

@@ -17,6 +17,7 @@ def test_attachment_options(mock_mkv: MagicMock) -> None:
     cover_attachment.description = "Cover Art"
     cover_attachment.attach_once = False
     cover_attachment.uid = None
+    cover_attachment.source_id = None
 
     mock_mkv.attachments = [cover_attachment]
 
