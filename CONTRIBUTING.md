@@ -134,10 +134,11 @@ Enhancement suggestions are tracked as [GitHub issues](https://github.com/GitBib
 <!-- You might want to create an issue template for enhancement suggestions that can be used as a guide and that defines the structure of the information to be included. If you do so, reference it here in the description. -->
 
 ### Your First Code Contribution
-<!-- TODO
-include Setup of env, IDE and typical getting started instructions?
 
--->
+Please ensure you follow these steps:
+
+1.  **Write Tests**: Ensure that you write tests for your code changes. We strive for high code coverage and reliability.
+2.  **Run Prek**: We use `prek`, which is an analogue to `pre-commit`, to ensure code quality. Please run the `prek` hook before submitting your changes to verify that your code meets our linting and formatting standards.
 
 ### Improving The Documentation
 <!-- TODO
