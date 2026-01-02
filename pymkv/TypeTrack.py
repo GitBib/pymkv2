@@ -43,6 +43,7 @@ type_files = {
     "subtitles": {
         "PGS": "sup",
         "ASS": "ass",
+        "SubStationAlpha": "ass",
         "SSA": "ssa",
         "UTF8": "srt",
         "SubRip/SRT": "srt",
