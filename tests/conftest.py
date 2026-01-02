@@ -157,3 +157,10 @@ def mock_track_cleaner() -> Callable[[Any], None]:
         m.color_max_frame_light = None
 
     return clean_mock
+
+
+@pytest.fixture
+def dummy_mkv(tmp_path: Path) -> Path:
+    f = tmp_path / "dummy.mkv"
+    f.touch()
+    return f
