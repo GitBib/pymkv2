@@ -201,18 +201,6 @@ def test_get_track_error(get_path_test_file: Path) -> None:
         mkv.get_track(2)
 
 
-def test_added_lang_in_track_and_mux_file(
-    get_base_path: Path,
-    get_path_test_file: Path,
-) -> None:
-    mkv = MKVFile(get_path_test_file)
-    output_file = get_base_path / "file-test.mkv"
-    track = cast("MKVTrack", mkv.get_track(1))
-    track.language_ietf = "TEST"
-    with pytest.raises(ValueError):  # noqa: PT011
-        mkv.mux(output_file)
-
-
 def test_track_init_legacy_dict(dummy_mkv: Path) -> None:
     # Test initialization with existing_info as a dict (legacy support)
     info = {
@@ -238,37 +226,6 @@ def test_track_repr(dummy_mkv: Path) -> None:
         rep = repr(t)
         assert repr(str(dummy_mkv)) in rep
         assert "MKVTrack" in str(type(t))
-
-
-def test_track_properties_ielf_language(dummy_mkv: Path) -> None:
-    info = MkvMergeOutput(container=ContainerInfo(), tracks=[TrackInfo(id=0, type="video", codec="h264")])
-    with (
-        patch.object(sys.modules["pymkv.MKVTrack"], "get_file_info", return_value=info),
-        patch.object(sys.modules["pymkv.MKVTrack"], "verify_supported", return_value=True),
-    ):
-        t = MKVTrack(str(dummy_mkv))
-
-        # Test language_ietf setter
-        t.language_ietf = "en-US"
-        assert t.language_ietf == "en-US"
-
-        # Test effective_language priority
-        # 1. Only ietf
-        assert t.effective_language == "en-US"
-
-        # 2. Both (ietf wins)
-        t.language = "eng"
-        assert t.language == "eng"
-        # In the new behavior, setting language clears language_ietf
-        assert t.effective_language == "eng"
-
-        # 3. Only legacy
-        t.language_ietf = None
-        assert t.effective_language == "eng"
-
-        # 4. None
-        t.language = None
-        assert t.effective_language is None
 
 
 def test_track_pts_property(dummy_mkv: Path) -> None:

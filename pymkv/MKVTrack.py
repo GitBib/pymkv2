@@ -395,13 +395,6 @@ class MKVTrack:
         self._sync = sync
 
     @property
-    def effective_language(self) -> str | None:
-        """
-        Get the effective language of the track, prioritizing IETF (BCP47) over legacy (ISO639-2).
-        """
-        return self._language_ietf or self._language
-
-    @property
     def language_ietf(self) -> str | None:
         """
         Get the language of the track with BCP47 format.
