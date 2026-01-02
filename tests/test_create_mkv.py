@@ -1,4 +1,5 @@
 import subprocess as sp
+import sys
 from pathlib import Path
 from unittest.mock import MagicMock, PropertyMock, patch
 
@@ -24,30 +25,35 @@ def test_create_new_mkv(
     mkv.mux(output_file)
 
 
-@patch("pymkv.MKVFile.checking_file_path")
-def test_mkvfile_init_errors(mock_check: MagicMock, tmp_path: Path) -> None:
-    mock_check.side_effect = lambda x: x
-
+def test_mkvfile_init_errors(tmp_path: Path) -> None:
     # 1. CalledProcessError re-raise
-    with patch("pymkv.MKVFile.get_file_info") as mock_get:
-        mock_get.side_effect = sp.CalledProcessError(1, "cmd", output=b"error")
-        with pytest.raises(sp.CalledProcessError):
-            MKVFile("file.mkv")
+    with (
+        patch.object(sys.modules["pymkv.MKVFile"], "checking_file_path", side_effect=lambda x: x),
+        patch.object(
+            sys.modules["pymkv.MKVFile"], "get_file_info", side_effect=sp.CalledProcessError(1, "cmd", output=b"error")
+        ),
+        pytest.raises(sp.CalledProcessError),
+    ):
+        MKVFile("file.mkv")
 
     # 2. msgspec.ValidationError -> ValueError
-    with patch("pymkv.MKVFile.get_file_info") as mock_get:
-        mock_get.side_effect = msgspec.ValidationError("invalid json")
-        with pytest.raises(ValueError, match="Invalid JSON"):
-            MKVFile("file.mkv")
+    with (
+        patch.object(sys.modules["pymkv.MKVFile"], "checking_file_path", side_effect=lambda x: x),
+        patch.object(
+            sys.modules["pymkv.MKVFile"], "get_file_info", side_effect=msgspec.ValidationError("invalid json")
+        ),
+        pytest.raises(ValueError, match="Invalid JSON"),
+    ):
+        MKVFile("file.mkv")
 
     # 3. Not supported
-    with patch("pymkv.MKVFile.get_file_info") as mock_get:
-        # returns valid info but supported=False
-        real_info = MkvMergeOutput(container=ContainerInfo(supported=False))
-        mock_get.return_value = real_info
-
-        with pytest.raises(ValueError, match="not a valid Matroska file"):
-            MKVFile("file.mkv")
+    real_info = MkvMergeOutput(container=ContainerInfo(supported=False))
+    with (
+        patch.object(sys.modules["pymkv.MKVFile"], "checking_file_path", side_effect=lambda x: x),
+        patch.object(sys.modules["pymkv.MKVFile"], "get_file_info", return_value=real_info),
+        pytest.raises(ValueError, match="not a valid Matroska file"),
+    ):
+        MKVFile("file.mkv")
 
 
 def test_mkvfile_repr() -> None:
@@ -148,18 +154,17 @@ def test_split_methods_validation() -> None:
         mkv.split_chapters(2, 1)
 
 
-@patch("pymkv.MKVTrack.get_file_info")
-@patch("pymkv.MKVTrack.checking_file_path")
-@patch("pymkv.MKVTrack.verify_supported", return_value=True)
-def test_order_tracks_by_file_id_keyerror(mock_verify: MagicMock, mock_check: MagicMock, mock_info: MagicMock) -> None:
-    mock_check.side_effect = lambda x: x
-    mock_info.return_value = MkvMergeOutput(
-        container=ContainerInfo(), tracks=[TrackInfo(id=0, type="video", codec="h264")]
-    )
+def test_order_tracks_by_file_id_keyerror() -> None:
+    info = MkvMergeOutput(container=ContainerInfo(), tracks=[TrackInfo(id=0, type="video", codec="h264")])
 
-    mkv = MKVFile()
-    t1 = MKVTrack("file1.mkv")
-    mkv.tracks = [t1]
+    with (
+        patch.object(sys.modules["pymkv.MKVTrack"], "checking_file_path", side_effect=lambda x: x),
+        patch.object(sys.modules["pymkv.MKVTrack"], "get_file_info", return_value=info),
+        patch.object(sys.modules["pymkv.MKVTrack"], "verify_supported", return_value=True),
+    ):
+        mkv = MKVFile()
+        t1 = MKVTrack("file1.mkv")
+        mkv.tracks = [t1]
 
     # We simulate KeyError by making track.file_path return different values
 

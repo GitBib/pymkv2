@@ -1,11 +1,12 @@
+import sys
 from pathlib import Path
 from typing import cast
-from unittest.mock import MagicMock, patch
+from unittest.mock import patch
 
 import pytest
 
 from pymkv import MKVFile, MKVTrack
-from pymkv.models import ContainerInfo, MkvMergeOutput, TrackInfo
+from pymkv.models import ContainerInfo, MkvMergeOutput, TrackInfo, TrackProperties
 
 
 def test_remove_track_one_track(get_path_test_file: Path) -> None:
@@ -225,88 +226,94 @@ def test_track_init_legacy_dict(dummy_mkv: Path) -> None:
     # pts check removed due to uncertainty of field mapping
 
 
-@patch("pymkv.MKVTrack.get_file_info")
-@patch("pymkv.MKVTrack.verify_supported", return_value=True)
-def test_track_repr(mock_verify: MagicMock, mock_info: MagicMock, dummy_mkv: Path) -> None:
+def test_track_repr(dummy_mkv: Path) -> None:
     # return dummy info with at least 1 track
-    mock_info.return_value = MkvMergeOutput(
-        container=ContainerInfo(), tracks=[TrackInfo(id=0, type="video", codec="h264")]
+    info = MkvMergeOutput(container=ContainerInfo(), tracks=[TrackInfo(id=0, type="video", codec="h264")])
+
+    with (
+        patch.object(sys.modules["pymkv.MKVTrack"], "get_file_info", return_value=info),
+        patch.object(sys.modules["pymkv.MKVTrack"], "verify_supported", return_value=True),
+    ):
+        t = MKVTrack(str(dummy_mkv))
+        rep = repr(t)
+        assert str(dummy_mkv) in rep
+        assert "MKVTrack" in str(type(t))
+
+
+def test_track_properties_ielf_language(dummy_mkv: Path) -> None:
+    info = MkvMergeOutput(container=ContainerInfo(), tracks=[TrackInfo(id=0, type="video", codec="h264")])
+    with (
+        patch.object(sys.modules["pymkv.MKVTrack"], "get_file_info", return_value=info),
+        patch.object(sys.modules["pymkv.MKVTrack"], "verify_supported", return_value=True),
+    ):
+        t = MKVTrack(str(dummy_mkv))
+
+        # Test language_ietf setter
+        t.language_ietf = "en-US"
+        assert t.language_ietf == "en-US"
+
+        # Test effective_language priority
+        # 1. Only ietf
+        assert t.effective_language == "en-US"
+
+        # 2. Both (ietf wins)
+        t.language = "eng"
+        assert t.language == "eng"
+        assert t.effective_language == "en-US"
+
+        # 3. Only legacy
+        t.language_ietf = None
+        assert t.effective_language == "eng"
+
+        # 4. None
+        t.language = None
+        assert t.effective_language is None
+
+
+def test_track_pts_property(dummy_mkv: Path) -> None:
+    info = MkvMergeOutput(
+        container=ContainerInfo(),
+        tracks=[TrackInfo(id=0, type="video", codec="h264", properties=TrackProperties(language_ietf="en-US"))],
     )
 
-    t = MKVTrack(str(dummy_mkv))
-    rep = repr(t)
-    assert str(dummy_mkv) in rep
-    assert "MKVTrack" in str(type(t))
+    with (
+        patch.object(sys.modules["pymkv.MKVTrack"], "get_file_info", return_value=info),
+        patch.object(sys.modules["pymkv.MKVTrack"], "verify_supported", return_value=True),
+    ):
+        t = MKVTrack(str(dummy_mkv))
+        # pts is 0 by default
+        assert t.pts == 0
+        t._pts = 123  # noqa: SLF001
+        assert t.pts == 123  # noqa: PLR2004
 
 
-@patch("pymkv.MKVTrack.get_file_info")
-@patch("pymkv.MKVTrack.verify_supported", return_value=True)
-def test_track_properties_ielf_language(mock_verify: MagicMock, mock_info: MagicMock, dummy_mkv: Path) -> None:
-    mock_info.return_value = MkvMergeOutput(
-        container=ContainerInfo(), tracks=[TrackInfo(id=0, type="video", codec="h264")]
-    )
-    t = MKVTrack(str(dummy_mkv))
+def test_track_tags_setter(dummy_mkv: Path, tmp_path: Path) -> None:
+    # Setup dummy validation
+    info = MkvMergeOutput(container=ContainerInfo(), tracks=[TrackInfo(id=0, type="video", codec="h264")])
 
-    # Test language_ietf setter
-    t.language_ietf = "en-US"
-    assert t.language_ietf == "en-US"
+    with (
+        patch.object(sys.modules["pymkv.MKVTrack"], "get_file_info", return_value=info),
+        patch.object(sys.modules["pymkv.MKVTrack"], "verify_supported", return_value=True),
+    ):
+        t = MKVTrack(str(dummy_mkv))
 
-    # Test effective_language priority
-    # 1. Only ietf
-    assert t.effective_language == "en-US"
+        # Test None
+        t.tags = None
+        assert t.tags is None
 
-    # 2. Both (ietf wins)
-    t.language = "eng"
-    assert t.language == "eng"
-    assert t.effective_language == "en-US"
+        # Test invalid type
+        with pytest.raises(TypeError, match="not of type str"):
+            t.tags = 123  # type: ignore[assignment]
 
-    # 3. Only legacy
-    t.language_ietf = None
-    assert t.effective_language == "eng"
+        # Test non-existent file
+        with pytest.raises(FileNotFoundError, match="does not exist"):
+            t.tags = str(tmp_path / "non_existent_tags.xml")
 
-    # 4. None
-    t.language = None
-    assert t.effective_language is None
-
-
-@patch("pymkv.MKVTrack.get_file_info")
-@patch("pymkv.MKVTrack.verify_supported", return_value=True)
-def test_track_pts_property(mock_verify: MagicMock, mock_info: MagicMock, dummy_mkv: Path) -> None:
-    mock_info.return_value = MkvMergeOutput(
-        container=ContainerInfo(), tracks=[TrackInfo(id=0, type="video", codec="h264")]
-    )
-    t = MKVTrack(str(dummy_mkv))
-    # pts is 0 by default
-    assert t.pts == 0
-    t._pts = 123  # noqa: SLF001
-    assert t.pts == 123  # noqa: PLR2004
-
-
-@patch("pymkv.MKVTrack.get_file_info")
-@patch("pymkv.MKVTrack.verify_supported", return_value=True)
-def test_track_tags_setter(mock_verify: MagicMock, mock_info: MagicMock, dummy_mkv: Path, tmp_path: Path) -> None:
-    mock_info.return_value = MkvMergeOutput(
-        container=ContainerInfo(), tracks=[TrackInfo(id=0, type="video", codec="h264")]
-    )
-    t = MKVTrack(str(dummy_mkv))
-
-    # Test None
-    t.tags = None
-    assert t.tags is None
-
-    # Test invalid type
-    with pytest.raises(TypeError, match="not of type str"):
-        t.tags = 123  # type: ignore[assignment]
-
-    # Test non-existent file
-    with pytest.raises(FileNotFoundError, match="does not exist"):
-        t.tags = str(tmp_path / "non_existent_tags.xml")
-
-    # Test valid file
-    tags_file = tmp_path / "tags.xml"
-    tags_file.touch()
-    t.tags = str(tags_file)
-    assert t.tags == str(tags_file)
+        # Test valid file
+        tags_file = tmp_path / "tags.xml"
+        tags_file.touch()
+        t.tags = str(tags_file)
+        assert t.tags == str(tags_file)
 
 
 def test_track_file_path_setter_verification_failure(tmp_path: Path) -> None:
@@ -314,19 +321,19 @@ def test_track_file_path_setter_verification_failure(tmp_path: Path) -> None:
     invalid = tmp_path / "invalid.mkv"
     invalid.touch()
     with (
-        patch("pymkv.MKVTrack.verify_supported", return_value=False),
+        patch.object(sys.modules["pymkv.MKVTrack"], "verify_supported", return_value=False),
         pytest.raises(ValueError, match="not a valid Matroska file"),
     ):
         MKVTrack(str(invalid))
 
 
-@patch("pymkv.MKVTrack.get_file_info")
-@patch("pymkv.MKVTrack.verify_supported", return_value=True)
-def test_extract_silent_and_path(mock_verify: MagicMock, mock_info: MagicMock, dummy_mkv: Path, tmp_path: Path) -> None:
-    mock_info.return_value = MkvMergeOutput(
-        container=ContainerInfo(), tracks=[TrackInfo(id=0, type="video", codec="h264")]
-    )
-    t = MKVTrack(str(dummy_mkv))
+def test_extract_silent_and_path(dummy_mkv: Path, tmp_path: Path) -> None:
+    info = MkvMergeOutput(container=ContainerInfo(), tracks=[TrackInfo(id=0, type="video", codec="h264")])
+    with (
+        patch.object(sys.modules["pymkv.MKVTrack"], "get_file_info", return_value=info),
+        patch.object(sys.modules["pymkv.MKVTrack"], "verify_supported", return_value=True),
+    ):
+        t = MKVTrack(str(dummy_mkv))
     output = tmp_path / "extracted"
 
     with patch("subprocess.run") as mock_run:
