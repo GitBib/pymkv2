@@ -4,6 +4,10 @@ on:
   release:
     types: [created]
 
+permissions:
+  contents: write
+  id-token: write
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
@@ -45,6 +49,8 @@ jobs:
       shell: bash
       run: |
         uv build
+        gh release upload "${{ steps.vars.outputs.tag }}" dist/* --clobber
         uv publish
       env:
+        GH_TOKEN: ${{ github.token }}
         UV_PUBLISH_TOKEN: ${{ secrets.PYPI_TOKEN }}
