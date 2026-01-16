@@ -26,6 +26,7 @@ class TrackOptions(CommandGeneratorBase):
         "flag_original": ("--original-flag", True),
         "flag_commentary": ("--commentary-flag", True),
         "sync": ("--sync", False),
+        "timestamps": ("--timestamps", False),
     }
 
     def generate(self, mkv_file: MKVFile) -> Iterator[str]:
