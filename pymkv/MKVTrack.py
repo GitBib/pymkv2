@@ -27,6 +27,11 @@ prevent any global tags from being included if the :class:`~pymkv.MKVTrack` is m
 >>> track3 = MKVTrack("path/to/MKV.mkv", track_id=1)  # doctest: +SKIP
 >>> track3.no_global_tags = True  # doctest: +SKIP
 
+Apply a timestamp file to a track. This is useful for variable frame rate video or to adjust timing.
+
+>>> track4 = MKVTrack("path/to/track.h264")  # doctest: +SKIP
+>>> track4.timestamps = "path/to/timestamps.txt"  # doctest: +SKIP
+
 Now all these tracks can be added to an :class:`~pymkv.MKVFile` object and muxed together.
 
 >>> from pymkv import MKVFile
@@ -34,6 +39,7 @@ Now all these tracks can be added to an :class:`~pymkv.MKVFile` object and muxed
 >>> file.add_track(track1)  # doctest: +SKIP
 >>> file.add_track(track2)  # doctest: +SKIP
 >>> file.add_track(track3)  # doctest: +SKIP
+>>> file.add_track(track4)  # doctest: +SKIP
 >>> file.mux("path/to/output.mkv")  # doctest: +SKIP
 """
 
@@ -158,6 +164,7 @@ class MKVTrack:
         existing_info: MkvMergeOutput | dict[str, Any] | None = None,
         tag_entries: int = 0,
         compression: bool | None = None,
+        timestamps: str | os.PathLike | None = None,
     ) -> None:
         self._track_codec: str | None = None
         self._track_type: str | None = None
@@ -196,6 +203,8 @@ class MKVTrack:
         self.flag_original = flag_original
         self.compression = compression
         self._tag_entries = tag_entries
+        self._timestamps: str | None = None
+        self.timestamps = timestamps
 
         # exclusions
         self.no_chapters = False
@@ -482,6 +491,42 @@ class MKVTrack:
         return self._tag_entries
 
     @property
+    def timestamps(self) -> str | None:
+        """
+        Get the timestamps file to include with the track.
+
+        Returns:
+            str: The path to the timestamps file.
+        """
+        return self._timestamps
+
+    @timestamps.setter
+    def timestamps(self, file_path: str | os.PathLike | None) -> None:
+        """
+        Set the timestamps file for the track.
+
+        Args:
+            file_path (str): The path to the timestamps file.
+
+        Raises:
+            TypeError: If the file_path is not a string.
+            FileNotFoundError: If the file does not exist or is not a file.
+        """
+        if file_path is None:
+            self._timestamps = None
+            return
+
+        if not isinstance(file_path, (str, os.PathLike)):
+            msg = f'"{file_path}" is not of type str or PathLike'
+            raise TypeError(msg)
+
+        file_path = Path(file_path).expanduser()
+        if not file_path.is_file():
+            msg = f'"{file_path}" does not exist'
+            raise FileNotFoundError(msg)
+        self._timestamps = str(file_path)
+
+    @property
     def track_codec(self) -> str | None:
         """
         Get the codec of the track.
@@ -545,4 +590,54 @@ class MKVTrack:
             )
         else:
             sp.run(command, check=True, capture_output=True)  # noqa: S603
+        return output_path
+
+    def extract_timestamps(
+        self,
+        output_path: str | os.PathLike | None = None,
+        silent: bool | None = False,
+    ) -> str:
+        """
+        Extract the timestamps of the track as a file (v2 format).
+
+        Examples
+        --------
+        >>> track = MKVTrack("path/to/media.mkv", track_id=0)  # doctest: +SKIP
+        >>> timestamp_path = track.extract_timestamps()  # doctest: +SKIP
+
+
+        Args:
+            output_path (str | os.PathLike | None, optional): The path to be used as the output file
+                in the mkvextract command.
+            silent (bool | None, optional): By default the mkvmerge output will be shown unless silent is True.
+
+        Returns:
+            str: The path of the extracted file.
+        """
+        extract_info_file = f"_[{self.track_id}]_timestamps.txt"
+
+        if output_path is None:
+            output_path = f"{self.file_path}{extract_info_file}"
+        else:
+            file = Path(self.file_path)
+            output_path = Path(output_path, f"{file.name}{extract_info_file}")
+
+        output_path = str(Path(output_path).expanduser())
+
+        command = [
+            *self.mkvextract_path,
+            "timestamps_v2",
+            f"{self.file_path}",
+            f"{self.track_id}:{output_path}",
+        ]
+
+        if silent:
+            sp.run(  # noqa: S603
+                command,
+                stdout=sp.DEVNULL,
+                check=True,
+            )
+        else:
+            sp.run(command, check=True, capture_output=True)  # noqa: S603
+
         return output_path
