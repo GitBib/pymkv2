@@ -1,3 +1,13 @@
+"""Generator for track ordering options.
+
+Handles the `--track-order` flag to specify the order of tracks in the output.
+
+Examples
+--------
+>>> from pymkv.command_generators.track_order_options import TrackOrderOptions  # doctest: +SKIP
+>>> order_opts = TrackOrderOptions()  # doctest: +SKIP
+"""
+
 from __future__ import annotations
 
 from typing import TYPE_CHECKING
@@ -26,6 +36,15 @@ class TrackOrderOptions(CommandGeneratorBase):
         ------
         str
             The next command line argument token.
+
+        Examples
+        --------
+        >>> from pymkv.MKVFile import MKVFile
+        >>> mkv = MKVFile()
+        >>> mkv.add_track("video.h264")  # doctest: +SKIP
+        >>> options = TrackOrderOptions()
+        >>> # args = list(options.generate(mkv))
+        >>> # "--track-order" in args
         """
         # Logic from original command()
         track_order = [f"{track.file_id}:{track.track_id}" for track in mkv_file.tracks if track.file_id is not None]

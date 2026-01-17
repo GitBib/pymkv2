@@ -1,3 +1,13 @@
+"""Generator for splitting options.
+
+Handles various splitting modes (size, duration, timestamps, etc.).
+
+Examples
+--------
+>>> from pymkv.command_generators.split_options import SplitOptions  # doctest: +SKIP
+>>> split_opts = SplitOptions()  # doctest: +SKIP
+"""
+
 from __future__ import annotations
 
 from typing import TYPE_CHECKING
@@ -26,5 +36,17 @@ class SplitOptions(CommandGeneratorBase):
         ------
         str
             The next command line argument token.
+
+        Examples
+        --------
+        >>> from pymkv.MKVFile import MKVFile
+        >>> mkv = MKVFile()
+        >>> mkv.split_duration("00:10:00")
+        >>> options = SplitOptions()
+        >>> args = list(options.generate(mkv))
+        >>> "--split" in args
+        True
+        >>> "duration:00:10:00" in args
+        True
         """
         yield from mkv_file._split_options  # noqa: SLF001

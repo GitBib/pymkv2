@@ -1,3 +1,13 @@
+"""Utility module for common operations in pymkv.
+
+Includes functions for path verification and ensuring mkvtoolnix components are available.
+
+Examples
+--------
+>>> from pymkv.utils import prepare_mkvtoolnix_path  # doctest: +SKIP
+>>> path = prepare_mkvtoolnix_path('mkvmerge')  # doctest: +SKIP
+"""
+
 from __future__ import annotations
 
 import os

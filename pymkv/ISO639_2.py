@@ -1,3 +1,12 @@
+"""Utilities for checking ISO 639-2 language code compliance.
+
+Examples
+--------
+>>> from pymkv.ISO639_2 import is_iso639_2  # doctest: +SKIP
+>>> is_iso639_2('eng')  # doctest: +SKIP
+True
+"""
+
 from __future__ import annotations
 
 from iso639 import Language, LanguageNotFoundError

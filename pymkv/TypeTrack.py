@@ -1,3 +1,13 @@
+"""Module containing mappings for track types and extensions.
+
+Examples
+--------
+>>> from pymkv.MKVTrack import MKVTrack  # doctest: +SKIP
+>>> from pymkv.TypeTrack import get_track_extension  # doctest: +SKIP
+>>> # Assuming a track object exists:
+>>> ext = get_track_extension(MKVTrack("movie.mkv"))  # doctest: +SKIP
+"""
+
 from __future__ import annotations
 
 from typing import TYPE_CHECKING

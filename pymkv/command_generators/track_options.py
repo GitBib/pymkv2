@@ -1,3 +1,13 @@
+"""Generator for track-specific options.
+
+Handles flags related to individual tracks such as language, names, and flags.
+
+Examples
+--------
+>>> from pymkv.command_generators.track_options import TrackOptions  # doctest: +SKIP
+>>> track_opts = TrackOptions()  # doctest: +SKIP
+"""
+
 from __future__ import annotations
 
 from typing import TYPE_CHECKING
@@ -42,6 +52,20 @@ class TrackOptions(CommandGeneratorBase):
         ------
         str
             The next command line argument token.
+
+        Examples
+        --------
+        >>> from pymkv.MKVFile import MKVFile
+        >>> from pymkv.MKVTrack import MKVTrack
+        >>> mkv = MKVFile()
+        >>> track = MKVTrack("video.h264", track_id=0, language="eng")
+        >>> mkv.add_track(track)
+        >>> options = TrackOptions()
+        >>> args = list(options.generate(mkv))
+        >>> "--language" in args
+        True
+        >>> "0:eng" in args
+        True
         """
         # Group tracks by file_path to avoid repeating input files
         files: dict[str, list[MKVTrack]] = {}

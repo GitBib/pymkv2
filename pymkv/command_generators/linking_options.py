@@ -1,3 +1,13 @@
+"""Generator for file linking options.
+
+Handles flags for linking MKV files (previous/next).
+
+Examples
+--------
+>>> from pymkv.command_generators.linking_options import LinkingOptions  # doctest: +SKIP
+>>> link_opts = LinkingOptions()  # doctest: +SKIP
+"""
+
 from __future__ import annotations
 
 from typing import TYPE_CHECKING
@@ -26,6 +36,15 @@ class LinkingOptions(CommandGeneratorBase):
         ------
         str
             The next command line argument token.
+
+        Examples
+        --------
+        >>> from pymkv.MKVFile import MKVFile
+        >>> mkv = MKVFile()
+        >>> mkv.link_to_previous("prev.mkv")  # doctest: +SKIP
+        >>> options = LinkingOptions()
+        >>> # args = list(options.generate(mkv))
+        >>> # "--link-to-previous" in args
         """
         if mkv_file._link_to_previous_file:  # noqa: SLF001
             yield "--link-to-previous"

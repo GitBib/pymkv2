@@ -1,3 +1,15 @@
+""":class:`~pymkv.Timestamp` provides timestamp handling and conversion utilities.
+
+Examples
+--------
+>>> from pymkv import Timestamp  # doctest: +SKIP
+>>> ts = Timestamp("00:01:30.500")  # doctest: +SKIP
+>>> ts.to_string()  # doctest: +SKIP
+'00:01:30.500000000'
+>>> ts.total_seconds  # doctest: +SKIP
+90.5
+"""
+
 from __future__ import annotations
 
 import re

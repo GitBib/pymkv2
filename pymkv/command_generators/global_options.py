@@ -1,3 +1,14 @@
+"""Generators for global and basic options of mkvmerge.
+
+Includes `BaseOptions` for fundamental flags (like title, output) and `GlobalOptions` for tags.
+
+Examples
+--------
+>>> from pymkv.command_generators.global_options import GlobalOptions, BaseOptions  # doctest: +SKIP
+>>> global_opts = GlobalOptions()  # doctest: +SKIP
+>>> base_opts = BaseOptions()  # doctest: +SKIP
+"""
+
 from __future__ import annotations
 
 from typing import TYPE_CHECKING
@@ -26,6 +37,20 @@ class BaseOptions(CommandGeneratorBase):
         ------
         str
             The next command line argument token.
+
+        Examples
+        --------
+        >>> from pymkv.MKVFile import MKVFile
+        >>> mkv = MKVFile()
+        >>> mkv.title = "My Movie"
+        >>> options = BaseOptions()
+        >>> args = list(options.generate(mkv))
+        >>> "-o" in args
+        True
+        >>> "--title" in args
+        True
+        >>> args[args.index("--title") + 1]
+        'My Movie'
         """
         yield "-o"
         yield f"{mkv_file.output_path}"
@@ -54,6 +79,15 @@ class GlobalOptions(CommandGeneratorBase):
         ------
         str
             The next command line argument token.
+
+        Examples
+        --------
+        >>> from pymkv.MKVFile import MKVFile
+        >>> mkv = MKVFile()
+        >>> mkv._global_tags_file = "tags.xml"  # doctest: +SKIP
+        >>> options = GlobalOptions()
+        >>> # args = list(options.generate(mkv))
+        >>> # "--global-tags" in args
         """
         if mkv_file._global_tags_file:  # noqa: SLF001
             yield "--global-tags"
