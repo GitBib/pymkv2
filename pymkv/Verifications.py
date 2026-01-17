@@ -117,6 +117,11 @@ def get_file_info(
         If check_path is True and the file does not exist.
     TypeError
         If check_path is True and file_path is not a string or PathLike object.
+
+    Examples
+    --------
+    >>> info = get_file_info('path/to/file.mkv')  # doctest: +SKIP
+    >>> print(info.container.title)  # doctest: +SKIP
     """
     return msgspec.json.decode(
         get_file_info_raw(file_path, mkvmerge_path, check_path=check_path),
@@ -301,6 +306,11 @@ def verify_recognized(
     -----
     This function checks if mkvmerge can recognize the container format of the specified file,
     which is a prerequisite for any further operations with the file.
+
+    Examples
+    --------
+    >>> if verify_recognized('path/to/file.mkv'):  # doctest: +SKIP
+    ...     print("File is recognized")
     """
     file_path = verify_file_path_and_mkvmerge(file_path, mkvmerge_path)
     try:

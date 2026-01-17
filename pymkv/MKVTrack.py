@@ -561,6 +561,11 @@ class MKVTrack:
 
         Returns:
             str: The path of the extracted file.
+
+        Examples
+        --------
+        >>> track = MKVTrack("path/to/media.mkv", track_id=0)  # doctest: +SKIP
+        >>> extract_path = track.extract()  # doctest: +SKIP
         """
         extract_info_file = f"_[{self.track_id}]"
         if self.language:

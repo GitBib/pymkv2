@@ -1,3 +1,13 @@
+"""Generator for attachment-specific options.
+
+Handles flags for adding or replacing attachments in the MKV file.
+
+Examples
+--------
+>>> from pymkv.command_generators.attachment_options import AttachmentOptions  # doctest: +SKIP
+>>> att_opts = AttachmentOptions()  # doctest: +SKIP
+"""
+
 from __future__ import annotations
 
 from typing import TYPE_CHECKING
@@ -26,6 +36,17 @@ class AttachmentOptions(CommandGeneratorBase):
         ------
         str
             The next command line argument token.
+
+        Examples
+        --------
+        >>> from pymkv.MKVFile import MKVFile
+        >>> from pymkv.MKVAttachment import MKVAttachment
+        >>> mkv = MKVFile()
+        >>> att = MKVAttachment('cover.jpg', name='Cover')
+        >>> mkv.add_attachment(att)  # doctest: +SKIP
+        >>> options = AttachmentOptions()
+        >>> # args = list(options.generate(mkv))
+        >>> # "--attachment-name" in args
         """
         for attachment in mkv_file.attachments:
             if attachment.source_id is not None:

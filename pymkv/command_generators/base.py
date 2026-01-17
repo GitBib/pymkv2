@@ -1,3 +1,15 @@
+"""Base class defines the interface for command generation.
+
+All command generators for mkvmerge options must inherit from the `CommandGeneratorBase` class.
+
+Examples
+--------
+>>> from pymkv.command_generators.base import CommandGeneratorBase  # doctest: +SKIP
+>>> class MyGenerator(CommandGeneratorBase):  # doctest: +SKIP
+...     def generate(self, mkv_file):
+...         yield "-v"
+"""
+
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
@@ -26,5 +38,15 @@ class CommandGeneratorBase(ABC):
         ------
         str
             The next command line argument token.
+
+        Examples
+        --------
+        >>> class MyGenerator(CommandGeneratorBase):
+        ...     def generate(self, mkv_file):
+        ...         yield "-v"
+        >>>
+        >>> gen = MyGenerator()
+        >>> list(gen.generate(None))
+        ['-v']
         """
         ...

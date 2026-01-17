@@ -296,6 +296,19 @@ class MKVFile:
         str, list of str
             The full command to mux the :class:`~pymkv.MKVFile` as a string containing spaces. Will be returned as a
             list of strings with no spaces if `subprocess` is True.
+
+        Examples
+        --------
+        >>> mkv = MKVFile()
+        >>> mkv.add_track('path/to/track.h264')  # doctest: +SKIP
+        >>> # Generate command string
+        >>> cmd_str = mkv.command('output.mkv')  # doctest: +SKIP
+        >>> print(cmd_str)  # doctest: +SKIP
+        mkvmerge -o output.mkv path/to/track.h264
+        >>> # Generate command list for subprocess
+        >>> cmd_list = mkv.command('output.mkv', subprocess=True)  # doctest: +SKIP
+        >>> print(cmd_list)  # doctest: +SKIP
+        ['mkvmerge', '-o', 'output.mkv', 'path/to/track.h264']
         """
 
         self.output_path = str(Path(output_path).expanduser())
@@ -355,6 +368,22 @@ class MKVFile:
         ValueError
             Raised if the external mkvmerge command fails with a non-zero exit status
             (except for warnings when ignore_warning is True).
+
+        Examples
+        --------
+        >>> mkv = MKVFile()
+        >>> mkv.add_track('video.h264')  # doctest: +SKIP
+        >>> # Basic muxing
+        >>> mkv.mux('output.mkv')  # doctest: +SKIP
+        0
+        >>> # Muxing silently
+        >>> mkv.mux('output.mkv', silent=True)  # doctest: +SKIP
+        0
+        >>> # Muxing with progress handler
+        >>> def progress(p):
+        ...     print(f"Progress: {p}%")
+        >>> mkv.mux('output.mkv', progress_handler=progress)  # doctest: +SKIP
+        0
         """
         output_path = str(Path(output_path).expanduser())
         args = self.command(output_path, subprocess=True)
@@ -423,6 +452,15 @@ class MKVFile:
         ------
         TypeError
             Raised if if `file` is not a string-like path to an MKV file or an :class:`~pymkv.MKVFile` object.
+
+        Examples
+        --------
+        >>> mkv1 = MKVFile('part1.mkv')  # doctest: +SKIP
+        >>> mkv2 = MKVFile('part2.mkv')  # doctest: +SKIP
+        >>> # Concatenate mkv2 to mkv1
+        >>> mkv1.add_file(mkv2)  # doctest: +SKIP
+        >>> # Add file directly from path
+        >>> mkv1.add_file('part3.mkv')  # doctest: +SKIP
         """
         if isinstance(file, (str, os.PathLike)):
             self._number_file += 1
@@ -456,6 +494,15 @@ class MKVFile:
         ------
         TypeError
             Raised if `track` is not a string-like path to a track file or an :class:`~pymkv.MKVTrack`.
+
+        Examples
+        --------
+        >>> mkv = MKVFile()
+        >>> # Add a track from a file path
+        >>> mkv.add_track('video.h264')  # doctest: +SKIP
+        >>> # Add an MKVTrack object
+        >>> track = MKVTrack('audio.aac', language='eng')  # doctest: +SKIP
+        >>> mkv.add_track(track)  # doctest: +SKIP
         """
         if isinstance(track, str):
             new_track = MKVTrack(
@@ -495,6 +542,15 @@ class MKVFile:
         TypeError
             Raised if if `attachment` is not a string-like path to an attachment file
             or an :class:`~pymkv.MKVAttachment`.
+
+        Examples
+        --------
+        >>> mkv = MKVFile()
+        >>> # Add attachment from file path
+        >>> mkv.add_attachment('cover.jpg')  # doctest: +SKIP
+        >>> # Add MKVAttachment object
+        >>> att = MKVAttachment('font.ttf', name='Font')  # doctest: +SKIP
+        >>> mkv.add_attachment(att)  # doctest: +SKIP
         """
         if isinstance(attachment, str):
             self.attachments.append(MKVAttachment(attachment))
@@ -519,6 +575,14 @@ class MKVFile:
         :class:`~pymkv.MKVTrack`, list of :class:`~pymkv.MKVTrack`
             A list of all :class:`~pymkv.MKVTrack` objects in an :class:`~pymkv.MKVFile`. Returns a specific
             :class:`~pymkv.MKVTrack` if `track_num` is specified.
+
+        Examples
+        --------
+        >>> mkv = MKVFile('input.mkv')  # doctest: +SKIP
+        >>> # Get all tracks
+        >>> all_tracks = mkv.get_track()  # doctest: +SKIP
+        >>> # Get the first track
+        >>> first_track = mkv.get_track(0)  # doctest: +SKIP
         """
         return self.tracks if track_num is None else self.tracks[track_num]
 
@@ -535,6 +599,13 @@ class MKVFile:
         ------
         IndexError
             Raised if `track_num` is is out of range of the track list.
+
+        Examples
+        --------
+        >>> mkv = MKVFile()
+        >>> mkv.add_track('track1.mkv')  # doctest: +SKIP
+        >>> mkv.add_track('track2.mkv')  # doctest: +SKIP
+        >>> mkv.move_track_front(1)  # doctest: +SKIP
         """
         if not 0 <= track_num < len(self.tracks):
             msg = "track index out of range"
@@ -555,6 +626,13 @@ class MKVFile:
         ------
         IndexError
             Raised if `track_num` is is out of range of the track list.
+
+        Examples
+        --------
+        >>> mkv = MKVFile()
+        >>> mkv.add_track('track1.mkv')  # doctest: +SKIP
+        >>> mkv.add_track('track2.mkv')  # doctest: +SKIP
+        >>> mkv.move_track_end(0)  # doctest: +SKIP
         """
         if not 0 <= track_num < len(self.tracks):
             msg = "track index out of range"
@@ -575,6 +653,13 @@ class MKVFile:
         ------
         IndexError
             Raised if `track_num` is is out of range of the track list.
+
+        Examples
+        --------
+        >>> mkv = MKVFile()
+        >>> mkv.add_track('track1.mkv')  # doctest: +SKIP
+        >>> mkv.add_track('track2.mkv')  # doctest: +SKIP
+        >>> mkv.move_track_forward(0)  # doctest: +SKIP
         """
         if not 0 <= track_num < len(self.tracks) - 1:
             msg = "Track index out of range"
@@ -598,6 +683,13 @@ class MKVFile:
         ------
         IndexError
             Raised if `track_num` is is out of range of the track list.
+
+        Examples
+        --------
+        >>> mkv = MKVFile()
+        >>> mkv.add_track('track1.mkv')  # doctest: +SKIP
+        >>> mkv.add_track('track2.mkv')  # doctest: +SKIP
+        >>> mkv.move_track_backward(1)  # doctest: +SKIP
         """
         if not 0 < track_num < len(self.tracks):
             msg = "Track index out of range"
@@ -623,6 +715,13 @@ class MKVFile:
         ------
         IndexError
             Raised if `track_num_1` or `track_num_2` are out of range of the track list.
+
+        Examples
+        --------
+        >>> mkv = MKVFile()
+        >>> mkv.add_track('track1.mkv')  # doctest: +SKIP
+        >>> mkv.add_track('track2.mkv')  # doctest: +SKIP
+        >>> mkv.swap_tracks(0, 1)  # doctest: +SKIP
         """
         if not 0 <= track_num_1 < len(self.tracks) or not 0 <= track_num_2 < len(
             self.tracks,
@@ -650,6 +749,12 @@ class MKVFile:
         ------
         IndexError
             Raised if `track_num` is is out of range of the track list.
+
+        Examples
+        --------
+        >>> mkv = MKVFile()
+        >>> mkv.add_track('t1.mkv')  # doctest: +SKIP
+        >>> mkv.replace_track(0, MKVTrack('new.mkv'))  # doctest: +SKIP
         """
         if not 0 <= track_num < len(self.tracks):
             msg = "track index out of range"
@@ -670,6 +775,12 @@ class MKVFile:
         ------
         IndexError
             Raised if `track_num` is is out of range of the track list.
+
+        Examples
+        --------
+        >>> mkv = MKVFile()
+        >>> mkv.add_track('t1.mkv')  # doctest: +SKIP
+        >>> mkv.remove_track(0)  # doctest: +SKIP
         """
         if not 0 <= track_num < len(self.tracks):
             msg = "track index out of range"
@@ -701,6 +812,15 @@ class MKVFile:
         ------
         TypeError
             Raised if if `size` is not a bitmath object or an integer.
+
+        Examples
+        --------
+        >>> import bitmath
+        >>> mkv = MKVFile('input.mkv')  # doctest: +SKIP
+        >>> # Split by 100MB
+        >>> mkv.split_size(100 * 1024 * 1024)  # doctest: +SKIP
+        >>> # Split by bitmath object
+        >>> mkv.split_size(bitmath.MiB(50))  # doctest: +SKIP
         """
         if getattr(size, "__module__", None) == bitmath.__name__:
             size = cast("bitmath.Bitmath", size).bytes
@@ -722,6 +842,14 @@ class MKVFile:
             representing the number of seconds. The duration string requires formatting of at least M:S.
         link : bool, optional
             Determines if the split files should be linked together after splitting.
+
+        Examples
+        --------
+        >>> mkv = MKVFile('input.mkv')  # doctest: +SKIP
+        >>> # Split every 1 minute
+        >>> mkv.split_duration('00:01:00')  # doctest: +SKIP
+        >>> # Split every 600 seconds
+        >>> mkv.split_duration(600)  # doctest: +SKIP
         """
         self._split_options = ["--split", f"duration:{Timestamp(duration)!s}"]
         if link:
@@ -748,6 +876,14 @@ class MKVFile:
         ------
         ValueError
             Raised if invalid or improperly formatted timestamps are passed in for `*timestamps`.
+
+        Examples
+        --------
+        >>> mkv = MKVFile('input.mkv')  # doctest: +SKIP
+        >>> # Split at specific timestamps
+        >>> mkv.split_timestamps('00:01:00', '00:05:30')  # doctest: +SKIP
+        >>> # Split at seconds
+        >>> mkv.split_timestamps(60, 330)  # doctest: +SKIP
         """
         # check if in timestamps form
         ts_flat: list[str | int] = MKVFile.flatten(timestamps)
@@ -792,6 +928,12 @@ class MKVFile:
             Raised if non-int frames are passed in for `*frames` or within the `*frames` iterable.
         ValueError
             Raised if improperly formatted frames are passed in for `*frames`.
+
+        Examples
+        --------
+        >>> mkv = MKVFile('input.mkv')  # doctest: +SKIP
+        >>> # Split at specific frame numbers
+        >>> mkv.split_frames(1000, 5000)  # doctest: +SKIP
         """
         # check if in frames form
         frames_flat: list[int] = MKVFile.flatten(frames)

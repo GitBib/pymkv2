@@ -1,3 +1,13 @@
+"""Data models for parsing mkvmerge JSON output using msgspec.
+
+This module defines structures that map to the JSON output of `mkvmerge -J`.
+
+Examples
+--------
+>>> from pymkv.models import MkvMergeOutput  # doctest: +SKIP
+>>> # data = msgspec.json.decode(json_bytes, type=MkvMergeOutput)  # doctest: +SKIP
+"""
+
 from __future__ import annotations
 
 import msgspec

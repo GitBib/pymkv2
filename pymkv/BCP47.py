@@ -1,3 +1,12 @@
+"""Utilities for checking BCP 47 language code compliance.
+
+Examples
+--------
+>>> from pymkv.BCP47 import is_bcp47  # doctest: +SKIP
+>>> is_bcp47('en-US')  # doctest: +SKIP
+True
+"""
+
 import warnings
 from functools import cache
 
