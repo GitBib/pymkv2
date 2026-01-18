@@ -10,21 +10,24 @@
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 
+import datetime
+import importlib.metadata
 import os
 import sys
 
 sys.path.insert(0, os.path.abspath("../.."))  # noqa: PTH100
 
-
 # -- Project information -----------------------------------------------------
 
 project = "pymkv2"
-copyright = "2025, Sheldon Woodward & GitBib"  # noqa: A001
+copyright = f"{datetime.datetime.now().year}, Sheldon Woodward & GitBib"  # noqa: A001
 author = "Sheldon Woodward & GitBib"
 
 # The full version, including alpha/beta/rc tags
-release = "2.1.1"
-
+try:
+    release = importlib.metadata.version("pymkv2")
+except importlib.metadata.PackageNotFoundError:
+    release = "0.0.0"
 
 # -- General configuration ---------------------------------------------------
 
@@ -42,7 +45,6 @@ templates_path = ["_templates"]
 exclude_patterns: list[str] = []
 
 master_doc = "index"
-
 
 # -- Options for HTML output -------------------------------------------------
 
