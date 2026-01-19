@@ -24,6 +24,9 @@ def is_iso639_2(language: str) -> bool:
     bool
         True if the language code is valid according to ISO 639-2, False otherwise.
     """
+    if not isinstance(language, str):
+        return False
+
     try:
         Language.from_part2b(language)
         return True  # noqa: TRY300
