@@ -1,6 +1,6 @@
 [project]
 name = "pymkv2"
-version = "2.1.2"
+version = "2.2.0r1"
 description = "A Python wrapper for mkvmerge. It provides support for muxing, splitting, linking, chapters, tags, and attachments through the use of mkvmerge."
 authors = [
     {name = "GitBib", email = "job@bnff.website"},
@@ -29,7 +29,7 @@ requires-python = "<4.0,>=3.10"
 dependencies = [
     "bitmath==1.3.3.1",
     "bcp47==0.1.0",
-    "python-iso639<2027.0.0,>=2024.4.27",
+    "python-iso639<2027.0.0,>=2025.11.16",
     "msgspec>=0.20.0",
 ]
 
@@ -41,9 +41,9 @@ dev = [
     "pytest-ruff<1.0.0,>=0.4.1",
     "pytest-mypy>=0.10.3,<2.0.0",
     "mypy<2.0.0,>=1.14.1",
-    "ruff<1.0.0,>=0.14.0",
+    "ruff<1.0.0,>=0.14.13",
     "sphinx-immaterial<0.14.0,>=0.12.4; python_version == \"3.13\"",
-    "pyinstrument>=5.1.1",
+    "pyinstrument>=5.1.2",
 ]
 
 [project.urls]
