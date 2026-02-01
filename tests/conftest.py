@@ -32,7 +32,7 @@ def _cleanup_mkv_files(
     get_path_test_file_two: Path,
 ) -> Generator[None, None, None]:
     yield
-    for ext in ["*.mkv", "*.mp4", "*.ogg", "*.txt", "*.srt"]:
+    for ext in ["*.mkv", "*.mp4", "*.ogg", "*.txt", "*.srt", "*.xml"]:
         for file_path in get_base_path.glob(ext):
             if file_path not in (get_path_test_file, get_path_test_file_two):
                 file_path.unlink()
@@ -72,6 +72,26 @@ def get_path_test_srt(get_base_path: Path) -> Path:
     srt_path = get_base_path / "test_file.srt"
     create_srt_file_with_random_text(srt_path)
     return srt_path
+
+
+@pytest.fixture
+def get_path_test_chapters_xml(get_base_path: Path) -> Path:
+    """
+    Fixture to create a path for a temporary chapter XML file.
+    """
+    chapter_path = get_base_path / "chapters.xml"
+    chapter_path.touch()
+    return chapter_path
+
+
+@pytest.fixture
+def get_path_test_chapters_txt(get_base_path: Path) -> Path:
+    """
+    Fixture to create a path for a temporary simple chapter TXT file.
+    """
+    chapter_path = get_base_path / "simple_chapters.txt"
+    chapter_path.touch()
+    return chapter_path
 
 
 @pytest.fixture(autouse=True)

@@ -20,6 +20,12 @@ only generated, not executed.
 >>> mkv.add_track(MKVTrack('/path/to/another/track.aac'))  # doctest: +SKIP
 >>> mkv.command('/path/to/output.mkv')  # doctest: +SKIP
 
+Add chapters to an MKV file using chapter objects:
+
+>>> from pymkv.chapters import ChapterAtom, ChapterDisplay  # doctest: +SKIP
+>>> atom = ChapterAtom(time_start="00:00:00.000", displays=[ChapterDisplay(string="Intro")])  # doctest: +SKIP
+>>> mkv.add_chapter(atom)  # doctest: +SKIP
+
 Import an existing MKV and remove a track. This example will import an MKV that already exists on your filesystem,
 remove a track and allow you to mux that change into a new file.
 
@@ -54,6 +60,7 @@ import logging
 import os
 import re
 import subprocess as sp
+import tempfile
 from collections.abc import Callable, Iterable, Sequence
 from pathlib import Path
 from typing import Any, TypeVar, cast
@@ -61,6 +68,12 @@ from typing import Any, TypeVar, cast
 import bitmath
 import msgspec
 
+from pymkv.chapters import (
+    ChapterAtom,
+    Chapters,
+    EditionEntry,
+    export_to_xml,
+)
 from pymkv.command_generators import (
     AttachmentOptions,
     BaseOptions,
@@ -131,6 +144,8 @@ class MKVFile:
         self.mkvmerge_path: tuple[str, ...] = prepare_mkvtoolnix_path(mkvmerge_path)
         self.title = title
         self._chapters_file: str | None = None
+        self.chapters_obj: Chapters | None = None
+        self._temp_chapters_file: str | None = None
         self._chapter_language: str | None = None
         self._global_tags_file: str | None = None
         self._link_to_previous_file: str | None = None
@@ -313,6 +328,10 @@ class MKVFile:
 
         self.output_path = str(Path(output_path).expanduser())
 
+        # Handle object-based chapters
+        if self.chapters_obj and not self._chapters_file:
+            self._write_chapters_xml()
+
         # Pre-assign file IDs
         unique_file_dict: dict[str, int] = {}
         for track in self.tracks:
@@ -438,6 +457,69 @@ class MKVFile:
                 raise ValueError(error_message)
 
         return proc.returncode
+
+    def _write_chapters_xml(self) -> None:
+        """
+        Write chapter objects to a temporary XML file.
+        """
+        if not self.chapters_obj:
+            return
+
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".xml", delete=False, encoding="utf-8") as tf:
+            xml_content = export_to_xml(self.chapters_obj)
+            tf.write(xml_content)
+
+        self._temp_chapters_file = tf.name
+        self._chapters_file = tf.name
+
+    def add_chapter(self, chapter: ChapterAtom | EditionEntry) -> None:
+        """
+        Add a chapter or edition entry to the MKVFile.
+
+        If a ChapterAtom is provided, it is added to the first EditionEntry (creating one if needed).
+        If an EditionEntry is provided, it is added to the list of editions.
+
+        Parameters
+        ----------
+        chapter : ChapterAtom | EditionEntry
+            The chapter object to add.
+
+        Examples
+        --------
+        >>> from pymkv import MKVFile, MKVTrack
+        >>> from pymkv.chapters import ChapterAtom, ChapterDisplay
+        >>>
+        >>> mkv = MKVFile()
+        >>>
+        >>> # Method 1: Add simple chapter directly
+        >>> atom = ChapterAtom(
+        ...     time_start="00:00:00.000",
+        ...     displays=[ChapterDisplay(string="Intro")]
+        ... )
+        >>> mkv.add_chapter(atom)
+        >>>
+        >>> # Method 2: Use helper on internal object
+        >>> # Ensure chapters_obj is initialized if accessing directly
+        >>> if mkv.chapters_obj is None:
+        ...     from pymkv.chapters import Chapters
+        ...     mkv.chapters_obj = Chapters()
+        >>> mkv.chapters_obj.add_simple_chapter("00:10:00.000", "Part 2")
+        >>>
+        >>> # XML is automatically generated during mux/command
+        >>> # cmd = mkv.command("output.mkv")
+        """
+        if self.chapters_obj is None:
+            self.chapters_obj = Chapters()
+
+        if isinstance(chapter, ChapterAtom):
+            if not self.chapters_obj.editions:
+                self.chapters_obj.editions.append(EditionEntry())
+            self.chapters_obj.editions[0].atoms.append(chapter)
+        elif isinstance(chapter, EditionEntry):
+            self.chapters_obj.editions.append(chapter)
+        else:
+            msg = "chapter must be ChapterAtom or EditionEntry"
+            raise TypeError(msg)
 
     def add_file(self, file: MKVFile | str | os.PathLike) -> None:
         """
