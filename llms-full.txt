@@ -1,0 +1,156 @@
+pymkv2
+=====
+
+Welcome to the pymkv2 documentation! Here you will find links to the core modules and examples of how to use each.
+
+Modules
+-------
+
+The three primary modules of pymkv2 are :class:`~pymkv.MKVFile`, :class:`~pymkv.MKVTrack`, and
+:class:`~pymkv.MKVAttachment`. The :class:`~pymkv.MKVFile` class is used to import existing or create new MKV files.
+The :class:`~pymkv.MKVTrack` class is used to add individual tracks to an :class:`~pymkv.MKVFile`. The
+:class:`~pymkv.MKVAttachment` class is used to add attachments to an :class:`~pymkv.MKVFile`.
+
+Each module supports or mimics many of the same operations as mkvmerge but are not necessarily complete. If there is
+functionality that is missing or an error in the docs, please open a new issue `here <https://github
+.com/gitbib/pymkv2/issues>`_.
+
+.. toctree::
+    :maxdepth: 1
+
+    pymkv/MKVFile
+    pymkv/MKVTrack
+    pymkv/MKVAttachment
+    pymkv/Timestamp
+    pymkv/Verifications
+    pymkv/models
+
+Install
+-------
+
+To install pymkv2 from PyPI, use the following command:
+
+    $ pip install pymkv2
+
+You can also clone the repo and run the following command in the project root to install the source code as editable:
+
+    $ pip install -e .
+
+Indices and tables
+------------------
+
+* :ref:`genindex`
+* :ref:`modindex`
+* :ref:`search`
+
+
+MKVFile
+-------
+
+.. automodule:: pymkv.MKVFile
+    :noindex:
+
+.. autoclass:: pymkv.MKVFile
+    :members:
+
+
+MKVTrack
+--------
+
+.. automodule:: pymkv.MKVTrack
+    :noindex:
+
+.. autoclass:: pymkv.MKVTrack
+    :members:
+
+
+MKVAttachment
+-------------
+
+.. automodule:: pymkv.MKVAttachment
+    :noindex:
+
+.. autoclass:: pymkv.MKVAttachment
+    :members:
+
+
+Timestamp
+-------------
+
+.. automodule:: pymkv.Timestamp
+    :noindex:
+
+.. autoclass:: pymkv.Timestamp
+    :members:
+
+
+Verifications
+============
+
+The Verifications module provides utilities for validating files, paths and MKVToolNix executables.
+
+Core Functions
+-------------
+
+File Path Verification
+~~~~~~~~~~~~~~~~~~~~~
+
+.. autofunction:: pymkv.checking_file_path
+
+MKVToolNix Verification
+~~~~~~~~~~~~~~~~~~~~~~
+
+.. autofunction:: pymkv.verify_mkvmerge
+
+File Format Verification
+~~~~~~~~~~~~~~~~~~~~~~
+
+.. autofunction:: pymkv.verify_matroska
+
+.. autofunction:: pymkv.verify_recognized
+
+.. autofunction:: pymkv.verify_supported
+
+Utility Functions
+~~~~~~~~~~~~~~~
+
+.. autofunction:: pymkv.get_file_info
+
+Examples
+--------
+
+Basic Usage
+~~~~~~~~~~
+
+Here's a simple example of verifying an MKV file::
+
+    from pymkv import verify_matroska, verify_mkvmerge
+    
+    # First verify mkvmerge is available
+    if verify_mkvmerge("mkvmerge"):
+        # Then check if file is valid Matroska
+        if verify_matroska("path/to/file.mkv", "mkvmerge"):
+            print("Valid MKV file!")
+
+Advanced Usage
+~~~~~~~~~~~~
+
+Example showing multiple verifications::
+
+    from pymkv import verify_recognized, verify_supported
+    
+    # Check if file format is recognized
+    if verify_recognized("path/to/file.mkv"):
+        # Check if format is fully supported
+        if verify_supported("path/to/file.mkv"):
+            print("File is fully supported!")
+
+
+models
+------
+
+.. automodule:: pymkv.models
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
