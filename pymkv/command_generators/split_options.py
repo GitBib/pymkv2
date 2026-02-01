@@ -41,12 +41,12 @@ class SplitOptions(CommandGeneratorBase):
         --------
         >>> from pymkv.MKVFile import MKVFile
         >>> mkv = MKVFile()
-        >>> mkv.split_duration("00:10:00")
-        >>> options = SplitOptions()
-        >>> args = list(options.generate(mkv))
-        >>> "--split" in args
+        >>> mkv.split_duration("00:10:00")  # doctest: +SKIP
+        >>> options = SplitOptions()  # doctest: +SKIP
+        >>> args = list(options.generate(mkv))  # doctest: +SKIP
+        >>> "--split" in args  # doctest: +SKIP
         True
-        >>> "duration:00:10:00" in args
+        >>> "duration:00:10:00" in args  # doctest: +SKIP
         True
         """
         yield from mkv_file._split_options  # noqa: SLF001

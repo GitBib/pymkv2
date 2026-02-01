@@ -81,3 +81,30 @@ def test_track_options_grouping(mock_mkv: MagicMock, mock_track_cleaner: Any) ->
     assert "--no-audio" in args[idx_a:]
     assert "--subtitle-tracks" in args[idx_a:]
     assert "0" in args[idx_a:]
+
+
+def test_track_options_empty_language(mock_mkv: MagicMock, mock_track_cleaner: Any) -> None:  # noqa: ANN401
+    track = MagicMock(spec=MKVTrack)
+    track.file_path = "videos.mkv"
+    track.track_id = 0
+    track.track_type = "video"
+    track.language = ""
+    track.language_ietf = ""
+    track.compression = None
+
+    mock_track_cleaner(track)
+    # Re-apply empty strings after cleaner (cleaner might reset them)
+    track.language = ""
+    track.language_ietf = ""
+
+    mock_mkv.tracks = [track]
+    mock_mkv._info_json = None  # noqa: SLF001
+
+    opts = TrackOptions()
+    args = gen_to_list(opts, mock_mkv)
+
+    # Count occurrences of --language
+    # We expect 2: one for language, one for language_ietf
+    assert args.count("--language") == 2  # noqa: PLR2004
+    # And correct values
+    assert "0:" in args

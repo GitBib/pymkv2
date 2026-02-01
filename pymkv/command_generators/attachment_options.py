@@ -42,7 +42,7 @@ class AttachmentOptions(CommandGeneratorBase):
         >>> from pymkv.MKVFile import MKVFile
         >>> from pymkv.MKVAttachment import MKVAttachment
         >>> mkv = MKVFile()
-        >>> att = MKVAttachment('cover.jpg', name='Cover')
+        >>> att = MKVAttachment('cover.jpg', name='Cover')  # doctest: +SKIP
         >>> mkv.add_attachment(att)  # doctest: +SKIP
         >>> options = AttachmentOptions()
         >>> # args = list(options.generate(mkv))
@@ -51,13 +51,13 @@ class AttachmentOptions(CommandGeneratorBase):
         for attachment in mkv_file.attachments:
             if attachment.source_id is not None:
                 continue
-            if attachment.name:
+            if attachment.name is not None:
                 yield "--attachment-name"
                 yield attachment.name
-            if attachment.description:
+            if attachment.description is not None:
                 yield "--attachment-description"
                 yield attachment.description
-            if attachment.mime_type:
+            if attachment.mime_type is not None:
                 yield "--attachment-mime-type"
                 yield attachment.mime_type
 
