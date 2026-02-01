@@ -769,7 +769,7 @@ wheels = [
 
 [[package]]
 name = "pymkv2"
-version = "2.2.0.post1"
+version = "2.2.0.post2"
 source = { editable = "." }
 dependencies = [
     { name = "bcp47" },
