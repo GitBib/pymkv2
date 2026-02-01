@@ -20,7 +20,7 @@ sys.path.insert(0, os.path.abspath("../.."))  # noqa: PTH100
 # -- Project information -----------------------------------------------------
 
 project = "pymkv2"
-copyright = f"{datetime.datetime.now().year}, Sheldon Woodward & GitBib"  # noqa: A001
+copyright = f"{datetime.datetime.now(tz=datetime.timezone.utc).year}, Sheldon Woodward & GitBib"  # noqa: A001
 author = "Sheldon Woodward & GitBib"
 
 # The full version, including alpha/beta/rc tags
@@ -34,7 +34,13 @@ except importlib.metadata.PackageNotFoundError:
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
-extensions = ["sphinx.ext.autodoc", "sphinx.ext.coverage", "sphinx.ext.napoleon", "sphinx_immaterial"]
+extensions = [
+    "sphinx.ext.autodoc",
+    "sphinx.ext.coverage",
+    "sphinx.ext.napoleon",
+    "sphinx_immaterial",
+    "sphinx_llms_txt",
+]
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ["_templates"]
