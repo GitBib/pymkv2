@@ -42,6 +42,7 @@ class BaseOptions(CommandGeneratorBase):
         --------
         >>> from pymkv.MKVFile import MKVFile
         >>> mkv = MKVFile()
+        >>> mkv.output_path = "out.mkv"
         >>> mkv.title = "My Movie"
         >>> options = BaseOptions()
         >>> args = list(options.generate(mkv))
@@ -55,7 +56,7 @@ class BaseOptions(CommandGeneratorBase):
         yield "-o"
         yield f"{mkv_file.output_path}"
 
-        if mkv_file.title:
+        if mkv_file.title is not None:
             yield "--title"
             yield mkv_file.title
 

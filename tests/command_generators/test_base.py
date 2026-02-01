@@ -22,3 +22,7 @@ def test_base_options(mock_mkv: MagicMock) -> None:
     mock_mkv.no_track_statistics_tags = False
     args = gen_to_list(opts, mock_mkv)
     assert args == ["-o", "output.mkv"]
+
+    mock_mkv.title = ""
+    args = gen_to_list(opts, mock_mkv)
+    assert args == ["-o", "output.mkv", "--title", ""]

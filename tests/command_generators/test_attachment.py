@@ -35,3 +35,27 @@ def test_attachment_options(mock_mkv: MagicMock) -> None:
         "cover.jpg",
     ]
     assert args == expected
+
+    # Test empty strings
+    empty_attachment = MagicMock(spec=MKVAttachment)
+    empty_attachment.file_path = "empty.txt"
+    empty_attachment.name = ""
+    empty_attachment.mime_type = ""
+    empty_attachment.description = ""
+    empty_attachment.attach_once = False
+    empty_attachment.uid = None
+    empty_attachment.source_id = None
+
+    mock_mkv.attachments = [empty_attachment]
+    args = gen_to_list(opts, mock_mkv)
+    expected_empty = [
+        "--attachment-name",
+        "",
+        "--attachment-description",
+        "",
+        "--attachment-mime-type",
+        "",
+        "--attach-file",
+        "empty.txt",
+    ]
+    assert args == expected_empty
