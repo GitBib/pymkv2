@@ -11,36 +11,30 @@ Create a new :class:`~pymkv.MKVTrack` from a track file. This example takes a st
 :class:`~pymkv.MKVTrack`.
 
 >>> from pymkv import MKVTrack
->>> track1 = MKVTrack("path/to/track.h264")  # doctest: +SKIP
->>> track1.track_name = "Some Name"  # doctest: +SKIP
->>> track1.language = "eng"  # doctest: +SKIP
+>>> track1 = MKVTrack("path/to/track.h264")
+>>> track1.track_name = "Some Name"
+>>> track1.language = "eng"
 
 Create a new :class:`~pymkv.MKVTrack` from an MKV file. This example will take a specific track from an MKV and also
 prevent any global tags from being included if the :class:`~pymkv.MKVTrack` is muxed into an :class:`~pymkv.MKVFile`.
 
->>> track2 = MKVTrack("path/to/track.aac")  # doctest: +SKIP
->>> track2.language = "eng"  # doctest: +SKIP
+>>> track2 = MKVTrack("path/to/track.aac")
+>>> track2.language = "eng"
 
 Create a new :class:`~pymkv.MKVTrack` from an MKV file. This example will take a specific track from an MKV and also
 prevent any global tags from being included if the :class:`~pymkv.MKVTrack` is muxed into an :class:`~pymkv.MKVFile`.
 
->>> track3 = MKVTrack("path/to/MKV.mkv", track_id=1)  # doctest: +SKIP
->>> track3.no_global_tags = True  # doctest: +SKIP
-
-Apply a timestamp file to a track. This is useful for variable frame rate video or to adjust timing.
-
->>> track4 = MKVTrack("path/to/track.h264")  # doctest: +SKIP
->>> track4.timestamps = "path/to/timestamps.txt"  # doctest: +SKIP
+>>> track3 = MKVTrack("path/to/MKV.mkv", track_id=1)
+>>> track3.no_global_tags = True
 
 Now all these tracks can be added to an :class:`~pymkv.MKVFile` object and muxed together.
 
 >>> from pymkv import MKVFile
 >>> file = MKVFile()
->>> file.add_track(track1)  # doctest: +SKIP
->>> file.add_track(track2)  # doctest: +SKIP
->>> file.add_track(track3)  # doctest: +SKIP
->>> file.add_track(track4)  # doctest: +SKIP
->>> file.mux("path/to/output.mkv")  # doctest: +SKIP
+>>> file.add_track(track1)
+>>> file.add_track(track2)
+>>> file.add_track(track3)
+>>> file.mux("path/to/output.mkv")
 """
 
 from __future__ import annotations
@@ -50,11 +44,7 @@ import subprocess as sp
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
-import msgspec
-
-from pymkv.ISO639_2 import is_iso639_2
-from pymkv.models import MkvMergeOutput
-from pymkv.TypeTrack import get_track_extension
+from pymkv.ISO639_2 import get_iso639_2
 from pymkv.utils import prepare_mkvtoolnix_path
 from pymkv.Verifications import checking_file_path, get_file_info, verify_supported
 
@@ -87,14 +77,7 @@ class MKVTrack:
         Determines if the track should be the default track of its type when muxed into an MKV file.
     forced_track : bool, optional
         Determines if the track should be a forced track when muxed into an MKV file.
-    flag_commentary : bool, optional
-        Determines if the track should be a commentary track when muxed into an MKV file.
-    flag_hearing_impaired : bool, optional
-        Determines if the track should be a hearing impaired track when muxed into an MKV file.
-    flag_visual_impaired : bool, optional
-        Determines if the track should be a visual impaired track when muxed into an MKV file.
-    flag_original : bool, optional
-        Determines if the track should be an original track when muxed into an MKV file.
+    mkvmerge_path : str, list, os.PathLike, optional
         The path where pymkv looks for the mkvmerge executable. pymkv relies on the mkvmerge executable to parse
         files. By default, it is assumed mkvmerge is in your shell's $PATH variable. If it is not, you need to set
         *mkvmerge_path* to the executable location.
@@ -115,12 +98,6 @@ class MKVTrack:
         The path of the mkvextract executable.
     track_name : str
         The name that will be given to the track when muxed into a file.
-    language : str
-        The language of the track in ISO639-2 format.
-    language_ietf : str
-        The language of the track in BCP47 format.
-    effective_language : str
-        The prioritized language of the track (IETF BCP47 first, then ISO 639-2).
     default_track : bool
         Determines if the track should be the default track of its type when muxed into an MKV file.
     forced_track : bool
@@ -161,24 +138,19 @@ class MKVTrack:
         mkvmerge_path: str | os.PathLike | Iterable[str] = "mkvmerge",
         mkvextract_path: str | os.PathLike | Iterable[str] = "mkvextract",
         sync: int | None = None,
-        existing_info: MkvMergeOutput | dict[str, Any] | None = None,
+        existing_info: dict[str, Any] | None = None,
         tag_entries: int = 0,
         compression: bool | None = None,
-        timestamps: str | os.PathLike | None = None,
     ) -> None:
+        from pymkv.TypeTrack import get_track_extension  # noqa: PLC0415
+
+        # track info
         self._track_codec: str | None = None
         self._track_type: str | None = None
 
         # base
         self.mkvmerge_path = prepare_mkvtoolnix_path(mkvmerge_path)
-        # Ensure _info_json is always MkvMergeOutput if possible, or None
-        self._info_json: MkvMergeOutput | None = None
-        if existing_info:
-            if isinstance(existing_info, dict):
-                # Convert legacy dict to Struct for strict usage
-                self._info_json = msgspec.convert(existing_info, type=MkvMergeOutput, strict=False)
-            else:
-                self._info_json = existing_info
+        self._info_json: dict[str, Any] | None = existing_info or None
         self._file_path: str
         self.file_path = file_path
         self._track_id: int
@@ -203,8 +175,6 @@ class MKVTrack:
         self.flag_original = flag_original
         self.compression = compression
         self._tag_entries = tag_entries
-        self._timestamps: str | None = None
-        self.timestamps = timestamps
 
         # exclusions
         self.no_chapters = False
@@ -323,14 +293,17 @@ class MKVTrack:
         """
         if not self._info_json:
             self._info_json = get_file_info(self.file_path, mkvmerge_path=self.mkvmerge_path)
-        tracks = self._info_json.tracks
+        tracks = self._info_json.get("tracks", [])
         if not 0 <= track_id < len(tracks):
             msg = "track index out of range"
             raise IndexError(msg)
         self._track_id = track_id
-        self._pts = tracks[track_id].start_pts
-        self._track_codec = tracks[track_id].codec
-        self._track_type = tracks[track_id].type
+        try:
+            self._pts = tracks[track_id]["start_pts"]
+        except KeyError:
+            self._pts = 0
+        self._track_codec = tracks[track_id]["codec"]
+        self._track_type = tracks[track_id]["type"]
 
     @property
     def language(self) -> str | None:
@@ -351,16 +324,21 @@ class MKVTrack:
         Set the language of the MKVTrack.
 
         Args:
-            language (str): The language to be set for the MKVTrack.
+            language (str | None): The language code or name to be set for the MKVTrack.
+                Must be a valid ISO 639-2 code or recognized language name,
+                or None to unset.
 
         Raises:
-            ValueError: If the provided language is not a valid ISO639-2 language code.
+            ValueError: If the provided language code or name cannot be mapped to a valid ISO 639-2 code.
         """
-        if language is None or is_iso639_2(language):
-            self._language = language
+        if language is not None:
+            iso_code = get_iso639_2(language)
+            if iso_code is None:
+                msg = "cannot be mapped to a valid ISO 639-2 code."
+                raise ValueError(msg)
+            self._language = iso_code
         else:
-            msg = "not an ISO639-2 language code"
-            raise ValueError(msg)
+            self._language = None
 
     @property
     def pts(self) -> int:
@@ -431,16 +409,6 @@ class MKVTrack:
         self._language_ietf = language_ietf
 
     @property
-    def effective_language(self) -> str | None:
-        """
-        Get the prioritized language of the track (IETF BCP47 first, then ISO 639-2).
-
-        Returns:
-            str: The language of the track.
-        """
-        return self.language_ietf or self.language
-
-    @property
     def tags(self) -> str | None:
         """
         Get the tags file to include with the track.
@@ -491,42 +459,6 @@ class MKVTrack:
         return self._tag_entries
 
     @property
-    def timestamps(self) -> str | None:
-        """
-        Get the timestamps file to include with the track.
-
-        Returns:
-            str: The path to the timestamps file.
-        """
-        return self._timestamps
-
-    @timestamps.setter
-    def timestamps(self, file_path: str | os.PathLike | None) -> None:
-        """
-        Set the timestamps file for the track.
-
-        Args:
-            file_path (str): The path to the timestamps file.
-
-        Raises:
-            TypeError: If the file_path is not a string.
-            FileNotFoundError: If the file does not exist or is not a file.
-        """
-        if file_path is None:
-            self._timestamps = None
-            return
-
-        if not isinstance(file_path, (str, os.PathLike)):
-            msg = f'"{file_path}" is not of type str or PathLike'
-            raise TypeError(msg)
-
-        file_path = Path(file_path).expanduser()
-        if not file_path.is_file():
-            msg = f'"{file_path}" does not exist'
-            raise FileNotFoundError(msg)
-        self._timestamps = str(file_path)
-
-    @property
     def track_codec(self) -> str | None:
         """
         Get the codec of the track.
@@ -561,11 +493,6 @@ class MKVTrack:
 
         Returns:
             str: The path of the extracted file.
-
-        Examples
-        --------
-        >>> track = MKVTrack("path/to/media.mkv", track_id=0)  # doctest: +SKIP
-        >>> extract_path = track.extract()  # doctest: +SKIP
         """
         extract_info_file = f"_[{self.track_id}]"
         if self.language:
@@ -595,54 +522,4 @@ class MKVTrack:
             )
         else:
             sp.run(command, check=True, capture_output=True)  # noqa: S603
-        return output_path
-
-    def extract_timestamps(
-        self,
-        output_path: str | os.PathLike | None = None,
-        silent: bool | None = False,
-    ) -> str:
-        """
-        Extract the timestamps of the track as a file (v2 format).
-
-        Examples
-        --------
-        >>> track = MKVTrack("path/to/media.mkv", track_id=0)  # doctest: +SKIP
-        >>> timestamp_path = track.extract_timestamps()  # doctest: +SKIP
-
-
-        Args:
-            output_path (str | os.PathLike | None, optional): The path to be used as the output file
-                in the mkvextract command.
-            silent (bool | None, optional): By default the mkvmerge output will be shown unless silent is True.
-
-        Returns:
-            str: The path of the extracted file.
-        """
-        extract_info_file = f"_[{self.track_id}]_timestamps.txt"
-
-        if output_path is None:
-            output_path = f"{self.file_path}{extract_info_file}"
-        else:
-            file = Path(self.file_path)
-            output_path = Path(output_path, f"{file.name}{extract_info_file}")
-
-        output_path = str(Path(output_path).expanduser())
-
-        command = [
-            *self.mkvextract_path,
-            "timestamps_v2",
-            f"{self.file_path}",
-            f"{self.track_id}:{output_path}",
-        ]
-
-        if silent:
-            sp.run(  # noqa: S603
-                command,
-                stdout=sp.DEVNULL,
-                check=True,
-            )
-        else:
-            sp.run(command, check=True, capture_output=True)  # noqa: S603
-
         return output_path

@@ -1,34 +1,21 @@
-"""Utilities for checking ISO 639-2 language code compliance.
-
-Examples
---------
->>> from pymkv.ISO639_2 import is_iso639_2  # doctest: +SKIP
->>> is_iso639_2('eng')  # doctest: +SKIP
-True
-"""
-
 from __future__ import annotations
 
-from iso639 import Language, LanguageNotFoundError
+from iso639 import Language
 
 
-def is_iso639_2(language: str) -> bool:
+def get_iso639_2(language: str) -> str | None:
     """
+    Get the ISO 639-2 code for a given language.
+
     Parameters
     ----------
     language : str
-        The language code to check for ISO 639-2 compatibility.
+        The language code or name to check for ISO 639-2 compatibility.
 
     Returns
     -------
-    bool
-        True if the language code is valid according to ISO 639-2, False otherwise.
+    str | None
+        The ISO 639-2 (bibliographic) code if the language is recognized,
+        None otherwise.
     """
-    if not isinstance(language, str):
-        return False
-
-    try:
-        Language.from_part2b(language)
-        return True  # noqa: TRY300
-    except LanguageNotFoundError:
-        return False
+    return Language.match(language).part2b
