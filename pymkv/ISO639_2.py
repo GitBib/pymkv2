@@ -1,3 +1,16 @@
+"""Utilities for working with ISO 639-2 language codes.
+
+Examples
+--------
+>>> from pymkv.ISO639_2 import get_iso639_2  # doctest: +SKIP
+>>> get_iso639_2("eng")  # doctest: +SKIP
+'eng'
+>>> get_iso639_2("English")  # doctest: +SKIP
+'eng'
+>>> get_iso639_2("xyz")  # doctest: +SKIP
+None
+"""
+
 from __future__ import annotations
 
 from iso639 import Language
