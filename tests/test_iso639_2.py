@@ -1,19 +1,25 @@
 from typing import cast
 
-from pymkv.ISO639_2 import is_iso639_2
+from pymkv.ISO639_2 import get_iso639_2
 
 
-def test_is_iso639_2_true() -> None:
-    assert is_iso639_2("eng") is True
+def test_get_iso639_2_valid_code() -> None:
+    assert get_iso639_2("eng") == "eng"
 
 
-def test_is_iso639_2_false() -> None:
-    assert is_iso639_2("xyz") is False
+def test_get_iso639_2_valid_name() -> None:
+    # Using language name instead of code
+    assert get_iso639_2("English") == "eng"
 
 
-def test_is_iso639_2_non_str_input() -> None:
-    assert is_iso639_2(cast("str", 123)) is False
+def test_get_iso639_2_invalid_code() -> None:
+    assert get_iso639_2("xyz") is None
 
 
-def test_is_iso639_2_empty_string() -> None:
-    assert is_iso639_2("") is False
+def test_get_iso639_2_non_str_input() -> None:
+    # Should gracefully return None for non-str input
+    assert get_iso639_2(cast("str", 123)) is None
+
+
+def test_get_iso639_2_empty_string() -> None:
+    assert get_iso639_2("") is None
