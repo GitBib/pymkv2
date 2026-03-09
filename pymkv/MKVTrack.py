@@ -361,7 +361,7 @@ class MKVTrack:
         if language is not None:
             iso_code = get_iso639_2(language)
             if iso_code is None:
-                msg = "cannot be mapped to a valid ISO 639-2 code."
+                msg = f"'{language}' cannot be mapped to a valid ISO 639-2 language code"
                 raise ValueError(msg)
             self._language = iso_code
         else:

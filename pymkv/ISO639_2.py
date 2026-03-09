@@ -13,9 +13,12 @@ None
 
 from __future__ import annotations
 
-from iso639.language import Language, LanguageNotFoundError
+from functools import cache
+
+from iso639 import Language, LanguageNotFoundError
 
 
+@cache
 def get_iso639_2(language: str) -> str | None:
     """
     Get the ISO 639-2 code for a given language.
@@ -35,6 +38,6 @@ def get_iso639_2(language: str) -> str | None:
         return None
 
     try:
-        return Language.match(language).part2b
+        return Language.match(language, strict_case=False).part2b
     except LanguageNotFoundError:
         return None

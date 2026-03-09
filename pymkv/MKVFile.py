@@ -281,7 +281,7 @@ class MKVFile:
         if language is not None:
             iso_code = get_iso639_2(language)
             if iso_code is None:
-                msg = "not a valid ISO 639-2 language"
+                msg = f"'{language}' cannot be mapped to a valid ISO 639-2 language code"
                 raise ValueError(msg)
             self._chapter_language = iso_code
         else:
@@ -1260,7 +1260,7 @@ class MKVFile:
         file_path : str
             The chapters file to be added to the :class:`~pymkv.MKVFile` object.
         language : str, optional
-            Must be an ISO639-2 language code. Only applied if no existing language information exists in chapters.
+             Only applied if no existing language information exists in chapters.
 
         Raises
         ------
