@@ -3,7 +3,7 @@ import pytest
 from pymkv import MKVTrack
 
 
-def test_language_name_to_code(get_path_test_file: str):
+def test_language_name_to_code(get_path_test_file: str) -> None:
     track = MKVTrack(get_path_test_file)
     track.language = "English"
     assert track.language == "eng"
@@ -21,9 +21,11 @@ def test_language_name_to_code(get_path_test_file: str):
     track.language = "ARAbIC"
     assert track.language == "ara"
 
-    with pytest.raises(ValueError) as exc:
+    with pytest.raises(
+        ValueError,
+        match="cannot be mapped to a valid ISO 639-2 language code",
+    ):
         track.language = "invalid-lang"
-    assert "cannot be mapped to a valid ISO 639-2 language code" in str(exc.value)
 
     # unset language
     track.language = None
