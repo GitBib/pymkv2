@@ -85,7 +85,7 @@ from pymkv.command_generators import (
     TrackOptions,
     TrackOrderOptions,
 )
-from pymkv.ISO639_2 import is_iso639_2
+from pymkv.ISO639_2 import get_iso639_2
 from pymkv.MKVAttachment import MKVAttachment
 from pymkv.MKVTrack import MKVTrack
 from pymkv.models import MkvMergeOutput, TrackProperties
@@ -271,15 +271,21 @@ class MKVFile:
         Set the language code of the chapters in the MKVFile object.
 
         Args:
-            language (str): The language code for the chapters. Must be a valid ISO 639-2 language code.
+            language (str | None): The language code or name for the chapters.
+                Must be a valid ISO 639-2 language code or recognized language name,
+                or None to unset.
 
         Raises:
-            ValueError: If the provided language code is not a valid ISO 639-2 language code.
+            ValueError: If the provided language code or name is not recognized as a valid ISO 639-2 code.
         """
-        if language is not None and not is_iso639_2(language):
-            msg = "The provided language code is not a valid ISO 639-2 language code."
-            raise ValueError(msg)
-        self._chapter_language = language
+        if language is not None:
+            iso_code = get_iso639_2(language)
+            if iso_code is None:
+                msg = f"'{language}' cannot be mapped to a valid ISO 639-2 language code"
+                raise ValueError(msg)
+            self._chapter_language = iso_code
+        else:
+            self._chapter_language = None
 
     @property
     def global_tag_entries(self) -> int:
@@ -1254,7 +1260,7 @@ class MKVFile:
         file_path : str
             The chapters file to be added to the :class:`~pymkv.MKVFile` object.
         language : str, optional
-            Must be an ISO639-2 language code. Only applied if no existing language information exists in chapters.
+             Only applied if no existing language information exists in chapters.
 
         Raises
         ------

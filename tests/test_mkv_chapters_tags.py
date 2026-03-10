@@ -13,10 +13,13 @@ def test_chapter_language_getter_setter() -> None:
     mkv.chapter_language = "eng"
     assert mkv.chapter_language == "eng"
 
+    mkv.chapter_language = "English"
+    assert mkv.chapter_language == "eng"
+
     mkv.chapter_language = None
     assert mkv.chapter_language is None
 
-    with pytest.raises(ValueError, match="not a valid ISO 639-2 language code"):
+    with pytest.raises(ValueError, match="'invalid_code' cannot be mapped to a valid ISO 639-2 language code"):
         mkv.chapter_language = "invalid_code"
 
 

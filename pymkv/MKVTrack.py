@@ -52,7 +52,7 @@ from typing import TYPE_CHECKING, Any
 
 import msgspec
 
-from pymkv.ISO639_2 import is_iso639_2
+from pymkv.ISO639_2 import get_iso639_2
 from pymkv.models import MkvMergeOutput
 from pymkv.TypeTrack import get_track_extension
 from pymkv.utils import prepare_mkvtoolnix_path
@@ -351,16 +351,21 @@ class MKVTrack:
         Set the language of the MKVTrack.
 
         Args:
-            language (str): The language to be set for the MKVTrack.
+            language (str | None): The language code or name to be set for the MKVTrack.
+                Must be a valid ISO 639-2 code or recognized language name,
+                or None to unset.
 
         Raises:
-            ValueError: If the provided language is not a valid ISO639-2 language code.
+            ValueError: If the provided language code or name cannot be mapped to a valid ISO 639-2 code.
         """
-        if language is None or is_iso639_2(language):
-            self._language = language
+        if language is not None:
+            iso_code = get_iso639_2(language)
+            if iso_code is None:
+                msg = f"'{language}' cannot be mapped to a valid ISO 639-2 language code"
+                raise ValueError(msg)
+            self._language = iso_code
         else:
-            msg = "not an ISO639-2 language code"
-            raise ValueError(msg)
+            self._language = None
 
     @property
     def pts(self) -> int:
