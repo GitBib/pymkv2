@@ -103,3 +103,77 @@ def test_split_chapters_empty() -> None:
     mkv = MKVFile()
     mkv.split_chapters()
     assert mkv._split_options == ["--split", "chapters:all"]  # noqa: SLF001
+
+
+def test_split_timestamp_parts_valid() -> None:
+    mkv = MKVFile()
+    mkv.split_timestamp_parts([["00:01:00", "00:02:00"]])
+    assert mkv._split_options[0] == "--split"  # noqa: SLF001
+    assert mkv._split_options[1] == "parts:01:00-02:00"  # noqa: SLF001
+
+
+def test_split_timestamp_parts_with_none() -> None:
+    mkv = MKVFile()
+    mkv.split_timestamp_parts([cast("list[str]", [None, "00:05:00"])])
+    assert "parts:" in mkv._split_options[1]  # noqa: SLF001
+
+
+def test_split_timestamp_parts_with_link() -> None:
+    mkv = MKVFile()
+    mkv.split_timestamp_parts([["00:01:00", "00:02:00"]], link=True)
+    assert "--link" in mkv._split_options  # noqa: SLF001
+
+
+def test_split_parts_frames_valid() -> None:
+    mkv = MKVFile()
+    mkv.split_parts_frames([(100, 500)])
+    assert mkv._split_options[0] == "--split"  # noqa: SLF001
+    assert mkv._split_options[1] == "parts-frames:100-500"  # noqa: SLF001
+
+
+def test_split_parts_frames_with_link() -> None:
+    mkv = MKVFile()
+    mkv.split_parts_frames([(100, 500)], link=True)
+    assert "--link" in mkv._split_options  # noqa: SLF001
+
+
+def test_split_chapters_with_link() -> None:
+    mkv = MKVFile()
+    mkv.split_chapters(1, 2, link=True)
+    assert "--link" in mkv._split_options  # noqa: SLF001
+
+
+def test_split_timestamps_with_link() -> None:
+    mkv = MKVFile()
+    mkv.split_timestamps("00:01:00", link=True)
+    assert "--link" in mkv._split_options  # noqa: SLF001
+
+
+def test_split_timestamps_empty_raises() -> None:
+    mkv = MKVFile()
+    with pytest.raises(ValueError, match="formatted timestamps"):
+        mkv.split_timestamps()
+
+
+def test_split_frames_empty_raises() -> None:
+    mkv = MKVFile()
+    with pytest.raises(ValueError, match="formatted frames"):
+        mkv.split_frames()
+
+
+def test_split_frames_with_link() -> None:
+    mkv = MKVFile()
+    mkv.split_frames(100, 200, link=True)
+    assert "--link" in mkv._split_options  # noqa: SLF001
+
+
+def test_split_timestamp_parts_bad_set_length() -> None:
+    mkv = MKVFile()
+    with pytest.raises(ValueError, match="formatted"):
+        mkv.split_timestamp_parts([["00:00:10"]])
+
+
+def test_split_parts_frames_bad_set_length() -> None:
+    mkv = MKVFile()
+    with pytest.raises(ValueError, match="formatted"):
+        mkv.split_parts_frames([(100,)])

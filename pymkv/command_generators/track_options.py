@@ -18,6 +18,8 @@ if TYPE_CHECKING:
     from pymkv.MKVFile import MKVFile
     from pymkv.MKVTrack import MKVTrack
 
+from pymkv.Languages import is_known_language
+
 from .base import CommandGeneratorBase
 
 
@@ -29,8 +31,8 @@ class TrackOptions(CommandGeneratorBase):
         "language_ietf": ("--language", False),
         "language": ("--language", False),
         "tags": ("--tags", False),
-        "default_track": ("--default-track", True),
-        "forced_track": ("--forced-track", True),
+        "default_track": ("--default-track-flag", True),
+        "forced_track": ("--forced-display-flag", True),
         "flag_hearing_impaired": ("--hearing-impaired-flag", True),
         "flag_visual_impaired": ("--visual-impaired-flag", True),
         "flag_original": ("--original-flag", True),
@@ -74,10 +76,15 @@ class TrackOptions(CommandGeneratorBase):
                 files[track.file_path] = []
             files[track.file_path].append(track)
 
+        # The IETF gate must consult the binary that will actually run
+        # (``MKVFile.mkvmerge_path``) — a per-track override could disagree
+        # with mkvmerge's own language table.
+        mkvmerge_path = mkv_file.mkvmerge_path
+
         for file_path, tracks in files.items():
             # 1. Properties for all tracks in this file
             for track in tracks:
-                yield from self._generate_properties(track)
+                yield from self._generate_properties(track, mkvmerge_path)
                 yield from self._generate_exclusions(track)
 
             # 2. Track Selection (consolidated by type)
@@ -131,14 +138,24 @@ class TrackOptions(CommandGeneratorBase):
 
             yield file_path
 
-    def _generate_properties(self, track: MKVTrack) -> Iterator[str]:
+    def _generate_properties(self, track: MKVTrack, mkvmerge_path: tuple[str, ...]) -> Iterator[str]:
         if track.language is not None:
             yield "--language"
             yield f"{track.track_id}:{track.language}"
 
-        if track.language_ietf is not None:
-            yield "--language"
-            yield f"{track.track_id}:{track.language_ietf}"
+        # IETF wins when usable (mirrors ``effective_language``). ``und`` is
+        # only emitted when ``language`` is unset so it does not override an
+        # explicit value.
+        ietf = track.language_ietf
+        if ietf is not None and is_known_language(ietf, mkvmerge_path):
+            primary = ietf.split("-", 1)[0].lower()
+            if primary == "und":
+                if track.language is None:
+                    yield "--language"
+                    yield f"{track.track_id}:{ietf}"
+            else:
+                yield "--language"
+                yield f"{track.track_id}:{ietf}"
 
         for attr, (flag, is_bool) in self.property_flags.items():
             if attr in ("language", "language_ietf"):

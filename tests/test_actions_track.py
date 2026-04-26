@@ -1,3 +1,4 @@
+import subprocess as sp
 import sys
 from pathlib import Path
 from typing import cast
@@ -214,12 +215,9 @@ def test_track_init_legacy_dict(dummy_mkv: Path) -> None:
     # pts check removed due to uncertainty of field mapping
 
 
-def test_track_repr(dummy_mkv: Path) -> None:
-    # return dummy info with at least 1 track
-    info = MkvMergeOutput(container=ContainerInfo(), tracks=[TrackInfo(id=0, type="video", codec="h264")])
-
+def test_track_repr(dummy_mkv: Path, single_video_info: MkvMergeOutput) -> None:
     with (
-        patch.object(sys.modules["pymkv.MKVTrack"], "get_file_info", return_value=info),
+        patch.object(sys.modules["pymkv.MKVTrack"], "get_file_info", return_value=single_video_info),
         patch.object(sys.modules["pymkv.MKVTrack"], "verify_supported", return_value=True),
     ):
         t = MKVTrack(str(dummy_mkv))
@@ -245,12 +243,9 @@ def test_track_pts_property(dummy_mkv: Path) -> None:
         assert t.pts == 123  # noqa: PLR2004
 
 
-def test_track_tags_setter(dummy_mkv: Path, tmp_path: Path) -> None:
-    # Setup dummy validation
-    info = MkvMergeOutput(container=ContainerInfo(), tracks=[TrackInfo(id=0, type="video", codec="h264")])
-
+def test_track_tags_setter(dummy_mkv: Path, tmp_path: Path, single_video_info: MkvMergeOutput) -> None:
     with (
-        patch.object(sys.modules["pymkv.MKVTrack"], "get_file_info", return_value=info),
+        patch.object(sys.modules["pymkv.MKVTrack"], "get_file_info", return_value=single_video_info),
         patch.object(sys.modules["pymkv.MKVTrack"], "verify_supported", return_value=True),
     ):
         t = MKVTrack(str(dummy_mkv))
@@ -285,10 +280,9 @@ def test_track_file_path_setter_verification_failure(tmp_path: Path) -> None:
         MKVTrack(str(invalid))
 
 
-def test_extract_silent_and_path(dummy_mkv: Path, tmp_path: Path) -> None:
-    info = MkvMergeOutput(container=ContainerInfo(), tracks=[TrackInfo(id=0, type="video", codec="h264")])
+def test_extract_silent_and_path(dummy_mkv: Path, tmp_path: Path, single_video_info: MkvMergeOutput) -> None:
     with (
-        patch.object(sys.modules["pymkv.MKVTrack"], "get_file_info", return_value=info),
+        patch.object(sys.modules["pymkv.MKVTrack"], "get_file_info", return_value=single_video_info),
         patch.object(sys.modules["pymkv.MKVTrack"], "verify_supported", return_value=True),
     ):
         t = MKVTrack(str(dummy_mkv))
@@ -306,3 +300,81 @@ def test_extract_silent_and_path(dummy_mkv: Path, tmp_path: Path) -> None:
         # MKVTrack appends filename + extract info to the output path (assuming it as directory)
         # We just verify it returns a string starting with our output path
         assert str(output) in res
+
+
+def test_file_id_setter_invalid_type(dummy_mkv: Path, single_video_info: MkvMergeOutput) -> None:
+    with (
+        patch.object(sys.modules["pymkv.MKVTrack"], "get_file_info", return_value=single_video_info),
+        patch.object(sys.modules["pymkv.MKVTrack"], "verify_supported", return_value=True),
+    ):
+        t = MKVTrack(str(dummy_mkv))
+    with pytest.raises(ValueError, match="file_id must be an integer"):
+        t.file_id = "not_int"  # type: ignore[assignment]
+
+
+def test_track_id_setter_out_of_range(dummy_mkv: Path, single_video_info: MkvMergeOutput) -> None:
+    with (
+        patch.object(sys.modules["pymkv.MKVTrack"], "get_file_info", return_value=single_video_info),
+        patch.object(sys.modules["pymkv.MKVTrack"], "verify_supported", return_value=True),
+    ):
+        t = MKVTrack(str(dummy_mkv))
+    with pytest.raises(IndexError, match="track index out of range"):
+        t.track_id = 99
+
+
+def test_language_setter_invalid(dummy_mkv: Path, single_video_info: MkvMergeOutput) -> None:
+    with (
+        patch.object(sys.modules["pymkv.MKVTrack"], "get_file_info", return_value=single_video_info),
+        patch.object(sys.modules["pymkv.MKVTrack"], "verify_supported", return_value=True),
+    ):
+        t = MKVTrack(str(dummy_mkv))
+    with pytest.raises(
+        ValueError,
+        match=r"'xyz_invalid' cannot be mapped to a valid ISO 639-2 language code",
+    ):
+        t.language = "xyz_invalid"
+
+
+def test_extract_track_name_fallback(dummy_mkv: Path, tmp_path: Path, single_video_info: MkvMergeOutput) -> None:
+    with (
+        patch.object(sys.modules["pymkv.MKVTrack"], "get_file_info", return_value=single_video_info),
+        patch.object(sys.modules["pymkv.MKVTrack"], "verify_supported", return_value=True),
+    ):
+        t = MKVTrack(str(dummy_mkv))
+
+    # Clear language and extension, set track_name
+    t._language = None  # noqa: SLF001
+    t.extension = None
+    t.track_name = "MyTrack"
+
+    with patch("subprocess.run"):
+        result = t.extract(output_path=str(tmp_path), silent=True)
+        assert "MyTrack" in result
+
+
+def test_extract_timestamps_silent(dummy_mkv: Path, tmp_path: Path, single_video_info: MkvMergeOutput) -> None:
+    with (
+        patch.object(sys.modules["pymkv.MKVTrack"], "get_file_info", return_value=single_video_info),
+        patch.object(sys.modules["pymkv.MKVTrack"], "verify_supported", return_value=True),
+    ):
+        t = MKVTrack(str(dummy_mkv))
+
+    with patch("subprocess.run") as mock_run:
+        result = t.extract_timestamps(output_path=str(tmp_path), silent=True)
+        mock_run.assert_called_once()
+        call_kwargs = mock_run.call_args
+        assert call_kwargs[1].get("stdout") == sp.DEVNULL
+        assert "timestamps" in result
+
+
+def test_extract_timestamps_default_path(dummy_mkv: Path, single_video_info: MkvMergeOutput) -> None:
+    with (
+        patch.object(sys.modules["pymkv.MKVTrack"], "get_file_info", return_value=single_video_info),
+        patch.object(sys.modules["pymkv.MKVTrack"], "verify_supported", return_value=True),
+    ):
+        t = MKVTrack(str(dummy_mkv))
+
+    with patch("subprocess.run"):
+        result = t.extract_timestamps(silent=True)
+        assert str(dummy_mkv) in result
+        assert "timestamps" in result

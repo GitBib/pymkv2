@@ -21,6 +21,15 @@ prevent any global tags from being included if the :class:`~pymkv.MKVTrack` is m
 >>> track2 = MKVTrack("path/to/track.aac")  # doctest: +SKIP
 >>> track2.language = "eng"  # doctest: +SKIP
 
+The ``language`` setter accepts any recognized identifier (639-1, /B, /T,
+639-3, or English name) and stores the canonical /B code, while
+``matches_language`` performs a normalized comparison across all formats
+including BCP 47 subtags.
+
+>>> track2.language = "Chinese"  # doctest: +SKIP
+>>> track2.matches_language("zh")  # doctest: +SKIP
+True
+
 Create a new :class:`~pymkv.MKVTrack` from an MKV file. This example will take a specific track from an MKV and also
 prevent any global tags from being included if the :class:`~pymkv.MKVTrack` is muxed into an :class:`~pymkv.MKVFile`.
 
@@ -52,7 +61,8 @@ from typing import TYPE_CHECKING, Any
 
 import msgspec
 
-from pymkv.ISO639_2 import is_iso639_2
+from pymkv.ISO639_2 import get_iso639_2
+from pymkv.Languages import is_known_language, languages_match, normalize_language
 from pymkv.models import MkvMergeOutput
 from pymkv.TypeTrack import get_track_extension
 from pymkv.utils import prepare_mkvtoolnix_path
@@ -116,11 +126,17 @@ class MKVTrack:
     track_name : str
         The name that will be given to the track when muxed into a file.
     language : str
-        The language of the track in ISO639-2 format.
+        The canonical ISO 639-2 /B code of the track. The setter accepts any
+        recognized identifier (639-1, /B, /T, 639-3, or English name) and
+        stores the canonical /B form, so ``track.language = "fra"`` reads back
+        as ``"fre"``.
     language_ietf : str
         The language of the track in BCP47 format.
     effective_language : str
-        The prioritized language of the track (IETF BCP47 first, then ISO 639-2).
+        Canonical ISO 639-2 /B language of the track, normalized from
+        ``language_ietf`` or ``language``. BCP 47 subtags are stripped, /T
+        codes are mapped to /B, and ``"und"`` / unknown values resolve to
+        ``None``.
     default_track : bool
         Determines if the track should be the default track of its type when muxed into an MKV file.
     forced_track : bool
@@ -338,10 +354,7 @@ class MKVTrack:
         Get the language of the track.
 
         Returns:
-            str: The language of the track.
-
-        Raises:
-            ValueError: If the passed in language is not an ISO 639-2 language code.
+            str: The canonical ISO 639-2 /B code of the track, or ``None``.
         """
         return self._language
 
@@ -350,17 +363,47 @@ class MKVTrack:
         """
         Set the language of the MKVTrack.
 
+        Accepts any recognized language identifier — ISO 639-1 (``"en"``),
+        639-2 /B (``"eng"``), 639-2 /T (``"fra"``), 639-3, or English language
+        name (``"English"``, case-insensitive) — and stores the canonical ISO
+        639-2 /B code. As a result, ``track.language = "fra"`` reads back as
+        ``"fre"`` and ``track.language = "English"`` reads back as ``"eng"``.
+
+        Well-formed BCP 47 tags are also accepted, but only the primary
+        subtag is preserved (``"zh-Hans-CN"`` reads back as ``"chi"``); use
+        :attr:`language_ietf` if the script/region subtags must round-trip.
+
+        The BCP 47 ``"und"`` sentinel (and any input that resolves to it) is
+        stored as ``None`` so that the read side (:attr:`language` getter and
+        :attr:`effective_language`) agrees on "no language". To explicitly
+        emit ``--language TID:und`` to mkvmerge, set :attr:`language_ietf` to
+        ``"und"`` instead.
+
         Args:
-            language (str): The language to be set for the MKVTrack.
+            language (str | None): The language to be set for the MKVTrack.
+                Pass ``None`` to clear the language.
 
         Raises:
-            ValueError: If the provided language is not a valid ISO639-2 language code.
+            ValueError: If the provided value is not ``None`` and cannot be
+                mapped to a valid ISO 639-2 language code. The error message
+                includes the offending value.
         """
-        if language is None or is_iso639_2(language):
-            self._language = language
-        else:
-            msg = "not an ISO639-2 language code"
+        if language is None:
+            self._language = None
+            return
+        # ``normalize_language`` collapses ``"und"`` to ``None`` per the
+        # documented "und = no language" contract. Fall back to ``get_iso639_2``
+        # for collective /B codes that python-iso639 does not know but mkvmerge
+        # does (``afa``, ``alg``, etc.); then re-collapse ``"und"`` so the
+        # stored value stays consistent with the contract.
+        iso_code = normalize_language(language, self.mkvmerge_path) or get_iso639_2(language)
+        if iso_code is None:
+            msg = f"'{language}' cannot be mapped to a valid ISO 639-2 language code"
             raise ValueError(msg)
+        if iso_code == "und":
+            self._language = None
+            return
+        self._language = iso_code
 
     @property
     def pts(self) -> int:
@@ -413,10 +456,7 @@ class MKVTrack:
         Get the language of the track with BCP47 format.
 
         Returns:
-            str: The language of the track in BCP47 format.
-
-        Raises:
-            ValueError: If the passed in language is not a BCP47 language code.
+            str: The language of the track in BCP47 format, or ``None``.
         """
         return self._language_ietf
 
@@ -433,12 +473,50 @@ class MKVTrack:
     @property
     def effective_language(self) -> str | None:
         """
-        Get the prioritized language of the track (IETF BCP47 first, then ISO 639-2).
+        Get the canonical ISO 639-2 /B language of the track.
+
+        Resolves ``language_ietf`` first; if that field is unset *or*
+        cannot be normalized to a /B code, falls back to ``language``. BCP
+        47 subtags are stripped (``"zh-Hans-CN"`` → ``"chi"``), /T codes are
+        mapped to /B (``"deu"`` → ``"ger"``), and ``"und"`` / unrecognized
+        values resolve to ``None``.
 
         Returns:
-            str: The language of the track.
+            str | None: Canonical ISO 639-2 /B code, or ``None`` when the
+            track has no recognized language.
         """
-        return self.language_ietf or self.language
+        # Mirror the writer's gate in ``TrackOptions._generate_properties``: an
+        # ``language_ietf`` value mkvmerge rejects (e.g. an English language
+        # name) is silently dropped at mux time, so the read side must fall
+        # through to ``language`` to stay consistent.
+        if is_known_language(self.language_ietf, self.mkvmerge_path):
+            ietf_norm = normalize_language(self.language_ietf, self.mkvmerge_path)
+            if ietf_norm is not None:
+                return ietf_norm
+        return normalize_language(self.language, self.mkvmerge_path)
+
+    def matches_language(self, code: str | None) -> bool:
+        """
+        Return ``True`` when ``code`` refers to this track's language.
+
+        Compares ``code`` against both ``language`` and ``language_ietf``
+        using :func:`pymkv.languages_match`, so any 639-1/2/B/2/T/3 code,
+        English language name, or BCP 47 tag with subtags is accepted on
+        either side.
+
+        Args:
+            code (str | None): A language identifier to test against the
+                track. ``None``, ``""`` and ``"und"`` always return ``False``.
+
+        Returns:
+            bool: ``True`` if ``code`` matches the track's language under
+            cross-format equality; otherwise ``False``.
+        """
+        if not code:
+            return False
+        return languages_match(code, self.language, self.mkvmerge_path) or languages_match(
+            code, self.language_ietf, self.mkvmerge_path
+        )
 
     @property
     def tags(self) -> str | None:
@@ -556,7 +634,7 @@ class MKVTrack:
 
         Args:
             output_path (str | os.PathLike | None, optional): The path to be used as the output file
-            in the mkvextract command.
+                in the mkvextract command.
             silent (bool | None, optional): By default the mkvmerge output will be shown unless silent is True.
 
         Returns:

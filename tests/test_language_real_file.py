@@ -26,14 +26,13 @@ def test_language_persistence_real_file(tmp_path: Path, get_path_test_file: Path
     ietf_lang = video_track.language_ietf
     assert ietf_lang is not None
     assert ietf_lang in ["ru", "rus"]
-    eff_lang = video_track.effective_language
-    assert eff_lang is not None
-    assert eff_lang in ["ru", "rus", "ru-RU"]
+    # effective_language is now the canonical /B ISO 639-2 code.
+    assert video_track.effective_language == "rus"
 
     audio_track = cast("MKVTrack", mkv.get_track(1))
     assert audio_track.language == "eng"
     assert audio_track.language_ietf == "en-US"
-    assert audio_track.effective_language == "en-US"
+    assert audio_track.effective_language == "eng"
 
     output_mkv = str(tmp_path / "output.mkv")
     command = mkv.command(output_mkv, subprocess=True)

@@ -206,7 +206,7 @@ class Timestamp:
         Returns:
             int: The element at the specified index.
         """
-        return (self.hh, self.mm, self.ss, self.ss)[index]
+        return (self.hh, self.mm, self.ss, self.nn)[index]
 
     @property
     def ts(self) -> str:
@@ -225,7 +225,9 @@ class Timestamp:
             r"^(([Hh]{1,2}):)?([Mm]{1,2}):([Ss]{1,2})(\.([Nn]{1,9}))?$",
             self.form,
         )
-        assert format_match is not None
+        if format_match is None:
+            msg = f'"{self.form}" is not a valid timestamp format'
+            raise ValueError(msg)
         format_groups = format_match.groups()
         timestamp_format = [format_groups[i] is not None for i in (1, 2, 3, 5)]
 
@@ -440,7 +442,9 @@ class Timestamp:
             r"^(([0-9]{1,2}):)?([0-9]{1,2}):([0-9]{1,2})(\.([0-9]{1,9}))?$",
             timestamp,
         )
-        assert timestamp_match is not None
+        if timestamp_match is None:
+            msg = f'"{timestamp}" is not a valid timestamp'
+            raise ValueError(msg)
         timestamp_groups = timestamp_match.groups()
 
         timestamp_lst = [cast("str", timestamp_groups[i]) for i in (1, 2, 3, 4)]

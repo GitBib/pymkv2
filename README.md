@@ -26,5 +26,36 @@ You can also clone the repo and run the following command in the project root to
 
     $ pip install -e .
 
+## Language code utilities
+
+pymkv exposes a normalized API for comparing and translating language codes
+across ISO 639-1, /B, /T, 639-3, BCP 47, and English language names. Use these
+helpers instead of comparing language strings directly — `language_ietf="zh-Hans"`
+and `language="chi"` should match, and they do via `languages_match`.
+
+```python
+from pymkv import (
+    MKVFile,
+    get_iso639_2,
+    languages_match,
+    language_equivalents,
+    normalize_language,
+)
+
+get_iso639_2("English")        # "eng"
+get_iso639_2("fra")            # "fre"  (canonical /B)
+normalize_language("zh-Hans")  # "chi"  (BCP 47 subtag stripped)
+languages_match("zho", "zh")   # True
+language_equivalents("eng")    # frozenset({"eng", "en"})
+
+# MKVTrack setter is now lenient — any recognized form is accepted and
+# canonicalized to /B on store.
+mkv = MKVFile("path/to/file.mkv")
+track = mkv.tracks[1]
+track.language = "Chinese"        # stored as "chi"
+track.matches_language("zh")       # True (works against language_ietf too)
+track.effective_language           # "chi" — normalized /B
+```
+
 ## Documentation
 The documentation for pymkv can be found [here](https://gitbib.github.io/pymkv2/) or in the project's docstrings.

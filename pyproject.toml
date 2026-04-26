@@ -1,6 +1,6 @@
 [project]
 name = "pymkv2"
-version = "2.2.0r2"
+version = "2.3.0"
 description = "A Python wrapper for mkvmerge. It provides support for muxing, splitting, linking, chapters, tags, and attachments through the use of mkvmerge."
 authors = [
     {name = "GitBib", email = "job@bnff.website"},
@@ -24,25 +24,42 @@ classifiers = [
 ]
 keywords = [
     "wrapper",
+    "mkvmerge",
+    "mkvtoolnix",
+    "mkvextract",
+    "matroska",
+    "mkv",
+    "video",
+    "audio",
+    "subtitles",
+    "multimedia",
+    "mux",
+    "muxing",
+    "demux",
+    "chapters",
+    "attachments",
+    "tags",
+    "iso-639",
+    "bcp-47",
+    "language-codes",
 ]
 requires-python = "<4.0,>=3.10"
 dependencies = [
-    "bitmath==1.3.3.1",
-    "bcp47==0.1.0",
-    "python-iso639<2027.0.0,>=2025.11.16",
-    "msgspec>=0.20.0",
+    "bitmath<3.0.0,>=2.0.0",
+    "python-iso639<2027.0.0,>=2026.4.20",
+    "msgspec>=0.21.0",
 ]
 
 [dependency-groups]
 dev = [
-    "Sphinx<9.0.0,>=8.2.3; python_version == \"3.13\"",
-    "pytest>=8.3.4,<10.0.0",
-    "pytest-cov>=6.0.0,<8.0.0",
-    "pytest-ruff<1.0.0,>=0.4.1",
-    "pytest-mypy>=0.10.3,<2.0.0",
-    "mypy<2.0.0,>=1.14.1",
-    "ruff<1.0.0,>=0.14.13",
-    "sphinx-immaterial<0.14.0,>=0.12.4; python_version == \"3.13\"",
+    "Sphinx<9.0.0,>=8.2.3; python_version == \"3.14\"",
+    "pytest>=9.0.0,<10.0.0",
+    "pytest-cov>=7.0.0,<8.0.0",
+    "pytest-ruff<1.0.0,>=0.5",
+    "pytest-mypy>=1.0.0,<2.0.0",
+    "mypy<2.0.0,>=1.18.0",
+    "ruff<1.0.0,>=0.15.0",
+    "sphinx-immaterial<0.14.0,>=0.13.0; python_version == \"3.14\"",
     "pyinstrument>=5.1.2",
     "sphinx-llms-txt>=0.7.1",
 ]
@@ -61,7 +78,7 @@ build-backend = "pdm.backend"
 addopts = "--doctest-modules --mypy --ruff --ruff-format"
 
 [[tool.mypy.overrides]]
-module = ["bcp47.*", "bitmath.*", "iso639.*"]
+module = ["bitmath.*", "iso639.*"]
 ignore_missing_imports = true
 
 [tool.ruff]
@@ -91,7 +108,7 @@ exclude = [
 
 line-length = 120
 indent-width = 4
-target-version = "py39"
+target-version = "py310"
 namespace-packages = ["docs/source"]
 
 [tool.ruff.lint]

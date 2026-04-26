@@ -21,8 +21,10 @@ functionality that is missing or an error in the docs, please open a new issue `
     pymkv/MKVFile
     pymkv/MKVTrack
     pymkv/MKVAttachment
+    pymkv/Chapters
     pymkv/Timestamp
     pymkv/Verifications
+    pymkv/Languages
     pymkv/models
 
 

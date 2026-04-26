@@ -3,6 +3,14 @@ from __future__ import annotations
 import importlib.metadata
 
 # package imports
+from .ISO639_2 import get_iso639_2
+from .Languages import (
+    is_known_language,
+    language_equivalents,
+    languages_match,
+    normalize_language,
+    preload_language_table,
+)
 from .MKVAttachment import MKVAttachment
 from .MKVFile import MKVFile
 from .MKVTrack import MKVTrack
@@ -30,6 +38,12 @@ __all__ = (
     "Timestamp",
     "checking_file_path",
     "get_file_info",
+    "get_iso639_2",
+    "is_known_language",
+    "language_equivalents",
+    "languages_match",
+    "normalize_language",
+    "preload_language_table",
     "verify_matroska",
     "verify_mkvmerge",
     "verify_recognized",
