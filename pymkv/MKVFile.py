@@ -67,6 +67,7 @@ from typing import Any, TypeVar, cast
 
 import bitmath
 import msgspec
+from typing_extensions import Self
 
 from pymkv.chapters import (
     ChapterAtom,
@@ -85,7 +86,8 @@ from pymkv.command_generators import (
     TrackOptions,
     TrackOrderOptions,
 )
-from pymkv.ISO639_2 import is_iso639_2
+from pymkv.ISO639_2 import get_iso639_2
+from pymkv.Languages import normalize_language
 from pymkv.MKVAttachment import MKVAttachment
 from pymkv.MKVTrack import MKVTrack
 from pymkv.models import MkvMergeOutput, TrackProperties
@@ -252,16 +254,32 @@ class MKVFile:
         """
         return repr(self.__dict__)
 
+    def cleanup(self) -> None:
+        """Remove any temporary files created during command generation or muxing.
+
+        This includes the temporary XML chapters file written by :meth:`_write_chapters_xml`.
+        Safe to call multiple times.
+        """
+        if self._temp_chapters_file is not None:
+            Path(self._temp_chapters_file).unlink(missing_ok=True)
+            self._temp_chapters_file = None
+            self._chapters_file = None
+
+    def __enter__(self) -> Self:
+        """Support use as a context manager."""
+        return self
+
+    def __exit__(self, exc_type: object, exc_val: object, exc_tb: object) -> None:
+        """Clean up temporary files on context manager exit."""
+        self.cleanup()
+
     @property
     def chapter_language(self) -> str | None:
         """
         Get the language code of the chapters in the MKVFile object.
 
         Returns:
-            str: The ISO 639-2 language code of the chapters.
-
-        Raises:
-            ValueError: If the stored language code is not a valid ISO 639-2 language code.
+            str: The canonical ISO 639-2 /B code of the chapters, or ``None``.
         """
         return self._chapter_language
 
@@ -270,16 +288,41 @@ class MKVFile:
         """
         Set the language code of the chapters in the MKVFile object.
 
+        Accepts any recognized language identifier — ISO 639-1 (``"en"``),
+        639-2 /B (``"eng"``), 639-2 /T (``"fra"``), 639-3, or English language
+        name (``"English"``, case-insensitive) — and stores the canonical ISO
+        639-2 /B code. As a result, ``mkv.chapter_language = "fra"`` reads back
+        as ``"fre"`` and ``mkv.chapter_language = "English"`` reads back as
+        ``"eng"``.
+
+        Well-formed BCP 47 tags are also accepted, but only the primary
+        subtag is preserved (``"zh-Hans-CN"`` reads back as ``"chi"``).
+
         Args:
-            language (str): The language code for the chapters. Must be a valid ISO 639-2 language code.
+            language (str | None): The language code for the chapters. Pass
+                ``None`` to clear the language.
 
         Raises:
-            ValueError: If the provided language code is not a valid ISO 639-2 language code.
+            ValueError: If the provided value is not ``None`` and cannot be
+                mapped to a valid ISO 639-2 language code. The error message
+                includes the offending value.
         """
-        if language is not None and not is_iso639_2(language):
-            msg = "The provided language code is not a valid ISO 639-2 language code."
+        if language is None:
+            self._chapter_language = None
+            return
+        # ``normalize_language`` collapses ``"und"`` to ``None`` (the documented
+        # "und = no language" contract). Fall back to ``get_iso639_2`` for
+        # collective /B codes that python-iso639 does not know but mkvmerge
+        # does (``afa``, ``alg``); then re-collapse ``"und"`` so the stored
+        # value stays consistent.
+        iso_code = normalize_language(language, self.mkvmerge_path) or get_iso639_2(language)
+        if iso_code is None:
+            msg = f"'{language}' cannot be mapped to a valid ISO 639-2 language code"
             raise ValueError(msg)
-        self._chapter_language = language
+        if iso_code == "und":
+            self._chapter_language = None
+            return
+        self._chapter_language = iso_code
 
     @property
     def global_tag_entries(self) -> int:
@@ -905,7 +948,8 @@ class MKVFile:
         >>> mkv.split_size(bitmath.MiB(50))  # doctest: +SKIP
         """
         if getattr(size, "__module__", None) == bitmath.__name__:
-            size = cast("bitmath.Bitmath", size).bytes
+            # bitmath 2.x returns ``.bytes`` as float; mkvmerge expects an integer.
+            size = int(cast("bitmath.Bitmath", size).bytes)
         elif not isinstance(size, int):
             msg = "size is not a bitmath object or integer"
             raise TypeError(msg)
@@ -975,7 +1019,7 @@ class MKVFile:
         if None in ts_flat:
             msg = f'"{timestamps}" are not properly formatted timestamps'
             raise ValueError(msg)
-        for ts_1, ts_2 in zip(ts_flat[:-1], ts_flat[1:]):
+        for ts_1, ts_2 in itertools.pairwise(ts_flat):
             if Timestamp(ts_1) >= Timestamp(ts_2):
                 msg = f'"{timestamps}" are not properly formatted timestamps'
                 raise ValueError(msg)
@@ -1026,7 +1070,7 @@ class MKVFile:
             if not isinstance(f, int):
                 msg = f'frame "{f}" not an int'
                 raise TypeError(msg)
-        for f_1, f_2 in zip(frames_flat[:-1], frames_flat[1:]):
+        for f_1, f_2 in itertools.pairwise(frames_flat):
             if f_1 >= f_2:
                 msg = f'"{frames}" are not properly formatted frames'
                 raise ValueError(msg)
@@ -1072,7 +1116,7 @@ class MKVFile:
             msg = f'"{timestamp_parts}" are not properly formatted parts'
             raise ValueError(msg)
 
-        for ts_1, ts_2 in zip(ts_flat[:-1], ts_flat[1:]):
+        for ts_1, ts_2 in itertools.pairwise(ts_flat):
             if None not in (ts_1, ts_2) and Timestamp(ts_1) >= Timestamp(ts_2):
                 msg = f'"{timestamp_parts}" are not properly formatted parts'
                 raise ValueError(msg)
@@ -1098,7 +1142,7 @@ class MKVFile:
 
     def split_parts_frames(
         self,
-        frame_parts: Iterable[int],
+        frame_parts: Iterable[list[int] | tuple[int, ...]],
         link: bool | None = False,
     ) -> None:
         """
@@ -1128,11 +1172,11 @@ class MKVFile:
         if None in f_flat[1:-1]:
             msg = f'"{frame_parts}" are not properly formatted parts'
             raise ValueError(msg)
-        for f_1, f_2 in zip(f_flat[:-1], f_flat[1:]):
+        for f_1, f_2 in itertools.pairwise(f_flat):
             if None not in (f_1, f_2) and f_1 >= f_2:
                 msg = f'"{frame_parts}" are not properly formatted parts'
                 raise ValueError(msg)
-        f_string = "parts:"
+        f_string = "parts-frames:"
         for fp in frame_parts:
             f_set = MKVFile.flatten(fp)
             if not isinstance(f_set, (list, tuple)):
@@ -1188,7 +1232,7 @@ class MKVFile:
             if c < 1:
                 msg = f'"{chapters}" are not properly formatted chapters'
                 raise ValueError(msg)
-        for c_1, c_2 in zip(c_flat[:-1], c_flat[1:]):
+        for c_1, c_2 in itertools.pairwise(c_flat):
             if c_1 >= c_2:
                 msg = f'"{chapters}" are not properly formatted chapters'
                 raise ValueError(msg)
@@ -1254,7 +1298,10 @@ class MKVFile:
         file_path : str
             The chapters file to be added to the :class:`~pymkv.MKVFile` object.
         language : str, optional
-            Must be an ISO639-2 language code. Only applied if no existing language information exists in chapters.
+            Language for the chapters. Accepts any recognized language identifier (ISO 639-1,
+            639-2 /B, 639-2 /T, 639-3, or English language name) and is canonicalized to
+            ISO 639-2 /B on store. Only applied if no existing language information exists
+            in chapters.
 
         Raises
         ------

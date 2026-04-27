@@ -1,7 +1,10 @@
+import xml.etree.ElementTree as ET
 from pathlib import Path
 
+import pytest
+
 from pymkv import MKVFile
-from pymkv.chapters import ChapterAtom, ChapterDisplay, Chapters, EditionEntry, export_to_xml
+from pymkv.chapters import ChapterAtom, ChapterDisplay, Chapters, EditionEntry, _dict_to_xml, export_to_xml
 
 
 def test_xml_export_simple() -> None:
@@ -80,3 +83,52 @@ def test_add_chapter_types() -> None:
     mkv.add_chapter(atom)
     assert len(mkv.chapters_obj.editions) == 1
     assert mkv.chapters_obj.editions[0].atoms[0] == atom
+
+
+def test_chapter_bool_flags_in_xml() -> None:
+    atom = ChapterAtom(time_start="00:00:00", hidden=True, enabled=False)
+    chapters = Chapters(editions=[EditionEntry(atoms=[atom])])
+    xml = export_to_xml(chapters)
+    assert "<ChapterFlagHidden>1</ChapterFlagHidden>" in xml
+    assert "<ChapterFlagEnabled>0</ChapterFlagEnabled>" in xml
+
+
+def test_add_simple_chapter_non_default_language() -> None:
+    chapters = Chapters()
+    chapters.add_simple_chapter("00:01:00.000", "Chapter", language="jpn")
+    xml = export_to_xml(chapters)
+    assert "<ChapterLanguage>jpn</ChapterLanguage>" in xml
+
+
+def test_edition_entry_bool_flags() -> None:
+    edition = EditionEntry(hidden=True, default=True, ordered=True, atoms=[ChapterAtom(time_start="00:00:00")])
+    chapters = Chapters(editions=[edition])
+    xml = export_to_xml(chapters)
+    assert "<EditionFlagHidden>1</EditionFlagHidden>" in xml
+    assert "<EditionFlagDefault>1</EditionFlagDefault>" in xml
+    assert "<EditionFlagOrdered>1</EditionFlagOrdered>" in xml
+
+
+def test_add_chapter_type_error() -> None:
+    mkv = MKVFile()
+    with pytest.raises(TypeError, match="chapter must be ChapterAtom or EditionEntry"):
+        mkv.add_chapter("not a valid chapter")  # type: ignore[arg-type]
+
+
+def test_dict_to_xml_non_dict_list_items() -> None:
+    root = ET.Element("Root")
+    _dict_to_xml(root, {"Tags": ["value1", "value2"]})
+    tags_elements = root.findall("Tags")
+    assert len(tags_elements) == 2  # noqa: PLR2004
+    assert tags_elements[0].text == "value1"
+    assert tags_elements[1].text == "value2"
+
+
+def test_dict_to_xml_nested_dict() -> None:
+    root = ET.Element("Root")
+    _dict_to_xml(root, {"Outer": {"Inner": "value"}})
+    outer = root.find("Outer")
+    assert outer is not None
+    inner = outer.find("Inner")
+    assert inner is not None
+    assert inner.text == "value"

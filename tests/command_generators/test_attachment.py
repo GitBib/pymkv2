@@ -59,3 +59,31 @@ def test_attachment_options(mock_mkv: MagicMock) -> None:
         "empty.txt",
     ]
     assert args == expected_empty
+
+
+def test_attachment_options_attach_once(mock_mkv: MagicMock) -> None:
+    att = MagicMock(spec=MKVAttachment)
+    att.file_path = "cover.jpg"
+    att.name = "cover"
+    att.mime_type = "image/jpeg"
+    att.description = None
+    att.attach_once = True
+    att.uid = None
+    att.source_id = None
+
+    mock_mkv.attachments = [att]
+
+    opts = AttachmentOptions()
+    args = gen_to_list(opts, mock_mkv)
+    assert "--attach-file-once" in args
+    assert "--attach-file" not in args
+
+
+def test_attachment_options_skips_source_attachment(mock_mkv: MagicMock) -> None:
+    att = MagicMock(spec=MKVAttachment)
+    att.source_id = 3
+    mock_mkv.attachments = [att]
+
+    opts = AttachmentOptions()
+    args = gen_to_list(opts, mock_mkv)
+    assert args == []

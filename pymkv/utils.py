@@ -12,10 +12,10 @@ from __future__ import annotations
 
 import os
 import shlex
-from collections.abc import Iterable, Sequence
+from collections.abc import Callable, Iterable, Sequence
 from functools import wraps
 from pathlib import Path
-from typing import Any, Callable, TypeVar, cast
+from typing import Any, TypeVar, cast
 
 T = TypeVar("T")
 SelfType = TypeVar("SelfType")
@@ -41,7 +41,7 @@ def prepare_mkvtoolnix_path(
         If the path type is invalid. Expected str, list of str, or os.PathLike.
     """
     if isinstance(path, os.PathLike):
-        return (os.fspath(path),)
+        return (str(Path(path)),)
     elif isinstance(path, str):  # noqa: RET505
         # Check if the path exists and is accessible
         return (path,) if Path(path).exists() else tuple(shlex.split(path))

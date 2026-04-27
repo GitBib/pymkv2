@@ -16,8 +16,68 @@ def test_chapter_language_getter_setter() -> None:
     mkv.chapter_language = None
     assert mkv.chapter_language is None
 
-    with pytest.raises(ValueError, match="not a valid ISO 639-2 language code"):
+    with pytest.raises(
+        ValueError,
+        match=r"'invalid_code' cannot be mapped to a valid ISO 639-2 language code",
+    ):
         mkv.chapter_language = "invalid_code"
+
+
+def test_chapter_language_accepts_english_name() -> None:
+    mkv = MKVFile()
+    mkv.chapter_language = "English"
+    assert mkv.chapter_language == "eng"
+
+
+def test_chapter_language_lowercase_name() -> None:
+    mkv = MKVFile()
+    mkv.chapter_language = "english"
+    assert mkv.chapter_language == "eng"
+
+
+def test_chapter_language_canonicalizes_terminological_to_bibliographic() -> None:
+    mkv = MKVFile()
+    mkv.chapter_language = "fra"
+    assert mkv.chapter_language == "fre"
+
+    mkv.chapter_language = "deu"
+    assert mkv.chapter_language == "ger"
+
+
+def test_chapter_language_accepts_iso639_1() -> None:
+    mkv = MKVFile()
+    mkv.chapter_language = "en"
+    assert mkv.chapter_language == "eng"
+
+
+def test_chapter_language_invalid_includes_offending_value() -> None:
+    mkv = MKVFile()
+    with pytest.raises(
+        ValueError,
+        match=r"'xyz' cannot be mapped to a valid ISO 639-2 language code",
+    ):
+        mkv.chapter_language = "xyz"
+
+
+def test_chapter_language_accepts_iso639_2_collective_code() -> None:
+    mkv = MKVFile()
+    mkv.chapter_language = "afa"
+    assert mkv.chapter_language == "afa"
+
+
+def test_chapter_language_und_stored_as_none() -> None:
+    mkv = MKVFile()
+    mkv.chapter_language = "und"
+    assert mkv.chapter_language is None
+
+
+def test_chapters_method_canonicalizes_language(tmp_path: Path) -> None:
+    mkv = MKVFile()
+    chapter_file = tmp_path / "chapters.xml"
+    chapter_file.touch()
+
+    mkv.chapters(str(chapter_file), language="English")
+    assert mkv.chapter_language == "eng"
 
 
 def test_global_tag_entries() -> None:

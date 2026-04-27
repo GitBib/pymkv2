@@ -15,14 +15,14 @@ jobs:
     if: github.event_name == 'push' || !github.event.pull_request.draft
     steps:
       - name: Check out repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v6.0.2
 
       - name: Install uv
         id: setup-uv
-        uses: astral-sh/setup-uv@v7
+        uses: astral-sh/setup-uv@v8.1.0
         with:
           version: latest
-          python-version: "3.13"
+          python-version: "3.14"
           enable-cache: true
 
       - name: Install project
@@ -33,7 +33,7 @@ jobs:
           uv run --frozen sphinx-build docs/source _build
 
       - name: Deploy
-        uses: peaceiris/actions-gh-pages@v4
+        uses: peaceiris/actions-gh-pages@v4.0.0
         if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/master' || github.event_name == 'pull_request' || github.event_name == 'workflow_dispatch' }}
         with:
           publish_branch: gh-pages

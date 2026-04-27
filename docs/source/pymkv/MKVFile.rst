@@ -6,3 +6,5 @@ MKVFile
 
 .. autoclass:: pymkv.MKVFile
     :members:
+    :undoc-members:
+    :show-inheritance:

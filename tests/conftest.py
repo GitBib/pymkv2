@@ -7,6 +7,8 @@ from unittest.mock import MagicMock
 import pytest
 from pyinstrument import Profiler
 
+from pymkv.models import ContainerInfo, MkvMergeOutput, TrackInfo
+
 TESTS_ROOT = Path.cwd()
 
 
@@ -113,9 +115,9 @@ def auto_profile(request: pytest.FixtureRequest) -> Generator[None, None, None]:
 def mock_mkv(request: Any) -> MagicMock:  # noqa: ANN401
     """Provides a mocked MKVFile with common attributes pre-set."""
     mkv = MagicMock()
-    # Default common attributes
     mkv.output_path = "output.mkv"
     mkv.title = None
+    mkv.mkvmerge_path = ("mkvmerge",)
     mkv._global_tags_file = None  # noqa: SLF001
     mkv.no_track_statistics_tags = False
     mkv.tracks = []
@@ -133,8 +135,10 @@ def mock_track_cleaner() -> Callable[[Any], None]:
     """Returns a helper function to ensure a mock track has all None/False attributes."""
 
     def clean_mock(m: Any) -> None:  # noqa: ANN401
+        m.mkvmerge_path = ("mkvmerge",)
         m.track_name = None
         m.language = None
+        m.language_ietf = None
         m.effective_language = None
         m.tags = {}
         m.default_track = False
@@ -184,3 +188,9 @@ def dummy_mkv(tmp_path: Path) -> Path:
     f = tmp_path / "dummy.mkv"
     f.touch()
     return f
+
+
+@pytest.fixture
+def single_video_info() -> MkvMergeOutput:
+    """MkvMergeOutput with a single h264 video track."""
+    return MkvMergeOutput(container=ContainerInfo(), tracks=[TrackInfo(id=0, type="video", codec="h264")])
