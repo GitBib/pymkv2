@@ -767,6 +767,7 @@ dependencies = [
     { name = "bitmath" },
     { name = "msgspec" },
     { name = "python-iso639" },
+    { name = "typing-extensions", marker = "python_full_version < '3.11'" },
 ]
 
 [package.dev-dependencies]
@@ -788,6 +789,7 @@ requires-dist = [
     { name = "bitmath", specifier = ">=2.0.0,<3.0.0" },
     { name = "msgspec", specifier = ">=0.21.0" },
     { name = "python-iso639", specifier = ">=2026.4.20,<2027.0.0" },
+    { name = "typing-extensions", marker = "python_full_version < '3.11'", specifier = ">=4.15.0" },
 ]
 
 [package.metadata.requires-dev]
