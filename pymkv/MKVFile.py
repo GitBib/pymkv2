@@ -60,6 +60,7 @@ import logging
 import os
 import re
 import subprocess as sp
+import sys
 import tempfile
 from collections.abc import Callable, Iterable, Sequence
 from pathlib import Path
@@ -67,7 +68,11 @@ from typing import Any, TypeVar, cast
 
 import bitmath
 import msgspec
-from typing_extensions import Self
+
+if sys.version_info >= (3, 11):
+    from typing import Self
+else:
+    from typing_extensions import Self
 
 from pymkv.chapters import (
     ChapterAtom,

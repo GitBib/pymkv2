@@ -48,6 +48,7 @@ dependencies = [
     "bitmath<3.0.0,>=2.0.0",
     "python-iso639<2027.0.0,>=2026.4.20",
     "msgspec>=0.21.0",
+    "typing-extensions>=4.15.0 ; python_full_version < '3.11'",
 ]
 
 [dependency-groups]
