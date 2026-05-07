@@ -64,7 +64,7 @@ import sys
 import tempfile
 from collections.abc import Callable, Iterable, Sequence
 from pathlib import Path
-from typing import Any, TypeVar, cast
+from typing import Any, ClassVar, TypeVar, cast
 
 import bitmath
 import msgspec
@@ -141,6 +141,8 @@ class MKVFile:
     FileNotFoundError
         Raised if the path to mkvmerge could not be verified.
     """
+
+    DEFAULT_UI_LANGUAGE: ClassVar[str] = "en" if sys.platform == "win32" else "en_US"
 
     def __init__(
         self,
@@ -342,7 +344,9 @@ class MKVFile:
     def command(
         self,
         output_path: str,
+        *,
         subprocess: bool = False,
+        ui_language: str | None = None,
     ) -> str | list[str]:
         """
         Generates an mkvmerge command based on the configured :class:`~pymkv.MKVFile`.
@@ -353,6 +357,17 @@ class MKVFile:
             The path to be used as the output file in the mkvmerge command.
         subprocess : bool
             Will return the command as a list so it can be used easily with the :mod:`subprocess` module.
+        ui_language : str, optional
+            The locale passed to mkvmerge via ``--ui-language`` to control the language of its output
+            (progress messages, warnings, errors). When ``None`` or empty, the value of
+            :attr:`DEFAULT_UI_LANGUAGE` is used. Forcing English output keeps the progress parser in
+            :meth:`mux` working regardless of the system locale. mkvmerge's translation table differs
+            between builds: Unix builds expect POSIX-style codes (``en_US``, ``de_DE``), Windows builds
+            expect short codes (``en``, ``de``). Run ``mkvmerge --ui-language list`` to see the tokens
+            accepted on the host. The default is selected at import time from ``sys.platform``
+            (``en`` on ``win32``, ``en_US`` elsewhere); override explicitly when wrapping a foreign-build
+            binary — e.g. invoking ``mkvmerge.exe`` from a Cygwin/MSYS Python (``sys.platform`` reports
+            ``cygwin``/``msys`` so the Unix default is picked, but the Windows binary needs ``en``).
 
         Returns
         -------
@@ -364,14 +379,12 @@ class MKVFile:
         --------
         >>> mkv = MKVFile()
         >>> mkv.add_track('path/to/track.h264')  # doctest: +SKIP
-        >>> # Generate command string
-        >>> cmd_str = mkv.command('output.mkv')  # doctest: +SKIP
-        >>> print(cmd_str)  # doctest: +SKIP
-        mkvmerge -o output.mkv path/to/track.h264
-        >>> # Generate command list for subprocess
-        >>> cmd_list = mkv.command('output.mkv', subprocess=True)  # doctest: +SKIP
-        >>> print(cmd_list)  # doctest: +SKIP
-        ['mkvmerge', '-o', 'output.mkv', 'path/to/track.h264']
+        >>> # Generate command list for subprocess (locale segment is platform-dependent)
+        >>> mkv.command('output.mkv', subprocess=True)  # doctest: +SKIP
+        ['mkvmerge', '--ui-language', 'en_US', '-o', 'output.mkv', 'path/to/track.h264']
+        >>> # Override when targeting a foreign-build binary or wanting translated output
+        >>> mkv.command('output.mkv', subprocess=True, ui_language='de_DE')  # doctest: +SKIP
+        ['mkvmerge', '--ui-language', 'de_DE', '-o', 'output.mkv', 'path/to/track.h264']
         """
 
         self.output_path = str(Path(output_path).expanduser())
@@ -399,6 +412,7 @@ class MKVFile:
         ]
 
         command_args = list(self.mkvmerge_path)
+        command_args.extend(("--ui-language", ui_language or self.DEFAULT_UI_LANGUAGE))
         generated_args = list(itertools.chain.from_iterable(p.generate(self) for p in pipeline))
         command_args.extend(generated_args)
 
@@ -407,9 +421,11 @@ class MKVFile:
     def mux(
         self,
         output_path: str | os.PathLike,
+        *,
         silent: bool = False,
         ignore_warning: bool = False,
         progress_handler: Callable[[int], None] | None = None,
+        ui_language: str | None = None,
     ) -> int:
         """
         Mixes the specified :class:`~pymkv.MKVFile`.
@@ -424,6 +440,12 @@ class MKVFile:
             If set to True, the muxing process will ignore any warnings (exit code 1) from mkvmerge.
         progress_handler : Callable[[int], None], optional
             A callback function that will be called with the current progress percentage (0-100).
+        ui_language : str, optional
+            The locale passed to mkvmerge via ``--ui-language``. When ``None`` (the default),
+            :attr:`DEFAULT_UI_LANGUAGE` is used so that the progress parser still recognises
+            ``Progress: NN%`` lines on systems whose locale would otherwise translate mkvmerge
+            output. The default is platform-aware (``en_US`` on Unix, ``en`` on Windows);
+            see :meth:`command` for accepted tokens. Forwarded to :meth:`command`.
 
         Returns
         -------
@@ -453,7 +475,7 @@ class MKVFile:
         0
         """
         output_path = str(Path(output_path).expanduser())
-        args = self.command(output_path, subprocess=True)
+        args = self.command(output_path, subprocess=True, ui_language=ui_language)
 
         if progress_handler:
             stdout_target = sp.PIPE
