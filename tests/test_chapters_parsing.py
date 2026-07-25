@@ -123,7 +123,7 @@ def test_parse_chapters_xml_nested_atoms() -> None:
     assert nested.displays[0].string == "Nested"
     assert nested.displays[0].country == "us"
     # Language falls back to the default when not specified in the XML.
-    assert nested.displays[0].language == "und"
+    assert nested.displays[0].language == "eng"
 
 
 def test_parse_chapters_xml_multiple_editions() -> None:

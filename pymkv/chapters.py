@@ -187,43 +187,67 @@ def _text_to_int(value: str | None) -> int | None:
         return None
 
 
+def _findtext(element: ET.Element, tag: str) -> str | None:
+    """
+    Return the stripped text of a child element, or ``None`` if it is absent or blank.
+    """
+    text = element.findtext(tag)
+    if text is None:
+        return None
+    text = text.strip()
+    return text or None
+
+
+def _strip_none(data: dict[str, Any]) -> dict[str, Any]:
+    """
+    Drop keys whose value is ``None`` before handing the dict to :func:`msgspec.convert`.
+    """
+    return {key: value for key, value in data.items() if value is not None}
+
+
 def _parse_chapter_display(element: ET.Element) -> dict[str, Any]:
     """
     Parse a single ``<ChapterDisplay>`` element into a dict matching :class:`ChapterDisplay`.
     """
-    return {
-        "ChapterString": element.findtext("ChapterString") or "",
-        "ChapterLanguage": element.findtext("ChapterLanguage") or "und",
-        "ChapterCountry": element.findtext("ChapterCountry"),
-    }
+    return _strip_none(
+        {
+            "ChapterString": _findtext(element, "ChapterString") or "",
+            "ChapterLanguage": _findtext(element, "ChapterLanguage"),
+            "ChapterCountry": _findtext(element, "ChapterCountry"),
+        }
+    )
 
 
 def _parse_chapter_atom(element: ET.Element) -> dict[str, Any]:
     """
     Recursively parse a ``<ChapterAtom>`` element into a dict matching :class:`ChapterAtom`.
     """
-    return {
-        "ChapterTimeStart": element.findtext("ChapterTimeStart") or "",
-        "ChapterTimeEnd": element.findtext("ChapterTimeEnd"),
-        "ChapterUID": _text_to_int(element.findtext("ChapterUID")),
-        "ChapterFlagHidden": _text_to_bool(element.findtext("ChapterFlagHidden")),
-        "ChapterFlagEnabled": _text_to_bool(element.findtext("ChapterFlagEnabled")),
-        "ChapterDisplay": [_parse_chapter_display(d) for d in element.findall("ChapterDisplay")],
-        "ChapterAtom": [_parse_chapter_atom(a) for a in element.findall("ChapterAtom")],
-    }
+    return _strip_none(
+        {
+            "ChapterTimeStart": _findtext(element, "ChapterTimeStart") or "",
+            "ChapterTimeEnd": _findtext(element, "ChapterTimeEnd"),
+            "ChapterUID": _text_to_int(element.findtext("ChapterUID")),
+            "ChapterFlagHidden": _text_to_bool(element.findtext("ChapterFlagHidden")),
+            "ChapterFlagEnabled": _text_to_bool(element.findtext("ChapterFlagEnabled")),
+            "ChapterDisplay": [_parse_chapter_display(d) for d in element.findall("ChapterDisplay")],
+            "ChapterAtom": [_parse_chapter_atom(a) for a in element.findall("ChapterAtom")],
+        }
+    )
 
 
 def _parse_edition_entry(element: ET.Element) -> dict[str, Any]:
     """
     Parse a single ``<EditionEntry>`` element into a dict matching :class:`EditionEntry`.
     """
-    return {
-        "EditionUID": _text_to_int(element.findtext("EditionUID")),
-        "EditionFlagHidden": _text_to_bool(element.findtext("EditionFlagHidden")),
-        "EditionFlagDefault": _text_to_bool(element.findtext("EditionFlagDefault")),
-        "EditionFlagOrdered": _text_to_bool(element.findtext("EditionFlagOrdered")),
-        "ChapterAtom": [_parse_chapter_atom(a) for a in element.findall("ChapterAtom")],
-    }
+    return _strip_none(
+        {
+            "EditionUID": _text_to_int(element.findtext("EditionUID")),
+            "EditionFlagHidden": _text_to_bool(element.findtext("EditionFlagHidden")),
+            "EditionFlagDefault": _text_to_bool(element.findtext("EditionFlagDefault")),
+            "EditionFlagOrdered": _text_to_bool(element.findtext("EditionFlagOrdered")),
+            "ChapterAtom": [_parse_chapter_atom(a) for a in element.findall("ChapterAtom")],
+        }
+    )
 
 
 def parse_chapters_xml(xml_content: str | bytes) -> Chapters:
