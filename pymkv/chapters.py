@@ -161,3 +161,109 @@ def export_to_xml(chapters: Chapters) -> str:
     xml_bytes = ET.tostring(root, encoding="utf-8", xml_declaration=True)
 
     return xml_bytes.decode("utf-8")
+
+
+def _text_to_bool(value: str | None) -> bool | None:
+    """
+    Convert a Matroska chapter XML flag ("0"/"1") to a bool, preserving ``None``.
+    """
+    if value is None:
+        return None
+    return value.strip() == "1"
+
+
+def _text_to_int(value: str | None) -> int | None:
+    """
+    Convert element text to an int, preserving ``None`` and tolerating blank/invalid values.
+    """
+    if value is None:
+        return None
+    value = value.strip()
+    if not value:
+        return None
+    try:
+        return int(value)
+    except ValueError:
+        return None
+
+
+def _parse_chapter_display(element: ET.Element) -> dict[str, Any]:
+    """
+    Parse a single ``<ChapterDisplay>`` element into a dict matching :class:`ChapterDisplay`.
+    """
+    return {
+        "ChapterString": element.findtext("ChapterString") or "",
+        "ChapterLanguage": element.findtext("ChapterLanguage") or "und",
+        "ChapterCountry": element.findtext("ChapterCountry"),
+    }
+
+
+def _parse_chapter_atom(element: ET.Element) -> dict[str, Any]:
+    """
+    Recursively parse a ``<ChapterAtom>`` element into a dict matching :class:`ChapterAtom`.
+    """
+    return {
+        "ChapterTimeStart": element.findtext("ChapterTimeStart") or "",
+        "ChapterTimeEnd": element.findtext("ChapterTimeEnd"),
+        "ChapterUID": _text_to_int(element.findtext("ChapterUID")),
+        "ChapterFlagHidden": _text_to_bool(element.findtext("ChapterFlagHidden")),
+        "ChapterFlagEnabled": _text_to_bool(element.findtext("ChapterFlagEnabled")),
+        "ChapterDisplay": [_parse_chapter_display(d) for d in element.findall("ChapterDisplay")],
+        "ChapterAtom": [_parse_chapter_atom(a) for a in element.findall("ChapterAtom")],
+    }
+
+
+def _parse_edition_entry(element: ET.Element) -> dict[str, Any]:
+    """
+    Parse a single ``<EditionEntry>`` element into a dict matching :class:`EditionEntry`.
+    """
+    return {
+        "EditionUID": _text_to_int(element.findtext("EditionUID")),
+        "EditionFlagHidden": _text_to_bool(element.findtext("EditionFlagHidden")),
+        "EditionFlagDefault": _text_to_bool(element.findtext("EditionFlagDefault")),
+        "EditionFlagOrdered": _text_to_bool(element.findtext("EditionFlagOrdered")),
+        "ChapterAtom": [_parse_chapter_atom(a) for a in element.findall("ChapterAtom")],
+    }
+
+
+def parse_chapters_xml(xml_content: str | bytes) -> Chapters:
+    """
+    Parse a Matroska chapters XML document (such as the output of ``mkvextract chapters``)
+    into a :class:`Chapters` object.
+
+    Parameters
+    ----------
+    xml_content : str | bytes
+        The XML content to parse, as returned by ``mkvextract chapters <file>``.
+
+    Returns
+    -------
+    Chapters
+        The parsed chapters, with one :class:`EditionEntry` per ``<EditionEntry>`` element.
+
+    Raises
+    ------
+    xml.etree.ElementTree.ParseError
+        If `xml_content` is not well-formed XML.
+
+    Examples
+    --------
+    >>> xml = '''<?xml version="1.0"?>
+    ... <Chapters>
+    ...   <EditionEntry>
+    ...     <ChapterAtom>
+    ...       <ChapterTimeStart>00:00:00.000</ChapterTimeStart>
+    ...       <ChapterDisplay>
+    ...         <ChapterString>Intro</ChapterString>
+    ...         <ChapterLanguage>eng</ChapterLanguage>
+    ...       </ChapterDisplay>
+    ...     </ChapterAtom>
+    ...   </EditionEntry>
+    ... </Chapters>'''
+    >>> chapters = parse_chapters_xml(xml)
+    >>> chapters.editions[0].atoms[0].displays[0].string
+    'Intro'
+    """
+    root = ET.fromstring(xml_content)  # noqa: S314
+    data = {"EditionEntry": [_parse_edition_entry(e) for e in root.findall("EditionEntry")]}
+    return msgspec.convert(data, type=Chapters, strict=False)

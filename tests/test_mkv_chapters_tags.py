@@ -1,9 +1,12 @@
+import subprocess as sp
 from pathlib import Path
 from unittest.mock import Mock
 
+import msgspec
 import pytest
 
 from pymkv import MKVFile
+from pymkv.Verifications import get_file_info
 
 
 def test_chapter_language_getter_setter() -> None:
@@ -220,6 +223,96 @@ def test_no_track_tags() -> None:
 
     for track in mkv.tracks:
         assert track.no_track_tags is True
+
+
+def test_chapters_obj_defaults_to_none() -> None:
+    mkv = MKVFile()
+    assert mkv.chapters_obj is None
+
+
+def test_read_chapters_parses_mkvextract_output(monkeypatch: pytest.MonkeyPatch, dummy_mkv: Path) -> None:
+    mkv = MKVFile()
+
+    xml_output = b"""<?xml version="1.0" encoding="UTF-8"?>
+<Chapters>
+  <EditionEntry>
+    <ChapterAtom>
+      <ChapterTimeStart>00:00:00.000000000</ChapterTimeStart>
+      <ChapterDisplay>
+        <ChapterString>Intro</ChapterString>
+        <ChapterLanguage>eng</ChapterLanguage>
+      </ChapterDisplay>
+    </ChapterAtom>
+  </EditionEntry>
+</Chapters>
+"""
+
+    def fake_run(command: list[str], check: bool, capture_output: bool) -> Mock:
+        assert command[-2] == "chapters"
+        assert command[-1] == str(dummy_mkv)
+        result = Mock()
+        result.stdout = xml_output
+        return result
+
+    monkeypatch.setattr(sp, "run", fake_run)
+
+    chapters = mkv._read_chapters(str(dummy_mkv))  # noqa: SLF001
+
+    assert chapters is not None
+    assert len(chapters.editions) == 1
+    assert chapters.editions[0].atoms[0].displays[0].string == "Intro"
+
+
+def test_read_chapters_returns_none_on_process_error(monkeypatch: pytest.MonkeyPatch, dummy_mkv: Path) -> None:
+    mkv = MKVFile()
+
+    def fake_run(*args: object, **kwargs: object) -> Mock:
+        raise sp.CalledProcessError(returncode=2, cmd=["mkvextract"])
+
+    monkeypatch.setattr(sp, "run", fake_run)
+
+    assert mkv._read_chapters(str(dummy_mkv)) is None  # noqa: SLF001
+
+
+def test_read_chapters_returns_none_on_empty_output(monkeypatch: pytest.MonkeyPatch, dummy_mkv: Path) -> None:
+    mkv = MKVFile()
+
+    def fake_run(*args: object, **kwargs: object) -> Mock:
+        result = Mock()
+        result.stdout = b""
+        return result
+
+    monkeypatch.setattr(sp, "run", fake_run)
+
+    assert mkv._read_chapters(str(dummy_mkv)) is None  # noqa: SLF001
+
+
+def test_read_chapters_returns_none_on_invalid_xml(monkeypatch: pytest.MonkeyPatch, dummy_mkv: Path) -> None:
+    mkv = MKVFile()
+
+    def fake_run(*args: object, **kwargs: object) -> Mock:
+        result = Mock()
+        result.stdout = b"<Chapters><EditionEntry>"
+        return result
+
+    monkeypatch.setattr(sp, "run", fake_run)
+
+    assert mkv._read_chapters(str(dummy_mkv)) is None  # noqa: SLF001
+
+
+def test_init_populates_chapters_obj_from_existing_file(get_path_test_file: Path) -> None:
+    """Integration test: if the fixture file has chapters, MKVFile should expose them."""
+    info = msgspec.to_builtins(get_file_info(get_path_test_file, "mkvmerge"))
+    chapter_entries = info.get("chapters", [])
+    has_chapters = any(entry.get("num_entries", 0) > 0 for entry in chapter_entries)
+
+    mkv = MKVFile(str(get_path_test_file))
+
+    if has_chapters:
+        assert mkv.chapters_obj is not None
+        assert len(mkv.chapters_obj.editions) > 0
+    else:
+        assert mkv.chapters_obj is None
 
 
 def test_no_attachments() -> None:

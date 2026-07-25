@@ -62,6 +62,7 @@ import re
 import subprocess as sp
 import sys
 import tempfile
+import xml.etree.ElementTree as ET
 from collections.abc import Callable, Iterable, Sequence
 from pathlib import Path
 from typing import Any, ClassVar, TypeVar, cast
@@ -79,6 +80,7 @@ from pymkv.chapters import (
     Chapters,
     EditionEntry,
     export_to_xml,
+    parse_chapters_xml,
 )
 from pymkv.command_generators import (
     AttachmentOptions,
@@ -135,6 +137,10 @@ class MKVFile:
         The path where pymkv looks for the mkvmerge executable. pymkv relies on the mkvmerge executable to parse
         files. By default, it is assumed mkvmerge is in your shell's $PATH variable. If it is not, you need to set
         *mkvmerge_path* to the executable location.
+    mkvextract_path : str, optional
+        The path where pymkv looks for the mkvextract executable. By default, it is
+        assumed mkvextract is in your shell's $PATH variable. If it is not, you need to set
+        *mkvextract_path* to the executable location.
 
     Raises
     ------
@@ -149,8 +155,10 @@ class MKVFile:
         file_path: str | os.PathLike | None = None,
         title: str | None = None,
         mkvmerge_path: str | os.PathLike | Iterable[str] = "mkvmerge",
+        mkvextract_path: str | os.PathLike | Iterable[str] = "mkvextract",
     ) -> None:
         self.mkvmerge_path: tuple[str, ...] = prepare_mkvtoolnix_path(mkvmerge_path)
+        self.mkvextract_path: tuple[str, ...] = prepare_mkvtoolnix_path(mkvextract_path)
         self.title = title
         self._chapters_file: str | None = None
         self.chapters_obj: Chapters | None = None
@@ -247,6 +255,10 @@ class MKVFile:
                     new_attachment.source_id = attachment_id
                     new_attachment.source_file = file_path
                     self.attachments.append(new_attachment)
+
+            chapter_entries = sum(c.num_entries for c in info_struct.chapters)
+            if chapter_entries > 0:
+                self.chapters_obj = self._read_chapters(file_path)
 
         # split options
         self._split_options: list[str] = []
@@ -527,6 +539,42 @@ class MKVFile:
                 raise ValueError(error_message)
 
         return proc.returncode
+
+    def _read_chapters(self, file_path: str) -> Chapters | None:
+        """
+        Extract and parse the chapters already present in `file_path`.
+
+        Uses ``mkvextract chapters <file_path>`` to obtain the chapter XML and parses it into a
+        :class:`~pymkv.chapters.Chapters` object. This is used internally when importing a
+        pre-existing MKV file that has chapters. Failures are logged and treated as "no chapters"
+        rather than raised, so a file with unreadable chapters can still be opened.
+
+        Parameters
+        ----------
+        file_path : str
+            The path of the MKV file to read chapters from.
+
+        Returns
+        -------
+        Chapters | None
+            The parsed chapters, or ``None`` if they could not be extracted or parsed.
+        """
+        command = [*self.mkvextract_path, "chapters", file_path]
+        try:
+            result = sp.run(command, check=True, capture_output=True)  # noqa: S603
+        except (sp.CalledProcessError, FileNotFoundError) as e:
+            logging.warning("Could not extract chapters from '%s': %s", file_path, e)
+            return None
+
+        xml_content = result.stdout.decode("utf-8")
+        if not xml_content.strip():
+            return None
+
+        try:
+            return parse_chapters_xml(xml_content)
+        except ET.ParseError as e:
+            logging.warning("Could not parse chapters XML from '%s': %s", file_path, e)
+            return None
 
     def _write_chapters_xml(self) -> None:
         """
