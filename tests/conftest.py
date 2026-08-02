@@ -1,4 +1,6 @@
 import random
+import shutil
+import subprocess as sp
 from collections.abc import Callable, Generator
 from pathlib import Path
 from typing import Any
@@ -8,6 +10,11 @@ import pytest
 from pyinstrument import Profiler
 
 from pymkv.models import ContainerInfo, MkvMergeOutput, TrackInfo
+
+requires_mkvtoolnix = pytest.mark.skipif(
+    shutil.which("mkvmerge") is None or shutil.which("mkvextract") is None,
+    reason="mkvmerge/mkvextract not installed; this test requires the real binaries",
+)
 
 TESTS_ROOT = Path.cwd()
 
@@ -94,6 +101,75 @@ def get_path_test_chapters_txt(get_base_path: Path) -> Path:
     chapter_path = get_base_path / "simple_chapters.txt"
     chapter_path.touch()
     return chapter_path
+
+
+# Source chapters XML used to build the real chaptered fixture file below. Deliberately includes
+# fields that pymkv.chapters.Chapters does not model (ChapterPhysicalEquiv, ChapLanguageIETF) so
+# tests can assert those are preserved on remux instead of being silently dropped.
+_CHAPTERS_SOURCE_XML = """<?xml version="1.0" encoding="UTF-8"?>
+<Chapters>
+  <EditionEntry>
+    <EditionUID>1111</EditionUID>
+    <ChapterAtom>
+      <ChapterUID>2001</ChapterUID>
+      <ChapterTimeStart>00:00:00.000000000</ChapterTimeStart>
+      <ChapterPhysicalEquiv>10</ChapterPhysicalEquiv>
+      <ChapterDisplay>
+        <ChapterString>Intro</ChapterString>
+        <ChapterLanguage>chi</ChapterLanguage>
+        <ChapLanguageIETF>zh-Hans</ChapLanguageIETF>
+      </ChapterDisplay>
+    </ChapterAtom>
+  </EditionEntry>
+</Chapters>
+"""
+
+
+@pytest.fixture
+def get_path_test_file_with_chapters(
+    get_path_test_file_two: Path,
+    tmp_path: Path,
+) -> Path:
+    """
+    Build a real MKV file with chapters (via ``mkvmerge --chapters``)
+    """
+    chapters_xml = tmp_path / "source_chapters.xml"
+    chapters_xml.write_text(_CHAPTERS_SOURCE_XML, encoding="utf-8")
+
+    output_path = tmp_path / "chaptered.mkv"
+
+    mkvmerge = shutil.which("mkvmerge")
+    assert mkvmerge is not None
+    sp.run(  # noqa: S603
+        [
+            mkvmerge,
+            "-o",
+            str(output_path),
+            "--chapters",
+            str(chapters_xml),
+            str(get_path_test_file_two),
+        ],
+        check=True,
+        capture_output=True,
+    )
+    return output_path
+
+
+@pytest.fixture
+def real_mkvextract_chapters_xml(get_path_test_file_with_chapters: Path) -> str:
+    """
+    The actual XML that ``mkvextract chapters`` produces for the fixture above, including
+    whatever BOM/derived fields (e.g. ``ChapterCountry``) mkvextract adds on its own.
+    """
+
+    mkvextract = shutil.which("mkvextract")
+    assert mkvextract is not None
+    result = sp.run(  # noqa: S603
+        [mkvextract, "chapters", str(get_path_test_file_with_chapters)],
+        check=True,
+        capture_output=True,
+    )
+    return result.stdout.decode("utf-8")
 
 
 @pytest.fixture(autouse=True)

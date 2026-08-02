@@ -161,7 +161,8 @@ class MKVFile:
         self.mkvextract_path: tuple[str, ...] = prepare_mkvtoolnix_path(mkvextract_path)
         self.title = title
         self._chapters_file: str | None = None
-        self.chapters_obj: Chapters | None = None
+        self._chapters_obj: Chapters | None = None
+        self._chapters_from_source: bool = False
         self._temp_chapters_file: str | None = None
         self._chapter_language: str | None = None
         self._global_tags_file: str | None = None
@@ -258,7 +259,10 @@ class MKVFile:
 
             chapter_entries = sum(c.num_entries for c in info_struct.chapters)
             if chapter_entries > 0:
-                self.chapters_obj = self._read_chapters(file_path)
+                chapters_from_source = self._read_chapters(file_path)
+                if chapters_from_source is not None:
+                    self._chapters_obj = chapters_from_source
+                    self._chapters_from_source = True
 
         # split options
         self._split_options: list[str] = []
@@ -291,6 +295,28 @@ class MKVFile:
     def __exit__(self, exc_type: object, exc_val: object, exc_tb: object) -> None:
         """Clean up temporary files on context manager exit."""
         self.cleanup()
+
+    @property
+    def chapters_obj(self) -> Chapters | None:
+        """
+        Get or set the :class:`~pymkv.chapters.Chapters` object attached to this file.
+
+        Assigning to this property (``mkv.chapters_obj = Chapters()``) always marks the
+        chapters as caller-supplied: :meth:`command` will serialize them to a temporary XML
+        file and pass it to mkvmerge via ``--chapters``, overriding whatever chapters (if any)
+        the source file already had.
+
+        Returns
+        -------
+        Chapters | None
+            The chapters object, or ``None`` if no chapters are set.
+        """
+        return self._chapters_obj
+
+    @chapters_obj.setter
+    def chapters_obj(self, chapters: Chapters | None) -> None:
+        self._chapters_obj = chapters
+        self._chapters_from_source = False
 
     @property
     def chapter_language(self) -> str | None:
@@ -402,7 +428,7 @@ class MKVFile:
         self.output_path = str(Path(output_path).expanduser())
 
         # Handle object-based chapters
-        if self.chapters_obj and not self._chapters_file:
+        if self.chapters_obj and not self._chapters_file and not self._chapters_from_source:
             self._write_chapters_xml()
 
         # Pre-assign file IDs
@@ -628,6 +654,8 @@ class MKVFile:
         """
         if self.chapters_obj is None:
             self.chapters_obj = Chapters()
+        else:
+            self._chapters_from_source = False
 
         if isinstance(chapter, ChapterAtom):
             if not self.chapters_obj.editions:
