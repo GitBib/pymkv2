@@ -60,7 +60,8 @@ def test_attachment_info_defaults() -> None:
     assert ai.file_name is None
     assert ai.content_type is None
     assert ai.description is None
-    assert ai.size == 0
+    # A missing size stays unknown. mkvmerge refuses to attach an empty file, so 0 would be a fabricated value.
+    assert ai.size is None
     assert isinstance(ai.properties, AttachmentProperties)
 
 
