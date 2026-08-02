@@ -171,6 +171,19 @@ class AttachmentInfo(msgspec.Struct):
     properties: AttachmentProperties = msgspec.field(default_factory=AttachmentProperties)
 
 
+class ChapterInfo(msgspec.Struct):
+    """
+    Summary information about the chapters present in a file.
+
+    Attributes
+    ----------
+    num_entries : int
+        The number of chapter entries.
+    """
+
+    num_entries: int = 0
+
+
 class MkvMergeOutput(msgspec.Struct):
     """
     Root structure of `mkvmerge -J` output.
@@ -187,6 +200,8 @@ class MkvMergeOutput(msgspec.Struct):
         List of track tags.
     attachments : list[AttachmentInfo]
         List of attachments.
+    chapters : list[ChapterInfo]
+        Summary of chapters present in the file.
     file_name : str | None
         The file name.
     """
@@ -197,3 +212,4 @@ class MkvMergeOutput(msgspec.Struct):
     global_tags: list[TagEntry] = []
     track_tags: list[TagEntry] = []
     attachments: list[AttachmentInfo] = []
+    chapters: list[ChapterInfo] = []

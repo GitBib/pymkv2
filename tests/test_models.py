@@ -3,6 +3,7 @@ import msgspec
 from pymkv.models import (
     AttachmentInfo,
     AttachmentProperties,
+    ChapterInfo,
     ContainerInfo,
     ContainerProperties,
     MkvMergeOutput,
@@ -72,12 +73,18 @@ def test_attachment_properties_defaults() -> None:
     assert ap.mime_type is None
 
 
+def test_chapter_info_defaults() -> None:
+    ci = ChapterInfo()
+    assert ci.num_entries == 0
+
+
 def test_mkv_merge_output_defaults() -> None:
     output = MkvMergeOutput(container=ContainerInfo())
     assert output.tracks == []
     assert output.global_tags == []
     assert output.track_tags == []
     assert output.attachments == []
+    assert output.chapters == []
     assert output.file_name is None
 
 
@@ -98,6 +105,7 @@ def test_mkv_merge_output_decode() -> None:
         "global_tags": [],
         "track_tags": [],
         "attachments": [],
+        "chapters": [{"num_entries": 5}],
         "file_name": "test.mkv"
     }"""
     result = msgspec.json.decode(json_bytes, type=MkvMergeOutput, strict=False)
@@ -108,3 +116,5 @@ def test_mkv_merge_output_decode() -> None:
     assert result.tracks[0].codec == "h264"
     assert result.tracks[0].properties.default_track is True
     assert result.file_name == "test.mkv"
+    assert len(result.chapters) == 1
+    assert result.chapters[0].num_entries == 5  # noqa: PLR2004
