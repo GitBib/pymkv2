@@ -12,7 +12,7 @@ permissions:
 jobs:
   docs:
     runs-on: ubuntu-latest
-    if: github.event_name == 'push' || !github.event.pull_request.draft
+    timeout-minutes: 15
     steps:
       - name: Check out repository
         uses: actions/checkout@v7.0.1
@@ -21,9 +21,10 @@ jobs:
         id: setup-uv
         uses: astral-sh/setup-uv@v9.0.0
         with:
-          version: latest
+          version: "0.12.1"
           python-version: "3.14"
           enable-cache: true
+          prune-cache: true
 
       - name: Install project
         run: uv sync --all-extras --dev
@@ -34,7 +35,7 @@ jobs:
 
       - name: Deploy
         uses: peaceiris/actions-gh-pages@v4.1.0
-        if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/master' || github.event_name == 'pull_request' || github.event_name == 'workflow_dispatch' }}
+        if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/master' || github.event_name == 'workflow_dispatch' }}
         with:
           publish_branch: gh-pages
           github_token: ${{ secrets.GITHUB_TOKEN }}
