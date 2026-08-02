@@ -49,7 +49,6 @@ def _make_track(dummy_mkv: Path, info: MkvMergeOutput) -> MKVTrack:
     """Build an MKVTrack against a dummy file path with mocked file probing."""
     with (
         patch.object(sys.modules["pymkv.MKVTrack"], "get_file_info", return_value=info),
-        patch.object(sys.modules["pymkv.MKVTrack"], "verify_supported", return_value=True),
     ):
         return MKVTrack(str(dummy_mkv))
 
@@ -137,7 +136,6 @@ def test_language_setter_empty_string_raises(dummy_mkv: Path, single_video_info:
 def test_language_setter_constructor_canonicalizes(dummy_mkv: Path, single_video_info: MkvMergeOutput) -> None:
     with (
         patch.object(sys.modules["pymkv.MKVTrack"], "get_file_info", return_value=single_video_info),
-        patch.object(sys.modules["pymkv.MKVTrack"], "verify_supported", return_value=True),
     ):
         track = MKVTrack(str(dummy_mkv), language="fra")
     assert track.language == "fre"
