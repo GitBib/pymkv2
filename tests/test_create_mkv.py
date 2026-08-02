@@ -162,7 +162,6 @@ def test_order_tracks_by_file_id_keyerror(single_video_info: MkvMergeOutput) -> 
     with (
         patch.object(sys.modules["pymkv.MKVTrack"], "checking_file_path", side_effect=lambda x: x),
         patch.object(sys.modules["pymkv.MKVTrack"], "get_file_info", return_value=single_video_info),
-        patch.object(sys.modules["pymkv.MKVTrack"], "verify_supported", return_value=True),
     ):
         mkv = MKVFile()
         t1 = MKVTrack("file1.mkv")

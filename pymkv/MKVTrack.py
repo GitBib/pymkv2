@@ -66,7 +66,7 @@ from pymkv.Languages import is_known_language, languages_match, normalize_langua
 from pymkv.models import MkvMergeOutput
 from pymkv.TypeTrack import get_track_extension
 from pymkv.utils import prepare_mkvtoolnix_path
-from pymkv.Verifications import checking_file_path, get_file_info, verify_supported
+from pymkv.Verifications import checking_file_path, get_file_info, verify_mkvmerge
 
 if TYPE_CHECKING:
     from collections.abc import Iterable
@@ -189,6 +189,10 @@ class MKVTrack:
         self.mkvmerge_path = prepare_mkvtoolnix_path(mkvmerge_path)
         # Ensure _info_json is always MkvMergeOutput if possible, or None
         self._info_json: MkvMergeOutput | None = None
+        # Path that _info_json describes. None means "not probed yet", which also covers
+        # caller-supplied existing_info: it is trusted for the first file_path assignment
+        # and invalidated as soon as the path changes to something else.
+        self._info_path: str | None = None
         if existing_info:
             if isinstance(existing_info, dict):
                 # Convert legacy dict to Struct for strict usage
@@ -261,20 +265,40 @@ class MKVTrack:
 
         This method checks if the provided file path is valid and supported by mkvmerge.
         If the file is valid, it sets the file path and resets the track_id to 0.
-        If existing_info is already set, skip the verify_supported check since the file
-        was already verified.
+
+        The mkvmerge output is probed once and cached, so the track_id setter does not
+        have to run mkvmerge a second time. Pointing the track at a different file drops
+        that cache, so the track always describes the file it currently points at.
+
+        When existing_info was supplied, it is trusted for the first assignment and no
+        probe happens at all. It stops being trusted as soon as the path changes.
 
         Args:
             file_path (str): The path to the file containing the track.
 
         Raises:
             ValueError: If the file is not a valid Matroska file or is not supported.
+            FileNotFoundError: If mkvmerge is not available at mkvmerge_path.
         """
         fp = checking_file_path(file_path)
-        if not self._info_json and not verify_supported(fp, mkvmerge_path=self.mkvmerge_path):
-            msg = f"The file '{file_path}' is not a valid Matroska file or is not supported."
-            raise ValueError(msg)
+        if self._info_path is not None and fp != self._info_path:
+            # Pointing at a different file, whatever we cached describes the old one.
+            self._info_json = None
+        if self._info_json is None:
+            # verify_supported() would run mkvmerge -J and throw the result away, leaving
+            # the track_id setter to run it a second time. Probe once and keep the output.
+            # checking_file_path() above already validated the path, so only the mkvmerge
+            # binary still needs checking, and that lookup is cached.
+            if not verify_mkvmerge(self.mkvmerge_path):
+                msg = "mkvmerge is not at the specified path, add it there or change the mkvmerge_path property"
+                raise FileNotFoundError(msg)
+            info = get_file_info(fp, self.mkvmerge_path, check_path=False)
+            if not info.container.supported:
+                msg = f"The file '{file_path}' is not a valid Matroska file or is not supported."
+                raise ValueError(msg)
+            self._info_json = info
         self._file_path = fp
+        self._info_path = fp
         self.track_id = 0
 
     @property
