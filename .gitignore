@@ -113,3 +113,6 @@ tests/file.mkv
 tests/file-test.mkv
 tests/file_2.mkv
 .profiles
+
+# macOS
+.DS_Store

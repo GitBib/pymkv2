@@ -705,11 +705,10 @@ class MKVFile:
         >>> mkv.add_track(track)  # doctest: +SKIP
         """
         if isinstance(track, str):
-            new_track = MKVTrack(
-                track,
-                mkvmerge_path=self.mkvmerge_path,
-                existing_info=self._info_json,
-            )
+            # `track` is an arbitrary path, so self._info_json (the mkvmerge output of the file
+            # this MKVFile was built from) does not describe it. Passing it here would make the
+            # new track report metadata of track 0 of the original file and skip verification.
+            new_track = MKVTrack(track, mkvmerge_path=self.mkvmerge_path)
             self._extracted_from_add_track(new_track, new_file)
         elif isinstance(track, MKVTrack):
             self._extracted_from_add_track(track, new_file)

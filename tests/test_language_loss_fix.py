@@ -7,7 +7,6 @@ from pymkv import MKVFile, MKVTrack
 def test_language_loss_fix() -> None:
     with (
         patch.object(sys.modules["pymkv.MKVTrack"], "get_file_info") as mock_info,
-        patch.object(sys.modules["pymkv.MKVTrack"], "verify_supported", return_value=True),
         patch.object(sys.modules["pymkv.MKVTrack"], "checking_file_path", side_effect=lambda x: x),
     ):
         mock_info.return_value.tracks = [MagicMock(id=0, codec="V_MS/VFW/FOURCC", type="video", start_pts=0)]
@@ -35,7 +34,6 @@ def test_language_loss_fix() -> None:
 def test_track_options_command_generation() -> None:
     with (
         patch.object(sys.modules["pymkv.MKVTrack"], "get_file_info") as mock_info,
-        patch.object(sys.modules["pymkv.MKVTrack"], "verify_supported", return_value=True),
         patch.object(sys.modules["pymkv.MKVFile"], "verify_mkvmerge", return_value=True),
         patch.object(sys.modules["pymkv.MKVTrack"], "checking_file_path", side_effect=lambda x: x),
     ):
@@ -66,7 +64,6 @@ def test_track_options_skips_unnormalizable_language_ietf() -> None:
     # the same case, keeping the read- and write-side APIs consistent.
     with (
         patch.object(sys.modules["pymkv.MKVTrack"], "get_file_info") as mock_info,
-        patch.object(sys.modules["pymkv.MKVTrack"], "verify_supported", return_value=True),
         patch.object(sys.modules["pymkv.MKVFile"], "verify_mkvmerge", return_value=True),
         patch.object(sys.modules["pymkv.MKVTrack"], "checking_file_path", side_effect=lambda x: x),
     ):
@@ -95,7 +92,6 @@ def test_track_options_emits_und_sentinel_language_ietf() -> None:
     # tag with ``und`` (rather than silently passing the source through).
     with (
         patch.object(sys.modules["pymkv.MKVTrack"], "get_file_info") as mock_info,
-        patch.object(sys.modules["pymkv.MKVTrack"], "verify_supported", return_value=True),
         patch.object(sys.modules["pymkv.MKVFile"], "verify_mkvmerge", return_value=True),
         patch.object(sys.modules["pymkv.MKVTrack"], "checking_file_path", side_effect=lambda x: x),
     ):
@@ -123,7 +119,6 @@ def test_track_options_und_ietf_does_not_override_language() -> None:
     # and write APIs disagreeing about the same track.
     with (
         patch.object(sys.modules["pymkv.MKVTrack"], "get_file_info") as mock_info,
-        patch.object(sys.modules["pymkv.MKVTrack"], "verify_supported", return_value=True),
         patch.object(sys.modules["pymkv.MKVFile"], "verify_mkvmerge", return_value=True),
         patch.object(sys.modules["pymkv.MKVTrack"], "checking_file_path", side_effect=lambda x: x),
     ):
@@ -151,7 +146,6 @@ def test_track_options_und_subtag_ietf_does_not_override_language() -> None:
     # ``language``. The write side must not emit the IETF tag in that case.
     with (
         patch.object(sys.modules["pymkv.MKVTrack"], "get_file_info") as mock_info,
-        patch.object(sys.modules["pymkv.MKVTrack"], "verify_supported", return_value=True),
         patch.object(sys.modules["pymkv.MKVFile"], "verify_mkvmerge", return_value=True),
         patch.object(sys.modules["pymkv.MKVTrack"], "checking_file_path", side_effect=lambda x: x),
     ):
@@ -182,7 +176,6 @@ def test_track_options_name_ietf_does_not_emit_and_reads_consistently() -> None:
     # ``--language`` at all.
     with (
         patch.object(sys.modules["pymkv.MKVTrack"], "get_file_info") as mock_info,
-        patch.object(sys.modules["pymkv.MKVTrack"], "verify_supported", return_value=True),
         patch.object(sys.modules["pymkv.MKVFile"], "verify_mkvmerge", return_value=True),
         patch.object(sys.modules["pymkv.MKVTrack"], "checking_file_path", side_effect=lambda x: x),
     ):

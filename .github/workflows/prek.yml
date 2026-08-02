@@ -4,6 +4,7 @@ on: [push, pull_request]
 jobs:
   prek:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v6.0.2
+      - uses: actions/checkout@v7.0.1
       - uses: j178/prek-action@v2.0.3

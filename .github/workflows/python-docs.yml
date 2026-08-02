@@ -12,18 +12,19 @@ permissions:
 jobs:
   docs:
     runs-on: ubuntu-latest
-    if: github.event_name == 'push' || !github.event.pull_request.draft
+    timeout-minutes: 15
     steps:
       - name: Check out repository
-        uses: actions/checkout@v6.0.2
+        uses: actions/checkout@v7.0.1
 
       - name: Install uv
         id: setup-uv
-        uses: astral-sh/setup-uv@v8.1.0
+        uses: astral-sh/setup-uv@v9.0.0
         with:
-          version: latest
+          version: "0.12.1"
           python-version: "3.14"
           enable-cache: true
+          prune-cache: true
 
       - name: Install project
         run: uv sync --all-extras --dev
@@ -33,8 +34,10 @@ jobs:
           uv run --frozen sphinx-build docs/source _build
 
       - name: Deploy
-        uses: peaceiris/actions-gh-pages@v4.0.0
-        if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/master' || github.event_name == 'pull_request' || github.event_name == 'workflow_dispatch' }}
+        uses: peaceiris/actions-gh-pages@v4.1.0
+        # Publish only from master. workflow_dispatch can be started on any
+        # branch, so gate on the ref rather than on the event.
+        if: ${{ github.ref == 'refs/heads/master' }}
         with:
           publish_branch: gh-pages
           github_token: ${{ secrets.GITHUB_TOKEN }}
