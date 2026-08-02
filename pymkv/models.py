@@ -158,13 +158,16 @@ class AttachmentInfo(msgspec.Struct):
         The ID of the attachment.
     properties : AttachmentProperties
         The properties of the attachment.
+    size : int | None
+        The size of the attachment in bytes. None when mkvmerge did not report one — mkvmerge refuses to
+        attach an empty file, so a real attachment is never 0 bytes and a missing value must not be read as one.
     """
 
     id: int
     file_name: str | None = None
     content_type: str | None = None
     description: str | None = None
-    size: int = 0
+    size: int | None = None
     properties: AttachmentProperties = msgspec.field(default_factory=AttachmentProperties)
 
 
