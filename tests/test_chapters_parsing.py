@@ -11,7 +11,7 @@ SIMPLE_CHAPTERS_XML = """<?xml version="1.0" encoding="UTF-8"?>
     <EditionFlagDefault>1</EditionFlagDefault>
     <EditionFlagHidden>0</EditionFlagHidden>
     <ChapterAtom>
-      <ChapterUID>2000000001</ChapterUID>
+      <ChapterUID>  </ChapterUID>
       <ChapterTimeStart>00:00:00.000000000</ChapterTimeStart>
       <ChapterTimeEnd>00:05:00.000000000</ChapterTimeEnd>
       <ChapterFlagHidden>0</ChapterFlagHidden>
@@ -27,6 +27,13 @@ SIMPLE_CHAPTERS_XML = """<?xml version="1.0" encoding="UTF-8"?>
       <ChapterDisplay>
         <ChapterString>Chapter 2</ChapterString>
         <ChapterLanguage>eng</ChapterLanguage>
+      </ChapterDisplay>
+    </ChapterAtom>
+    <ChapterAtom>
+      <ChapterUID>not-a-number</ChapterUID>
+      <ChapterTimeStart>00:15:00.000000000</ChapterTimeStart>
+      <ChapterDisplay>
+        <ChapterString>Invalid UID</ChapterString>
       </ChapterDisplay>
     </ChapterAtom>
   </EditionEntry>
@@ -94,10 +101,10 @@ def test_parse_chapters_xml_simple_edition_and_atoms() -> None:
     assert edition.default is True
     assert edition.hidden is False
 
-    assert len(edition.atoms) == 2  # noqa: PLR2004
-    first, second = edition.atoms
+    assert len(edition.atoms) == 3  # noqa: PLR2004
+    first, second, invalid_uid = edition.atoms
 
-    assert first.uid == 2000000001  # noqa: PLR2004
+    assert first.uid is None  # blank text
     assert first.time_start == "00:00:00.000000000"
     assert first.time_end == "00:05:00.000000000"
     assert first.hidden is False
@@ -109,6 +116,9 @@ def test_parse_chapters_xml_simple_edition_and_atoms() -> None:
     assert second.uid == 2000000002  # noqa: PLR2004
     assert second.time_end is None
     assert second.displays[0].string == "Chapter 2"
+
+    assert invalid_uid.uid is None  # non-numeric
+    assert invalid_uid.displays[0].string == "Invalid UID"
 
 
 def test_parse_chapters_xml_nested_atoms() -> None:
