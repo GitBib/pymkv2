@@ -218,7 +218,6 @@ def test_track_init_legacy_dict(dummy_mkv: Path) -> None:
 def test_track_repr(dummy_mkv: Path, single_video_info: MkvMergeOutput) -> None:
     with (
         patch.object(sys.modules["pymkv.MKVTrack"], "get_file_info", return_value=single_video_info),
-        patch.object(sys.modules["pymkv.MKVTrack"], "verify_supported", return_value=True),
     ):
         t = MKVTrack(str(dummy_mkv))
         rep = repr(t)
@@ -234,7 +233,6 @@ def test_track_pts_property(dummy_mkv: Path) -> None:
 
     with (
         patch.object(sys.modules["pymkv.MKVTrack"], "get_file_info", return_value=info),
-        patch.object(sys.modules["pymkv.MKVTrack"], "verify_supported", return_value=True),
     ):
         t = MKVTrack(str(dummy_mkv))
         # pts is 0 by default
@@ -246,7 +244,6 @@ def test_track_pts_property(dummy_mkv: Path) -> None:
 def test_track_tags_setter(dummy_mkv: Path, tmp_path: Path, single_video_info: MkvMergeOutput) -> None:
     with (
         patch.object(sys.modules["pymkv.MKVTrack"], "get_file_info", return_value=single_video_info),
-        patch.object(sys.modules["pymkv.MKVTrack"], "verify_supported", return_value=True),
     ):
         t = MKVTrack(str(dummy_mkv))
 
@@ -270,20 +267,16 @@ def test_track_tags_setter(dummy_mkv: Path, tmp_path: Path, single_video_info: M
 
 
 def test_track_file_path_setter_verification_failure(tmp_path: Path) -> None:
-    # Test that verify_supported failure raises ValueError
+    """An empty file is reported unsupported by mkvmerge, so the setter must reject it."""
     invalid = tmp_path / "invalid.mkv"
     invalid.touch()
-    with (
-        patch.object(sys.modules["pymkv.MKVTrack"], "verify_supported", return_value=False),
-        pytest.raises(ValueError, match="not a valid Matroska file"),
-    ):
+    with pytest.raises(ValueError, match="not a valid Matroska file"):
         MKVTrack(str(invalid))
 
 
 def test_extract_silent_and_path(dummy_mkv: Path, tmp_path: Path, single_video_info: MkvMergeOutput) -> None:
     with (
         patch.object(sys.modules["pymkv.MKVTrack"], "get_file_info", return_value=single_video_info),
-        patch.object(sys.modules["pymkv.MKVTrack"], "verify_supported", return_value=True),
     ):
         t = MKVTrack(str(dummy_mkv))
     output = tmp_path / "extracted"
@@ -305,7 +298,6 @@ def test_extract_silent_and_path(dummy_mkv: Path, tmp_path: Path, single_video_i
 def test_file_id_setter_invalid_type(dummy_mkv: Path, single_video_info: MkvMergeOutput) -> None:
     with (
         patch.object(sys.modules["pymkv.MKVTrack"], "get_file_info", return_value=single_video_info),
-        patch.object(sys.modules["pymkv.MKVTrack"], "verify_supported", return_value=True),
     ):
         t = MKVTrack(str(dummy_mkv))
     with pytest.raises(ValueError, match="file_id must be an integer"):
@@ -315,7 +307,6 @@ def test_file_id_setter_invalid_type(dummy_mkv: Path, single_video_info: MkvMerg
 def test_track_id_setter_out_of_range(dummy_mkv: Path, single_video_info: MkvMergeOutput) -> None:
     with (
         patch.object(sys.modules["pymkv.MKVTrack"], "get_file_info", return_value=single_video_info),
-        patch.object(sys.modules["pymkv.MKVTrack"], "verify_supported", return_value=True),
     ):
         t = MKVTrack(str(dummy_mkv))
     with pytest.raises(IndexError, match="track index out of range"):
@@ -325,7 +316,6 @@ def test_track_id_setter_out_of_range(dummy_mkv: Path, single_video_info: MkvMer
 def test_language_setter_invalid(dummy_mkv: Path, single_video_info: MkvMergeOutput) -> None:
     with (
         patch.object(sys.modules["pymkv.MKVTrack"], "get_file_info", return_value=single_video_info),
-        patch.object(sys.modules["pymkv.MKVTrack"], "verify_supported", return_value=True),
     ):
         t = MKVTrack(str(dummy_mkv))
     with pytest.raises(
@@ -338,7 +328,6 @@ def test_language_setter_invalid(dummy_mkv: Path, single_video_info: MkvMergeOut
 def test_extract_track_name_fallback(dummy_mkv: Path, tmp_path: Path, single_video_info: MkvMergeOutput) -> None:
     with (
         patch.object(sys.modules["pymkv.MKVTrack"], "get_file_info", return_value=single_video_info),
-        patch.object(sys.modules["pymkv.MKVTrack"], "verify_supported", return_value=True),
     ):
         t = MKVTrack(str(dummy_mkv))
 
@@ -355,7 +344,6 @@ def test_extract_track_name_fallback(dummy_mkv: Path, tmp_path: Path, single_vid
 def test_extract_timestamps_silent(dummy_mkv: Path, tmp_path: Path, single_video_info: MkvMergeOutput) -> None:
     with (
         patch.object(sys.modules["pymkv.MKVTrack"], "get_file_info", return_value=single_video_info),
-        patch.object(sys.modules["pymkv.MKVTrack"], "verify_supported", return_value=True),
     ):
         t = MKVTrack(str(dummy_mkv))
 
@@ -370,7 +358,6 @@ def test_extract_timestamps_silent(dummy_mkv: Path, tmp_path: Path, single_video
 def test_extract_timestamps_default_path(dummy_mkv: Path, single_video_info: MkvMergeOutput) -> None:
     with (
         patch.object(sys.modules["pymkv.MKVTrack"], "get_file_info", return_value=single_video_info),
-        patch.object(sys.modules["pymkv.MKVTrack"], "verify_supported", return_value=True),
     ):
         t = MKVTrack(str(dummy_mkv))
 
@@ -378,3 +365,45 @@ def test_extract_timestamps_default_path(dummy_mkv: Path, single_video_info: Mkv
         result = t.extract_timestamps(silent=True)
         assert str(dummy_mkv) in result
         assert "timestamps" in result
+
+
+def test_file_path_reassignment_refreshes_track_info(
+    get_path_test_file_two: Path,
+    get_path_test_srt: Path,
+) -> None:
+    """Pointing a track at another file must describe that file, not the previous one."""
+    track = MKVTrack(str(get_path_test_srt))
+    assert track.track_type == "subtitles"
+
+    track.file_path = str(get_path_test_file_two)
+
+    assert track.track_type == "video"
+    assert track.track_codec == MKVTrack(str(get_path_test_file_two)).track_codec
+
+
+def test_file_path_reassignment_verifies_new_file(get_path_test_srt: Path, tmp_path: Path) -> None:
+    """Verification must run again for the new path, not be skipped by the cached info."""
+    track = MKVTrack(str(get_path_test_srt))
+    invalid = tmp_path / "invalid.mkv"
+    invalid.touch()
+
+    with pytest.raises(ValueError, match="not a valid Matroska file"):
+        track.file_path = str(invalid)
+
+
+def test_track_missing_mkvmerge_raises(get_path_test_srt: Path, tmp_path: Path) -> None:
+    """A bad mkvmerge_path must fail with a clear error rather than an mkvmerge traceback."""
+    missing = tmp_path / "definitely-not-mkvmerge"
+
+    with pytest.raises(FileNotFoundError, match="mkvmerge is not at the specified path"):
+        MKVTrack(str(get_path_test_srt), mkvmerge_path=str(missing))
+
+
+def test_track_id_setter_refetches_when_cache_cleared(get_path_test_srt: Path) -> None:
+    """The track_id setter keeps a fallback probe for when the cached info is gone."""
+    track = MKVTrack(str(get_path_test_srt))
+    track._info_json = None  # noqa: SLF001
+
+    track.track_id = 0
+
+    assert track.track_type == "subtitles"
