@@ -7,9 +7,13 @@ TEST_TWO_FILE := tests/file_2.mkv
 
 TEST_DIR := tests/
 
-# --fail makes curl exit non-zero on HTTP errors instead of writing the error
-# body into the target file, which would leave a corrupt "MKV" behind.
-CURL := curl -sSL --fail --retry 3 --retry-delay 2
+# --fail exits non-zero on HTTP errors instead of writing the error body into the
+# target file, which would leave a corrupt "MKV" behind.
+# --retry alone does not cover a stall mid-transfer ("curl: (56) Recv failure"),
+# which is how a 71 MB download actually fails on a flaky runner, so
+# --retry-all-errors is needed. --continue-at - resumes into the same .part file
+# rather than restarting from zero on every attempt.
+CURL := curl -sSL --fail --retry 5 --retry-delay 2 --retry-all-errors --continue-at -
 
 .PHONY: test clean
 
