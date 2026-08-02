@@ -35,7 +35,9 @@ jobs:
 
       - name: Deploy
         uses: peaceiris/actions-gh-pages@v4.1.0
-        if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/master' || github.event_name == 'workflow_dispatch' }}
+        # Publish only from master. workflow_dispatch can be started on any
+        # branch, so gate on the ref rather than on the event.
+        if: ${{ github.ref == 'refs/heads/master' }}
         with:
           publish_branch: gh-pages
           github_token: ${{ secrets.GITHUB_TOKEN }}
