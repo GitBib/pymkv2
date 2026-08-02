@@ -299,3 +299,34 @@ def test_add_track_with_string(get_path_test_file: Path) -> None:
     mkv = MKVFile()
     mkv.add_track(str(get_path_test_file))
     assert len(mkv.tracks) >= 1
+
+
+def test_add_track_with_string_reads_its_own_file(
+    get_path_test_file: Path,
+    get_path_test_srt: Path,
+) -> None:
+    """A track added by path must describe that path, not the file MKVFile was built from."""
+    mkv = MKVFile(str(get_path_test_file))
+    original_count = len(mkv.tracks)
+
+    mkv.add_track(str(get_path_test_srt))
+
+    assert len(mkv.tracks) == original_count + 1
+    added = mkv.tracks[-1]
+    assert added.file_path == str(get_path_test_srt)
+    assert added.track_type == "subtitles"
+    assert added.track_codec == MKVTrack(str(get_path_test_srt)).track_codec
+
+
+def test_add_track_with_string_rejects_unsupported_file(
+    get_path_test_file: Path,
+    get_base_path: Path,
+) -> None:
+    """Verification must still run for tracks added by path to a populated MKVFile."""
+    bogus = get_base_path / "not_a_media_file.txt"
+    bogus.write_text("definitely not media")
+
+    mkv = MKVFile(str(get_path_test_file))
+
+    with pytest.raises(ValueError, match="not a valid Matroska file or is not supported"):
+        mkv.add_track(str(bogus))
