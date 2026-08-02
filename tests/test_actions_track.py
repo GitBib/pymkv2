@@ -389,3 +389,21 @@ def test_file_path_reassignment_verifies_new_file(get_path_test_srt: Path, tmp_p
 
     with pytest.raises(ValueError, match="not a valid Matroska file"):
         track.file_path = str(invalid)
+
+
+def test_track_missing_mkvmerge_raises(get_path_test_srt: Path, tmp_path: Path) -> None:
+    """A bad mkvmerge_path must fail with a clear error rather than an mkvmerge traceback."""
+    missing = tmp_path / "definitely-not-mkvmerge"
+
+    with pytest.raises(FileNotFoundError, match="mkvmerge is not at the specified path"):
+        MKVTrack(str(get_path_test_srt), mkvmerge_path=str(missing))
+
+
+def test_track_id_setter_refetches_when_cache_cleared(get_path_test_srt: Path) -> None:
+    """The track_id setter keeps a fallback probe for when the cached info is gone."""
+    track = MKVTrack(str(get_path_test_srt))
+    track._info_json = None  # noqa: SLF001
+
+    track.track_id = 0
+
+    assert track.track_type == "subtitles"
