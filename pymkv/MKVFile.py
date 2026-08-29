@@ -55,6 +55,7 @@ Combine two MKVs. This example takes two existing MKVs and combines their tracks
 
 from __future__ import annotations
 
+import hashlib
 import itertools
 import logging
 import os
@@ -162,7 +163,7 @@ class MKVFile:
         self.title = title
         self._chapters_file: str | None = None
         self._chapters_obj: Chapters | None = None
-        self._chapters_from_source: bool = False
+        self._chapters_fingerprint: str | None = None
         self._temp_chapters_file: str | None = None
         self._chapter_language: str | None = None
         self._global_tags_file: str | None = None
@@ -262,7 +263,7 @@ class MKVFile:
                 chapters_from_source = self._read_chapters(file_path)
                 if chapters_from_source is not None:
                     self._chapters_obj = chapters_from_source
-                    self._chapters_from_source = True
+                    self._chapters_fingerprint = self._compute_chapters_fingerprint(chapters_from_source)
 
         # split options
         self._split_options: list[str] = []
@@ -316,7 +317,7 @@ class MKVFile:
     @chapters_obj.setter
     def chapters_obj(self, chapters: Chapters | None) -> None:
         self._chapters_obj = chapters
-        self._chapters_from_source = False
+        self._chapters_fingerprint = None
 
     @property
     def chapter_language(self) -> str | None:
@@ -428,8 +429,11 @@ class MKVFile:
         self.output_path = str(Path(output_path).expanduser())
 
         # Handle object-based chapters
-        if self.chapters_obj and not self._chapters_file and not self._chapters_from_source:
-            self._write_chapters_xml()
+        if self.chapters_obj and not self._chapters_file:
+            new_fp = self._compute_chapters_fingerprint(self.chapters_obj)
+            if self._chapters_fingerprint != new_fp:
+                self._write_chapters_xml()
+                self._chapters_fingerprint = new_fp
 
         # Pre-assign file IDs
         unique_file_dict: dict[str, int] = {}
@@ -602,6 +606,28 @@ class MKVFile:
             logging.warning("Could not parse chapters XML from '%s': %s", file_path, e)
             return None
 
+    def _compute_chapters_fingerprint(self, chapters: Chapters) -> str:
+        """
+        Compute a stable fingerprint for a :class:`~pymkv.chapters.Chapters` object.
+
+        The fingerprint is derived by serializing the chapters object using
+        ``msgspec.msgpack.encode`` and hashing the resulting bytes with SHA-256.
+        It is used internally to detect whether the chapters content has changed
+        compared to a previously stored state, without performing a deep structural
+        comparison.
+
+        Parameters
+        ----------
+        chapters : Chapters
+            The chapters object to fingerprint.
+
+        Returns
+        -------
+        str
+            A hexadecimal SHA-256 digest representing the chapters state.
+        """
+        return hashlib.sha256(msgspec.msgpack.encode(chapters)).hexdigest()
+
     def _write_chapters_xml(self) -> None:
         """
         Write chapter objects to a temporary XML file.
@@ -654,8 +680,6 @@ class MKVFile:
         """
         if self.chapters_obj is None:
             self.chapters_obj = Chapters()
-        else:
-            self._chapters_from_source = False
 
         if isinstance(chapter, ChapterAtom):
             if not self.chapters_obj.editions:
