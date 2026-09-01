@@ -28,7 +28,7 @@ jobs:
 
     - name: Install uv
       id: setup-uv
-      uses: astral-sh/setup-uv@v9.0.0
+      uses: astral-sh/setup-uv@v10.0.1
       with:
         version: "0.12.1"
         python-version: "3.14"
