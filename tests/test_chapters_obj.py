@@ -54,18 +54,16 @@ def test_mkvfile_integration() -> None:
     _ = mkv.command("output.mkv")
 
     # Check that a temp file was created for chapters
-    assert mkv._chapters_file is not None  # noqa: SLF001
+    assert mkv._chapters_file is None  # noqa: SLF001
     assert mkv._temp_chapters_file is not None  # noqa: SLF001
-    assert mkv._chapters_file == mkv._temp_chapters_file  # noqa: SLF001
-    assert Path(mkv._chapters_file).exists()  # noqa: SLF001
+    temp_file = Path(mkv._temp_chapters_file)  # noqa: SLF001
+    assert temp_file.exists()
 
     # Read the temp file to verify content
-    with Path(mkv._chapters_file).open() as f:  # noqa: SLF001
-        content = f.read()
-        assert "<ChapterString>My Chapter</ChapterString>" in content
+    assert "<ChapterString>My Chapter</ChapterString>" in temp_file.read_text(encoding="utf-8")
 
-    # Cleanup (usually done by context or explicit deletion, testing manual here)
-    Path(mkv._chapters_file).unlink()  # noqa: SLF001
+    mkv.cleanup()
+    assert not temp_file.exists()
 
 
 def test_add_chapter_types() -> None:
