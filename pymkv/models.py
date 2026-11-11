@@ -86,9 +86,13 @@ class ContainerProperties(msgspec.Struct):
     ----------
     title : str | None
         The title of the container.
+    duration : int | None
+        The container's duration in nanoseconds, as reported by mkvmerge. ``None`` if mkvmerge
+        didn't report one (e.g. the file has no tracks providing timestamps).
     """
 
     title: str | None = None
+    duration: int | None = None
 
 
 class ContainerInfo(msgspec.Struct):

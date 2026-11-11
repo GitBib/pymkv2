@@ -64,7 +64,7 @@ import sys
 import tempfile
 from collections.abc import Callable, Iterable, Sequence
 from pathlib import Path
-from typing import Any, ClassVar, TypeVar, cast
+from typing import Any, ClassVar, Final, TypeVar, cast
 
 import bitmath
 import msgspec
@@ -105,6 +105,8 @@ from pymkv.Verifications import (
 )
 
 T = TypeVar("T")
+
+NANOSECONDS_PER_SECOND: Final[int] = 1_000_000_000
 
 
 class MKVFile:
@@ -333,6 +335,20 @@ class MKVFile:
         self._chapter_language = iso_code
 
     @property
+    def duration(self) -> float | None:
+        """
+        Gets the container's duration in seconds, as reported by mkvmerge.
+
+        Returns:
+            float | None: The duration in seconds, or ``None`` if this MKVFile wasn't opened
+                from an existing file, or mkvmerge didn't report a duration for it.
+        """
+        if self._info_json is None:
+            return None
+        duration_ns = self._info_json.container.properties.duration
+        return duration_ns / NANOSECONDS_PER_SECOND if duration_ns is not None else None
+
+    @property
     def global_tag_entries(self) -> int:
         """
         Gets the number of global tag entries in the MKVFile object.
@@ -512,7 +528,13 @@ class MKVFile:
         if proc.returncode != 0:
             # Handle warnings (exit code 1) if ignore_warning is True
             if proc.returncode == 1 and ignore_warning:
-                logging.warning("Process completed with warnings, but ignored as per the setting.")
+                if err:
+                    warning_details = err.decode() if isinstance(err, bytes) else err
+                    logging.warning(
+                        "Process completed with warnings, but ignored as per the setting:\n%s", warning_details
+                    )
+                else:
+                    logging.warning("Process completed with warnings, but ignored as per the setting.")
             else:
                 # For other non-zero exit codes, raise an exception
                 error_message = f"Command failed with non-zero exit status {proc.returncode}"
