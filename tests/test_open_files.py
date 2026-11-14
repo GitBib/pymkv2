@@ -15,6 +15,18 @@ def test_open_file(get_path_test_file: Path) -> None:
     assert mkv.tracks[1].tag_entries == 4  # noqa: PLR2004
 
 
+def test_duration_reads_container_duration_in_seconds(get_path_test_file: Path) -> None:
+    mkv = MKVFile(get_path_test_file)
+
+    assert mkv.duration == pytest.approx(183.129)
+
+
+def test_duration_is_none_for_a_file_not_backed_mkvfile() -> None:
+    mkv = MKVFile(title="test")
+
+    assert mkv.duration is None
+
+
 def test_mux_file(get_base_path: Path, get_path_test_file: Path) -> None:
     mkv = MKVFile(get_path_test_file)
     output_file = get_base_path / "file-test.mkv"

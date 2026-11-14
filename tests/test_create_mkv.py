@@ -265,6 +265,32 @@ def test_mux_warning_ignored() -> None:
         assert ret == 1
 
 
+def test_mux_warning_ignored_logs_mkvmerge_warning_text(caplog: pytest.LogCaptureFixture) -> None:
+    mkv = MKVFile()
+    with patch("subprocess.Popen") as mock_popen:
+        proc = MagicMock()
+        proc.returncode = 1
+        proc.stdout = None
+        proc.communicate.return_value = (None, b"Warning: resyncing past damaged cluster")
+        mock_popen.return_value = proc
+        mkv.mux("output.mkv", ignore_warning=True)
+
+    assert "resyncing past damaged cluster" in caplog.text
+
+
+def test_mux_warning_ignored_logs_generic_message_without_stderr(caplog: pytest.LogCaptureFixture) -> None:
+    mkv = MKVFile()
+    with patch("subprocess.Popen") as mock_popen:
+        proc = MagicMock()
+        proc.returncode = 1
+        proc.stdout = None
+        proc.communicate.return_value = (None, b"")
+        mock_popen.return_value = proc
+        mkv.mux("output.mkv", ignore_warning=True)
+
+    assert "Process completed with warnings, but ignored as per the setting." in caplog.text
+
+
 def test_cleanup_removes_temp_chapters() -> None:
     mkv = MKVFile()
     atom = ChapterAtom(time_start="00:00:10.000", displays=[ChapterDisplay(string="Test")])

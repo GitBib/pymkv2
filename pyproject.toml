@@ -63,6 +63,7 @@ dev = [
     "sphinx-immaterial<0.14.0,>=0.13.0; python_version == \"3.14\"",
     "pyinstrument>=5.1.2",
     "sphinx-llms-txt>=0.7.1",
+    "pre-commit>=4.6.2",
 ]
 
 [project.urls]
