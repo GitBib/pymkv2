@@ -24,3 +24,20 @@ def test_chapter_options(mock_mkv: MagicMock) -> None:
     mock_mkv._chapter_language = None  # noqa: SLF001
     args = gen_to_list(opts, mock_mkv)
     assert args == []
+
+
+def test_chapter_options_uses_generated_file(mock_mkv: MagicMock) -> None:
+    mock_mkv._temp_chapters_file = "generated.xml"  # noqa: SLF001
+
+    args = gen_to_list(ChapterOptions(), mock_mkv)
+
+    assert args == ["--chapters", "generated.xml"]
+
+
+def test_chapter_options_prefers_user_file(mock_mkv: MagicMock) -> None:
+    mock_mkv._chapters_file = "user.xml"  # noqa: SLF001
+    mock_mkv._temp_chapters_file = "generated.xml"  # noqa: SLF001
+
+    args = gen_to_list(ChapterOptions(), mock_mkv)
+
+    assert args == ["--chapters", "user.xml"]

@@ -65,6 +65,24 @@ For more advanced scenarios, such as nested chapters, you can build the structur
     edition = EditionEntry(atoms=[parent])
     chapters.editions.append(edition)
 
+Chapters of Existing Files
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+When an `MKVFile` is created from a file that has chapters (or such a file is added with
+`add_file`), the chapters are read with ``mkvextract`` into ``chapters_obj``. While the object
+is unchanged, mkvmerge copies the original chapters natively, so nothing is lost on remux.
+Editing the object in place, replacing it, or setting it to ``None`` replaces the original
+chapters in the output. Editions without chapter atoms are ignored.
+
+.. code-block:: python
+
+    mkv = MKVFile("movie.mkv")
+    mkv.chapters_obj.editions[0].atoms[0].displays[0].string = "Opening"
+    mkv.mux("out.mkv")
+
+The parser supports every element of the mkvmerge chapter XML format. Unsupported elements are
+skipped with a logged warning and are lost if the chapters are edited.
+
 API Reference
 ~~~~~~~~~~~~~
 
@@ -87,7 +105,29 @@ API Reference
     :members:
     :undoc-members:
 
+.. autoclass:: pymkv.chapters.ChapterTrack
+    :members:
+    :undoc-members:
+
+.. autoclass:: pymkv.chapters.ChapterProcess
+    :members:
+    :undoc-members:
+
+.. autoclass:: pymkv.chapters.ChapterProcessCommand
+    :members:
+    :undoc-members:
+
+.. autoclass:: pymkv.chapters.EditionDisplay
+    :members:
+    :undoc-members:
+
+.. autoclass:: pymkv.chapters.BinaryValue
+    :members:
+    :undoc-members:
+
 Module Functions
 ~~~~~~~~~~~~~~~~
 
 .. autofunction:: pymkv.chapters.export_to_xml
+
+.. autofunction:: pymkv.chapters.parse_chapters_xml

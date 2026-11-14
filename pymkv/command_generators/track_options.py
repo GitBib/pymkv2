@@ -87,6 +87,12 @@ class TrackOptions(CommandGeneratorBase):
                 yield from self._generate_properties(track, mkvmerge_path)
                 yield from self._generate_exclusions(track)
 
+            # Native chapters replaced by MKVFile.chapters_obj
+            if file_path in mkv_file._chapters_to_drop and not any(  # noqa: SLF001
+                getattr(t, "no_chapters", False) for t in tracks
+            ):
+                yield "--no-chapters"
+
             # 2. Track Selection (consolidated by type)
             audio_ids = []
             video_ids = []

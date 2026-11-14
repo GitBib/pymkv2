@@ -475,3 +475,37 @@ def test_track_options_skips_malformed_und(
 
     assert "--language" not in args
     assert f"0:{malformed_und}" not in args
+
+
+def _plain_track(mock_track_cleaner: Any, file_path: str, track_id: int, *, no_chapters: bool = False) -> MagicMock:  # noqa: ANN401
+    track = MagicMock(spec=MKVTrack)
+    track.file_path = file_path
+    track.track_id = track_id
+    track.track_type = "video"
+    track.tags = {}
+    mock_track_cleaner(track)
+    track.no_chapters = no_chapters
+    return track
+
+
+def test_track_options_no_chapters_for_dropped_source(mock_mkv: MagicMock, mock_track_cleaner: Any) -> None:  # noqa: ANN401
+    mock_mkv.tracks = [
+        _plain_track(mock_track_cleaner, "a.mkv", 0),
+        _plain_track(mock_track_cleaner, "a.mkv", 1),
+        _plain_track(mock_track_cleaner, "b.mkv", 0),
+    ]
+    mock_mkv._info_json = None  # noqa: SLF001
+    mock_mkv._chapters_to_drop = frozenset({"a.mkv"})  # noqa: SLF001
+
+    args = gen_to_list(TrackOptions(), mock_mkv)
+
+    assert args.count("--no-chapters") == 1
+    assert args.index("--no-chapters") < args.index("a.mkv") < args.index("b.mkv")
+
+
+def test_track_options_no_duplicate_no_chapters(mock_mkv: MagicMock, mock_track_cleaner: Any) -> None:  # noqa: ANN401
+    mock_mkv.tracks = [_plain_track(mock_track_cleaner, "a.mkv", 0, no_chapters=True)]
+    mock_mkv._info_json = None  # noqa: SLF001
+    mock_mkv._chapters_to_drop = frozenset({"a.mkv"})  # noqa: SLF001
+
+    assert gen_to_list(TrackOptions(), mock_mkv).count("--no-chapters") == 1

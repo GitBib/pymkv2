@@ -55,6 +55,7 @@ Combine two MKVs. This example takes two existing MKVs and combines their tracks
 
 from __future__ import annotations
 
+import copy
 import itertools
 import logging
 import os
@@ -62,6 +63,7 @@ import re
 import subprocess as sp
 import sys
 import tempfile
+import xml.etree.ElementTree as ET
 from collections.abc import Callable, Iterable, Sequence
 from pathlib import Path
 from typing import Any, ClassVar, TypeVar, cast
@@ -79,6 +81,7 @@ from pymkv.chapters import (
     Chapters,
     EditionEntry,
     export_to_xml,
+    parse_chapters_xml,
 )
 from pymkv.command_generators import (
     AttachmentOptions,
@@ -135,6 +138,18 @@ class MKVFile:
         The path where pymkv looks for the mkvmerge executable. pymkv relies on the mkvmerge executable to parse
         files. By default, it is assumed mkvmerge is in your shell's $PATH variable. If it is not, you need to set
         *mkvmerge_path* to the executable location.
+    mkvextract_path : str, optional
+        The path where pymkv looks for the mkvextract executable. By default, it is
+        assumed mkvextract is in your shell's $PATH variable. If it is not, you need to set
+        *mkvextract_path* to the executable location.
+
+    Attributes
+    ----------
+    chapters_obj : Chapters | None
+        The chapters of the file. Importing a file (or adding one with :meth:`~pymkv.MKVFile.add_file`)
+        fills it with the chapters read via ``mkvextract``. While it matches what was read, chapters are
+        passed through natively by mkvmerge. Editing it in place, assigning a new object, or setting it to
+        ``None`` replaces the native chapters of the imported files in the generated command.
 
     Raises
     ------
@@ -149,12 +164,21 @@ class MKVFile:
         file_path: str | os.PathLike | None = None,
         title: str | None = None,
         mkvmerge_path: str | os.PathLike | Iterable[str] = "mkvmerge",
+        mkvextract_path: str | os.PathLike | Iterable[str] = "mkvextract",
     ) -> None:
         self.mkvmerge_path: tuple[str, ...] = prepare_mkvtoolnix_path(mkvmerge_path)
+        self.mkvextract_path: tuple[str, ...] = prepare_mkvtoolnix_path(mkvextract_path)
         self.title = title
         self._chapters_file: str | None = None
         self.chapters_obj: Chapters | None = None
+        # chapters as read from the source files, used to detect edits
+        self._chapters_baseline: Chapters | None = None
+        # source files whose native chapters are represented by `chapters_obj`
+        self._chapter_source_files: list[str] = []
+        # source files that get `--no-chapters` in the generated command
+        self._chapters_to_drop: frozenset[str] = frozenset()
         self._temp_chapters_file: str | None = None
+        self._retired_chapters_files: list[str] = []
         self._chapter_language: str | None = None
         self._global_tags_file: str | None = None
         self._link_to_previous_file: str | None = None
@@ -249,6 +273,13 @@ class MKVFile:
                     new_attachment.size = attachment.size
                     self.attachments.append(new_attachment)
 
+            if sum(c.num_entries for c in info_struct.chapters) > 0:
+                chapters_from_source = self._read_chapters(file_path)
+                if chapters_from_source is not None:
+                    self.chapters_obj = chapters_from_source
+                    self._chapters_baseline = copy.deepcopy(chapters_from_source)
+                    self._chapter_source_files.append(file_path)
+
         # split options
         self._split_options: list[str] = []
         self._progress_handler = None
@@ -265,13 +296,10 @@ class MKVFile:
     def cleanup(self) -> None:
         """Remove any temporary files created during command generation or muxing.
 
-        This includes the temporary XML chapters file written by :meth:`_write_chapters_xml`.
+        This includes every temporary XML chapters file written by :meth:`_write_chapters_xml`.
         Safe to call multiple times.
         """
-        if self._temp_chapters_file is not None:
-            Path(self._temp_chapters_file).unlink(missing_ok=True)
-            self._temp_chapters_file = None
-            self._chapters_file = None
+        self._release_temp_chapters()
 
     def __enter__(self) -> Self:
         """Support use as a context manager."""
@@ -390,9 +418,7 @@ class MKVFile:
 
         self.output_path = str(Path(output_path).expanduser())
 
-        # Handle object-based chapters
-        if self.chapters_obj and not self._chapters_file:
-            self._write_chapters_xml()
+        self._prepare_chapters()
 
         # Pre-assign file IDs
         unique_file_dict: dict[str, int] = {}
@@ -529,19 +555,122 @@ class MKVFile:
 
         return proc.returncode
 
-    def _write_chapters_xml(self) -> None:
+    def _read_chapters(self, file_path: str) -> Chapters | None:
+        """
+        Extract and parse the chapters already present in `file_path`.
+
+        Uses ``mkvextract chapters <file_path>`` to obtain the chapter XML and parses it into a
+        :class:`~pymkv.chapters.Chapters` object. This is used internally when importing a
+        pre-existing MKV file that has chapters. Failures are logged and treated as "no chapters"
+        rather than raised, so a file with unreadable chapters can still be opened.
+
+        Parameters
+        ----------
+        file_path : str
+            The path of the MKV file to read chapters from.
+
+        Returns
+        -------
+        Chapters | None
+            The parsed chapters, or ``None`` if they could not be extracted or parsed.
+        """
+        command = [*self.mkvextract_path, "chapters", file_path]
+        try:
+            result = sp.run(command, check=True, capture_output=True)  # noqa: S603
+        except (sp.CalledProcessError, FileNotFoundError) as e:
+            logging.warning("Could not extract chapters from '%s': %s", file_path, e)
+            return None
+
+        if not result.stdout.strip():
+            return None
+
+        try:
+            return parse_chapters_xml(result.stdout)
+        except ET.ParseError as e:
+            logging.warning("Could not parse chapters XML from '%s': %s", file_path, e)
+            return None
+
+    def _prepare_chapters(self) -> None:
+        """
+        Decide how chapters reach mkvmerge for the next command.
+
+        Chapters read from a source file are passed through natively by mkvmerge, so nothing is
+        emitted while :attr:`chapters_obj` equals what was read. When it was edited, replaced or
+        removed, the current content is written to a temporary XML file (or nothing, when no
+        chapters are left) and the native chapters of the source files are dropped, because
+        ``--chapters`` adds to them instead of replacing them.
+
+        A chapters file set with :meth:`chapters` takes precedence over :attr:`chapters_obj`.
+        """
+        if self._temp_chapters_file is not None:
+            self._retired_chapters_files.append(self._temp_chapters_file)
+            self._temp_chapters_file = None
+        self._chapters_to_drop = frozenset()
+        if self._chapters_file is not None:
+            return
+
+        current = self._usable_chapters(self.chapters_obj)
+        if current == self._usable_chapters(self._chapters_baseline):
+            return
+
+        if current is not None:
+            self._write_chapters_xml(current)
+        self._chapters_to_drop = frozenset(self._chapter_source_files)
+
+    @staticmethod
+    def _usable_chapters(chapters: Chapters | None) -> Chapters | None:
+        """
+        Return `chapters` without editions that have no atoms, or ``None`` if nothing is left.
+
+        mkvmerge rejects editions without chapter atoms.
+        """
+        if chapters is None:
+            return None
+        editions = [edition for edition in chapters.editions if edition.atoms]
+        return Chapters(editions=editions) if editions else None
+
+    def _release_temp_chapters(self) -> None:
+        """
+        Delete the generated chapters XML files, if any.
+        """
+        if self._temp_chapters_file is not None:
+            self._retired_chapters_files.append(self._temp_chapters_file)
+            self._temp_chapters_file = None
+        for file in self._retired_chapters_files:
+            Path(file).unlink(missing_ok=True)
+        self._retired_chapters_files.clear()
+
+    def _adopt_chapters_from(self, other: MKVFile) -> None:
+        """
+        Take over the source chapters of `other` when it is added with :meth:`add_file`.
+
+        The first file that has chapters provides :attr:`chapters_obj`. Later files only have their
+        native chapters registered, so they are dropped together with the others once the chapters
+        are edited. Chapters assigned by the caller are never replaced.
+        """
+        if not other._chapter_source_files:
+            return
+
+        if self._chapters_baseline is not None:
+            self._register_chapter_sources(other._chapter_source_files)
+        elif self.chapters_obj is None and other._chapters_baseline is not None:
+            self.chapters_obj = copy.deepcopy(other.chapters_obj)
+            self._chapters_baseline = copy.deepcopy(other._chapters_baseline)
+            self._register_chapter_sources(other._chapter_source_files)
+
+    def _register_chapter_sources(self, files: Iterable[str]) -> None:
+        for file in files:
+            if file not in self._chapter_source_files:
+                self._chapter_source_files.append(file)
+
+    def _write_chapters_xml(self, chapters: Chapters) -> None:
         """
         Write chapter objects to a temporary XML file.
         """
-        if not self.chapters_obj:
-            return
-
         with tempfile.NamedTemporaryFile(mode="w", suffix=".xml", delete=False, encoding="utf-8") as tf:
-            xml_content = export_to_xml(self.chapters_obj)
-            tf.write(xml_content)
+            tf.write(export_to_xml(chapters))
 
         self._temp_chapters_file = tf.name
-        self._chapters_file = tf.name
 
     def add_chapter(self, chapter: ChapterAtom | EditionEntry) -> None:
         """
@@ -579,6 +708,10 @@ class MKVFile:
         >>> # XML is automatically generated during mux/command
         >>> # cmd = mkv.command("output.mkv")
         """
+        if not isinstance(chapter, (ChapterAtom, EditionEntry)):
+            msg = "chapter must be ChapterAtom or EditionEntry"
+            raise TypeError(msg)
+
         if self.chapters_obj is None:
             self.chapters_obj = Chapters()
 
@@ -588,9 +721,6 @@ class MKVFile:
             self.chapters_obj.editions[0].atoms.append(chapter)
         elif isinstance(chapter, EditionEntry):
             self.chapters_obj.editions.append(chapter)
-        else:
-            msg = "chapter must be ChapterAtom or EditionEntry"
-            raise TypeError(msg)
 
     def add_file(self, file: MKVFile | str | os.PathLike) -> None:
         """
@@ -616,16 +746,18 @@ class MKVFile:
         >>> mkv1.add_file('part3.mkv')  # doctest: +SKIP
         """
         if isinstance(file, (str, os.PathLike)):
+            new_file = MKVFile(file, mkvmerge_path=self.mkvmerge_path, mkvextract_path=self.mkvextract_path)
             self._number_file += 1
-            new_tracks = MKVFile(file).tracks
-            for track in new_tracks:
+            for track in new_file.tracks:
                 track.file_id = self._number_file
-            self.tracks = self.tracks + new_tracks
+            self.tracks = self.tracks + new_file.tracks
+            self._adopt_chapters_from(new_file)
         elif isinstance(file, MKVFile):
             self._number_file += 1
             for track in file.tracks:
                 track.file_id = self._number_file
             self.tracks = self.tracks + file.tracks
+            self._adopt_chapters_from(file)
         else:
             msg = "track is not str or MKVFile"
             raise TypeError(msg)

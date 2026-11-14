@@ -49,6 +49,7 @@ class ChapterOptions(CommandGeneratorBase):
         if mkv_file._chapter_language:  # noqa: SLF001
             yield "--chapter-language"
             yield mkv_file._chapter_language  # noqa: SLF001
-        if mkv_file._chapters_file:  # noqa: SLF001
+        chapters_file = mkv_file._chapters_file or mkv_file._temp_chapters_file  # noqa: SLF001
+        if chapters_file:
             yield "--chapters"
-            yield mkv_file._chapters_file  # noqa: SLF001
+            yield chapters_file
