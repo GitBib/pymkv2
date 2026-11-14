@@ -178,6 +178,7 @@ class MKVFile:
         # source files that get `--no-chapters` in the generated command
         self._chapters_to_drop: frozenset[str] = frozenset()
         self._temp_chapters_file: str | None = None
+        self._retired_chapters_files: list[str] = []
         self._chapter_language: str | None = None
         self._global_tags_file: str | None = None
         self._link_to_previous_file: str | None = None
@@ -295,7 +296,7 @@ class MKVFile:
     def cleanup(self) -> None:
         """Remove any temporary files created during command generation or muxing.
 
-        This includes the temporary XML chapters file written by :meth:`_write_chapters_xml`.
+        This includes every temporary XML chapters file written by :meth:`_write_chapters_xml`.
         Safe to call multiple times.
         """
         self._release_temp_chapters()
@@ -601,7 +602,9 @@ class MKVFile:
 
         A chapters file set with :meth:`chapters` takes precedence over :attr:`chapters_obj`.
         """
-        self._release_temp_chapters()
+        if self._temp_chapters_file is not None:
+            self._retired_chapters_files.append(self._temp_chapters_file)
+            self._temp_chapters_file = None
         self._chapters_to_drop = frozenset()
         if self._chapters_file is not None:
             return
@@ -628,11 +631,14 @@ class MKVFile:
 
     def _release_temp_chapters(self) -> None:
         """
-        Delete the generated chapters XML file, if any.
+        Delete the generated chapters XML files, if any.
         """
         if self._temp_chapters_file is not None:
-            Path(self._temp_chapters_file).unlink(missing_ok=True)
+            self._retired_chapters_files.append(self._temp_chapters_file)
             self._temp_chapters_file = None
+        for file in self._retired_chapters_files:
+            Path(file).unlink(missing_ok=True)
+        self._retired_chapters_files.clear()
 
     def _adopt_chapters_from(self, other: MKVFile) -> None:
         """

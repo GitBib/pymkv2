@@ -259,14 +259,14 @@ def _convert_scalar(text: str | None, tp: type) -> Any:  # noqa: ANN401
     """
     if text is None:
         return None
-    text = text.strip()
-    if not text:
+    stripped = text.strip()
+    if not stripped:
         return None
     if tp is bool:
-        return {"1": True, "0": False}.get(text)
+        return {"1": True, "0": False}.get(stripped)
     if tp is int:
         try:
-            return int(text)
+            return int(stripped)
         except ValueError:
             return None
     return text

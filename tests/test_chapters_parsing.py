@@ -395,3 +395,18 @@ def test_parse_chapters_xml_missing_required_strings_default_to_empty() -> None:
 
     assert atom.time_start == ""
     assert atom.displays[0].string == ""
+
+
+def test_parse_chapters_xml_keeps_whitespace_in_strings() -> None:
+    xml = """<Chapters><EditionEntry><ChapterAtom>
+      <ChapterUID> 7 </ChapterUID>
+      <ChapterTimeStart>00:00:00.000000000</ChapterTimeStart>
+      <ChapterFlagHidden> 1 </ChapterFlagHidden>
+      <ChapterDisplay><ChapterString>  Intro  </ChapterString></ChapterDisplay>
+    </ChapterAtom></EditionEntry></Chapters>"""
+
+    atom = parse_chapters_xml(xml).editions[0].atoms[0]
+
+    assert atom.displays[0].string == "  Intro  "
+    assert atom.uid == 7  # noqa: PLR2004
+    assert atom.hidden is True

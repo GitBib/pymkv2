@@ -485,10 +485,90 @@ def test_second_command_reflects_later_edits(get_path_test_file_with_chapters: P
     mkv.chapters_obj.editions[0].atoms[0].displays[0].string = "Second"
     mkv.command("output.mkv")
 
-    assert not first_temp.exists()
+    assert "First" in first_temp.read_text(encoding="utf-8")
     second_temp = Path(mkv._temp_chapters_file or "")  # noqa: SLF001
     assert "Second" in second_temp.read_text(encoding="utf-8")
     mkv.cleanup()
+    assert not first_temp.exists()
+    assert not second_temp.exists()
+
+
+@requires_mkvtoolnix
+def test_earlier_command_stays_runnable_after_later_command(
+    get_path_test_file_with_chapters: Path,
+    tmp_path: Path,
+) -> None:
+    mkv = MKVFile(str(get_path_test_file_with_chapters))
+    assert mkv.chapters_obj is not None
+    mkv.chapters_obj.editions[0].atoms[0].displays[0].string = "First"
+    first_command = mkv.command(str(tmp_path / "first.mkv"), subprocess=True)
+    mkv.chapters_obj.editions[0].atoms[0].displays[0].string = "Second"
+    mkv.command(str(tmp_path / "second.mkv"), subprocess=True)
+
+    sp.run(first_command, check=True, capture_output=True)  # noqa: S603
+    mkv.cleanup()
+
+    mkvextract = shutil.which("mkvextract")
+    assert mkvextract is not None
+    extracted = sp.run(  # noqa: S603
+        [mkvextract, "chapters", str(tmp_path / "first.mkv")],
+        check=True,
+        capture_output=True,
+    ).stdout.decode("utf-8")
+    assert "First" in extracted
+    assert "Second" not in extracted
+
+
+@requires_mkvtoolnix
+def test_edit_keeps_whitespace_in_untouched_chapter_titles(
+    get_path_test_file_with_chapters: Path,
+    tmp_path: Path,
+) -> None:
+    padded_xml = tmp_path / "padded.xml"
+    padded_xml.write_text(
+        """<?xml version="1.0"?>
+<Chapters><EditionEntry>
+<ChapterAtom><ChapterTimeStart>00:00:00.000000000</ChapterTimeStart>
+  <ChapterDisplay><ChapterString>  Padded  </ChapterString></ChapterDisplay></ChapterAtom>
+<ChapterAtom><ChapterTimeStart>00:00:01.000000000</ChapterTimeStart>
+  <ChapterDisplay><ChapterString>Other</ChapterString></ChapterDisplay></ChapterAtom>
+</EditionEntry></Chapters>""",
+        encoding="utf-8",
+    )
+    source = tmp_path / "padded.mkv"
+    mkvmerge = shutil.which("mkvmerge")
+    mkvextract = shutil.which("mkvextract")
+    assert mkvmerge is not None
+    assert mkvextract is not None
+    sp.run(  # noqa: S603
+        [
+            mkvmerge,
+            "-q",
+            "-o",
+            str(source),
+            "--no-chapters",
+            "--chapters",
+            str(padded_xml),
+            str(get_path_test_file_with_chapters),
+        ],
+        check=True,
+        capture_output=True,
+    )
+
+    mkv = MKVFile(str(source))
+    assert mkv.chapters_obj is not None
+    mkv.chapters_obj.editions[0].atoms[1].displays[0].string = "Edited"
+    output = tmp_path / "output.mkv"
+    mkv.mux(str(output), silent=True)
+    mkv.cleanup()
+
+    extracted = sp.run(  # noqa: S603
+        [mkvextract, "chapters", str(output)],
+        check=True,
+        capture_output=True,
+    ).stdout.decode("utf-8")
+    assert "<ChapterString>  Padded  </ChapterString>" in extracted
+    assert "<ChapterString>Edited</ChapterString>" in extracted
 
 
 @requires_mkvtoolnix
