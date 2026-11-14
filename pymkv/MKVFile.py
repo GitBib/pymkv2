@@ -269,6 +269,7 @@ class MKVFile:
                     new_attachment.mime_type = mime_type
                     new_attachment.source_id = attachment_id
                     new_attachment.source_file = file_path
+                    new_attachment.size = attachment.size
                     self.attachments.append(new_attachment)
 
             if sum(c.num_entries for c in info_struct.chapters) > 0:

@@ -56,6 +56,9 @@ class MKVAttachment:
     attach_once : bool
         Determines if the attachment should be added to all split files or only the first. Default is False,
         which will attach to all files.
+    size : int | None
+        The size of the attachment in bytes, as reported by the file it was read from. It is ``None`` for an
+        attachment built from a local path, since that attachment is not part of an MKV yet.
     """
 
     def __init__(
@@ -73,6 +76,7 @@ class MKVAttachment:
         self._attach_once = attach_once
         self._source_id: int | None = None
         self._source_file: str | None = None
+        self._size: int | None = None
 
     def __repr__(self) -> str:
         """
@@ -90,10 +94,16 @@ class MKVAttachment:
     def file_path(self) -> str:
         """str: The path to the attachment file.
 
+        For an attachment read out of an MKV this is the containing file, and the path cannot be changed.
+        Replace such an attachment with :meth:`~pymkv.MKVFile.remove_attachment` followed by
+        :meth:`~pymkv.MKVFile.add_attachment`.
+
         Raises
         ------
         FileNotFoundError
             Raised if `file_path` does not exist.
+        ValueError
+            Raised when changing the path of an attachment that was read from a file.
         """
         return self._file_path
 
@@ -109,17 +119,38 @@ class MKVAttachment:
         ------
         FileNotFoundError
             If the specified file does not exist.
+        ValueError
+            If this attachment was read from a file and `file_path` names a different one.
 
         Returns
         -------
         None
         """
+        current = getattr(self, "_file_path", None)
+        if current is not None and str(file_path) == current:
+            # Byte-identical path. Nothing to validate, and nothing learned about the file has gone stale,
+            # so this stays a no-op even if the file has since been deleted.
+            return
         fp = Path(file_path).expanduser()
         if not fp.is_file():
             msg = f'"{fp}" does not exist'
             raise FileNotFoundError(msg)
+        if current is not None and Path(current).is_file() and fp.samefile(current):
+            # Same file spelled differently, e.g. after the caller normalized the path.
+            return
+        if getattr(self, "_source_id", None) is not None:
+            # This attachment is a reference into an MKV, not a local file. Repointing it used to look like
+            # it worked while AttachmentOptions skipped it, so the old embedded payload was muxed instead.
+            msg = (
+                f"attachment {self._name!r} (id {self._source_id}) was read from "
+                f'"{current}", so its path cannot be changed. '
+                "Remove this attachment and add a new MKVAttachment for the replacement instead."
+            )
+            raise ValueError(msg)
         self._mime_type = guess_type(fp)[0]
         self._name = None
+        # The name and size described the attachment this object used to point at.
+        self._size = None
         self._file_path = str(fp)
 
     @property
@@ -219,10 +250,42 @@ class MKVAttachment:
         """
         Set the ID of the attachment from the source file.
 
+        Pointing at a different attachment invalidates the size, which described the previous one.
+
         Parameters:
             source_id (int | None): The ID to set for the attachment in the source file.
         """
+        if source_id != self._source_id:
+            self._size = None
         self._source_id = source_id
+
+    @property
+    def size(self) -> int | None:
+        """
+        Get the size of the attachment in bytes.
+
+        The value comes from the file the attachment was read from, not from
+        :attr:`~pymkv.MKVAttachment.file_path`, which points at the containing MKV for an attachment read
+        out of one.
+
+        It stays None for an attachment built from a local path, including after
+        :meth:`~pymkv.MKVFile.mux`: this object is never refreshed from the output. Load the muxed file into
+        a new :class:`~pymkv.MKVFile` to read the sizes it ended up with.
+
+        Returns:
+            int | None: The size in bytes, or None for an attachment that was not read from a file.
+        """
+        return self._size
+
+    @size.setter
+    def size(self, size: int | None) -> None:
+        """
+        Set the size of the attachment in bytes.
+
+        Parameters:
+            size (int | None): The size in bytes.
+        """
+        self._size = size
 
     @property
     def source_file(self) -> str | None:
@@ -239,7 +302,11 @@ class MKVAttachment:
         """
         Set the path to the source file containing the attachment.
 
+        Pointing at a different file invalidates the size, which described the previous one.
+
         Parameters:
             source_file (str | None): The path to set for the source file.
         """
+        if source_file != self._source_file:
+            self._size = None
         self._source_file = source_file
