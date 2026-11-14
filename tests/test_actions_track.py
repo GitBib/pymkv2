@@ -253,7 +253,7 @@ def test_track_tags_setter(dummy_mkv: Path, tmp_path: Path, single_video_info: M
 
         # Test invalid type
         with pytest.raises(TypeError, match="not of type str"):
-            t.tags = 123  # type: ignore[assignment]
+            t.tags = 123  # ty: ignore[invalid-assignment]
 
         # Test non-existent file
         with pytest.raises(FileNotFoundError, match="does not exist"):
@@ -301,7 +301,7 @@ def test_file_id_setter_invalid_type(dummy_mkv: Path, single_video_info: MkvMerg
     ):
         t = MKVTrack(str(dummy_mkv))
     with pytest.raises(ValueError, match="file_id must be an integer"):
-        t.file_id = "not_int"  # type: ignore[assignment]
+        t.file_id = "not_int"  # ty: ignore[invalid-assignment]
 
 
 def test_track_id_setter_out_of_range(dummy_mkv: Path, single_video_info: MkvMergeOutput) -> None:

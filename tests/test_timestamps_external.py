@@ -31,7 +31,7 @@ def test_timestamps_setter_errors(get_path_test_file: Path, tmp_path: Path) -> N
     track = MKVTrack(str(get_path_test_file))
 
     with pytest.raises(TypeError):
-        track.timestamps = 123  # type: ignore[assignment]
+        track.timestamps = 123  # ty: ignore[invalid-assignment]
 
     with pytest.raises(FileNotFoundError):
         track.timestamps = str(tmp_path / "non_existent.txt")

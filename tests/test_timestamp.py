@@ -140,7 +140,7 @@ def test_ne_with_non_timestamp() -> None:
 def test_ts_setter_rejects_timestamp_object() -> None:
     ts = Timestamp("01:00:00")
     with pytest.raises(TypeError):
-        ts.ts = Timestamp("02:00:00")  # type: ignore[assignment]
+        ts.ts = Timestamp("02:00:00")
 
 
 def test_init_from_timestamp_object() -> None:
@@ -203,7 +203,7 @@ def test_ts_property_invalid_form() -> None:
 
 def test_verify_non_string() -> None:
     with pytest.raises(TypeError, match="not str type"):
-        Timestamp.verify(123)  # type: ignore[arg-type]
+        Timestamp.verify(123)  # ty: ignore[invalid-argument-type]
 
 
 def test_lt_with_non_timestamp() -> None:

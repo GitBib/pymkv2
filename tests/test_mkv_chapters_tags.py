@@ -705,7 +705,7 @@ def test_command_skips_editions_without_atoms() -> None:
 def test_add_chapter_invalid_type_does_not_create_chapters() -> None:
     mkv = MKVFile()
     with pytest.raises(TypeError):
-        mkv.add_chapter("nope")  # type: ignore[arg-type]
+        mkv.add_chapter("nope")  # ty: ignore[invalid-argument-type]
     assert mkv.chapters_obj is None
 
 

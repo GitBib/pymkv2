@@ -10,7 +10,7 @@
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 
-import datetime
+import datetime as dt
 import importlib.metadata
 import os
 import sys
@@ -20,7 +20,7 @@ sys.path.insert(0, os.path.abspath("../.."))  # noqa: PTH100
 # -- Project information -----------------------------------------------------
 
 project = "pymkv2"
-copyright = f"{datetime.datetime.now(tz=datetime.timezone.utc).year}, Sheldon Woodward & GitBib"  # noqa: A001
+copyright = f"{dt.datetime.now(tz=dt.timezone.utc).year}, Sheldon Woodward & GitBib"  # noqa: A001
 author = "Sheldon Woodward & GitBib"
 
 # The full version, including alpha/beta/rc tags
