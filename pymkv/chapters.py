@@ -297,7 +297,7 @@ def _parse_struct(element: ET.Element, cls: type[msgspec.Struct], unknown: set[s
     """
     data: dict[str, Any] = {}
     known: set[str] = set()
-    for info, tp in _schema(cls):  # type: ignore[arg-type]
+    for info, tp in _schema(cls):
         tag = info.encode_name
         if tag == _TEXT_KEY:
             value = _convert_scalar(element.text, tp)

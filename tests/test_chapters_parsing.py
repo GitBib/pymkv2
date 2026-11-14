@@ -363,7 +363,7 @@ def test_parse_chapters_xml_no_warning_for_supported_elements(caplog: pytest.Log
 def test_parse_chapters_xml_accepts_bom(as_bytes: bool) -> None:
     content: str | bytes = "\ufeff" + SIMPLE_CHAPTERS_XML
     if as_bytes:
-        content = content.encode("utf-8")  # type: ignore[union-attr]
+        content = content.encode("utf-8")
 
     assert len(parse_chapters_xml(content).editions) == 1
 

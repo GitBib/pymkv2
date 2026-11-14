@@ -13,7 +13,7 @@ from __future__ import annotations
 import msgspec
 
 
-class TrackProperties(msgspec.Struct, kw_only=True):  # type: ignore[call-arg]
+class TrackProperties(msgspec.Struct, kw_only=True):
     """
     Properties of a track as returned by `mkvmerge -J`.
 

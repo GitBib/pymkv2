@@ -40,7 +40,7 @@ def test_split_size_with_link() -> None:
 def test_split_size_with_invalid_type() -> None:
     mkv = MKVFile()
     with pytest.raises(TypeError):
-        mkv.split_size("10MiB")  # type: ignore[arg-type]
+        mkv.split_size("10MiB")  # ty: ignore[invalid-argument-type]
 
 
 def test_split_duration_with_string() -> None:

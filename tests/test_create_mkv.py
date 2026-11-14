@@ -93,12 +93,12 @@ def test_split_methods_validation() -> None:
     with pytest.raises(ValueError, match="formatted timestamps"):
         # Match part of error or use no match if message varies too much
         # But linter demands match. Let's use a generic match or suppress if unknown
-        mkv.split_timestamps(None)  # type: ignore[arg-type]
+        mkv.split_timestamps(None)  # ty: ignore[invalid-argument-type]
 
     # split_frames
     # Non-int
     with pytest.raises(TypeError, match="not an int"):
-        mkv.split_frames("100")  # type: ignore[arg-type]
+        mkv.split_frames("100")  # ty: ignore[invalid-argument-type]
     # Unordered
     with pytest.raises(ValueError, match="formatted frames"):
         mkv.split_frames(100, 50)
@@ -109,14 +109,14 @@ def test_split_methods_validation() -> None:
         mkv.split_timestamp_parts([])
     # None in wrong place
     with pytest.raises(ValueError, match="formatted"):
-        mkv.split_timestamp_parts([["00:00:10", None, "00:00:20"]])  # type: ignore[list-item]
+        mkv.split_timestamp_parts([["00:00:10", None, "00:00:20"]])  # ty: ignore[invalid-argument-type]
     # Unordered in zip
     with pytest.raises(ValueError, match="formatted"):
         mkv.split_timestamp_parts([["00:00:20", "00:00:10"]])
 
     # Not list/tuple set - expects ValueError
     with pytest.raises(ValueError, match="formatted"):
-        mkv.split_timestamp_parts(["not-list"])  # type: ignore[arg-type,list-item]
+        mkv.split_timestamp_parts(["not-list"])  # ty: ignore[invalid-argument-type]
     # Bad set length
     with pytest.raises(ValueError, match="formatted"):
         mkv.split_timestamp_parts([["00:00:10"]])  # length 1
@@ -127,29 +127,29 @@ def test_split_methods_validation() -> None:
         mkv.split_parts_frames([])
     # None in wrong place
     with pytest.raises(ValueError, match="formatted"):
-        mkv.split_parts_frames([[100, None, 200]])  # type: ignore[list-item]
+        mkv.split_parts_frames([[100, None, 200]])  # ty: ignore[invalid-argument-type]
     # Unordered
     with pytest.raises(ValueError, match="formatted"):
-        mkv.split_parts_frames([[200, 100]])  # type: ignore[list-item]
+        mkv.split_parts_frames([[200, 100]])
     # Not list/tuple
     with pytest.raises(ValueError, match="formatted"):  # Same reason as above
-        mkv.split_parts_frames(["not-list"])  # type: ignore[arg-type,list-item]
+        mkv.split_parts_frames(["not-list"])  # ty: ignore[invalid-argument-type]
     # Bad set length
     with pytest.raises(ValueError, match="formatted"):
-        mkv.split_parts_frames([[100]])  # type: ignore[list-item]
+        mkv.split_parts_frames([[100]])
     # Not int
     with pytest.raises(TypeError):
-        mkv.split_parts_frames([[100, "200"]])  # type: ignore[list-item]
+        mkv.split_parts_frames([[100, "200"]])  # ty: ignore[invalid-argument-type]
     # Not int (type check inside loop)
     # To verify the explicit type check using floats to bypass ">= not supported" TypeError
     # We remove the regex match requirement because it might be flaky depending on implementation details
     with pytest.raises(TypeError):
-        mkv.split_parts_frames([[100.5, 200.5]])  # type: ignore[list-item]
+        mkv.split_parts_frames([[100.5, 200.5]])  # ty: ignore[invalid-argument-type]
 
     # split_chapters
     # Not int
     with pytest.raises(TypeError):
-        mkv.split_chapters("1")  # type: ignore[arg-type]
+        mkv.split_chapters("1")  # ty: ignore[invalid-argument-type]
     # Invalid value (<1)
     with pytest.raises(ValueError, match="formatted chapters"):
         mkv.split_chapters(0)
@@ -181,25 +181,25 @@ def test_order_tracks_by_file_id_keyerror(single_video_info: MkvMergeOutput) -> 
 def test_add_track_type_error() -> None:
     mkv = MKVFile()
     with pytest.raises(TypeError, match="track is not str or MKVTrack"):
-        mkv.add_track(123)  # type: ignore[arg-type]
+        mkv.add_track(123)  # ty: ignore[invalid-argument-type]
 
 
 def test_add_file_type_error() -> None:
     mkv = MKVFile()
     with pytest.raises(TypeError, match="track is not str or MKVFile"):
-        mkv.add_file(123)  # type: ignore[arg-type]
+        mkv.add_file(123)  # ty: ignore[invalid-argument-type]
 
 
 def test_add_attachment_type_error() -> None:
     mkv = MKVFile()
     with pytest.raises(TypeError, match="Attachment is not str of MKVAttachment"):
-        mkv.add_attachment(123)  # type: ignore[arg-type]
+        mkv.add_attachment(123)  # ty: ignore[invalid-argument-type]
 
 
 def test_add_chapter_type_error() -> None:
     mkv = MKVFile()
     with pytest.raises(TypeError, match="chapter must be ChapterAtom or EditionEntry"):
-        mkv.add_chapter("bad_input")  # type: ignore[arg-type]
+        mkv.add_chapter("bad_input")  # ty: ignore[invalid-argument-type]
 
 
 def test_track_tags_empty_ids() -> None:
@@ -211,7 +211,7 @@ def test_track_tags_empty_ids() -> None:
 def test_track_tags_non_int_id(get_path_test_file: Path) -> None:
     mkv = MKVFile(str(get_path_test_file))
     with pytest.raises(TypeError, match="not an int"):
-        mkv.track_tags("a")  # type: ignore[arg-type]
+        mkv.track_tags("a")  # ty: ignore[invalid-argument-type]
 
 
 def test_track_tags_out_of_range(get_path_test_file: Path) -> None:

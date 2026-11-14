@@ -23,7 +23,7 @@ _TIMESTAMP_PATTERN: Final[re.Pattern] = re.compile(
 class Timestamp:
     __slots__ = ["_form", "_hh", "_mm", "_nn", "_ss"]
 
-    def __init__(  # noqa: PLR0913
+    def __init__(  # noqa: PLR0913, PLR0917
         self,
         timestamp: str | int | Timestamp | None = None,
         hh: int | None = None,

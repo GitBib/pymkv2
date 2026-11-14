@@ -57,9 +57,7 @@ dev = [
     "pytest>=9.0.0,<10.0.0",
     "pytest-cov>=7.0.0,<8.0.0",
     "pytest-ruff<1.0.0,>=0.5",
-    "pytest-mypy>=1.0.0,<2.0.0",
-    "mypy<2.0.0,>=1.18.0",
-    "ruff<1.0.0,>=0.15.0",
+    "ruff>=0.17.5",
     "sphinx-immaterial<0.14.0,>=0.13.0; python_version == \"3.14\"",
     "pyinstrument>=5.1.2",
     "sphinx-llms-txt>=0.7.1",
@@ -76,11 +74,7 @@ requires = ["pdm-backend"]
 build-backend = "pdm.backend"
 
 [tool.pytest.ini_options]
-addopts = "--doctest-modules --mypy --ruff --ruff-format"
-
-[[tool.mypy.overrides]]
-module = ["bitmath.*", "iso639.*"]
-ignore_missing_imports = true
+addopts = "--doctest-modules --ruff --ruff-format"
 
 [tool.ruff]
 # Exclude a variety of commonly ignored directories.

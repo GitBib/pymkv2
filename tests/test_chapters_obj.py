@@ -110,7 +110,7 @@ def test_edition_entry_bool_flags() -> None:
 def test_add_chapter_type_error() -> None:
     mkv = MKVFile()
     with pytest.raises(TypeError, match="chapter must be ChapterAtom or EditionEntry"):
-        mkv.add_chapter("not a valid chapter")  # type: ignore[arg-type]
+        mkv.add_chapter("not a valid chapter")  # ty: ignore[invalid-argument-type]
 
 
 def test_dict_to_xml_non_dict_list_items() -> None:

@@ -161,7 +161,7 @@ class MKVTrack:
         that are already part of an MKV file.
     """
 
-    def __init__(  # noqa: PLR0913
+    def __init__(  # noqa: PLR0913, PLR0917
         self,
         file_path: str,
         track_id: int = 0,

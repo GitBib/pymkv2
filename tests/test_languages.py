@@ -310,8 +310,8 @@ def test_normalize_language_strips_whitespace_in_primary_subtag() -> None:
 
 
 def test_normalize_language_handles_non_string_input() -> None:
-    assert Languages.normalize_language(123) is None  # type: ignore[arg-type]
-    assert Languages.normalize_language(["en"]) is None  # type: ignore[arg-type]
+    assert Languages.normalize_language(123) is None  # ty: ignore[invalid-argument-type]
+    assert Languages.normalize_language(["en"]) is None  # ty: ignore[invalid-argument-type]
 
 
 @pytest.mark.usefixtures("mocked_mkvmerge_table")
@@ -392,8 +392,8 @@ def test_languages_match_edge_cases(a: str | None, b: str | None, expected: bool
 
 @pytest.mark.usefixtures("mocked_mkvmerge_table")
 def test_languages_match_handles_non_string_input() -> None:
-    assert Languages.languages_match(123, "chi") is False  # type: ignore[arg-type]
-    assert Languages.languages_match("chi", ["zh"]) is False  # type: ignore[arg-type]
+    assert Languages.languages_match(123, "chi") is False  # ty: ignore[invalid-argument-type]
+    assert Languages.languages_match("chi", ["zh"]) is False  # ty: ignore[invalid-argument-type]
 
 
 @pytest.mark.usefixtures("mocked_mkvmerge_table")
@@ -438,7 +438,7 @@ def test_language_equivalents_empty_for_no_language(value: str | None) -> None:
 
 
 def test_language_equivalents_handles_non_string_input() -> None:
-    assert Languages.language_equivalents(123) == frozenset()  # type: ignore[arg-type]
+    assert Languages.language_equivalents(123) == frozenset()  # ty: ignore[invalid-argument-type]
 
 
 CUSTOM_TABLE = (
@@ -546,8 +546,8 @@ def test_is_known_language_strips_bcp47_subtags() -> None:
 
 
 def test_is_known_language_handles_non_string_input() -> None:
-    assert Languages.is_known_language(123) is False  # type: ignore[arg-type]
-    assert Languages.is_known_language(["en"]) is False  # type: ignore[arg-type]
+    assert Languages.is_known_language(123) is False  # ty: ignore[invalid-argument-type]
+    assert Languages.is_known_language(["en"]) is False  # ty: ignore[invalid-argument-type]
 
 
 @pytest.mark.usefixtures("mocked_mkvmerge_table")
@@ -658,7 +658,7 @@ def test_canonical_key_returns_none_for_sentinels() -> None:
     assert Languages._canonical_key("", None) is None  # noqa: SLF001
     assert Languages._canonical_key("und", None) is None  # noqa: SLF001
     assert Languages._canonical_key("xyz", None) is None  # noqa: SLF001
-    assert Languages._canonical_key(123, None) is None  # type: ignore[arg-type]  # noqa: SLF001
+    assert Languages._canonical_key(123, None) is None  # ty: ignore[invalid-argument-type]  # noqa: SLF001
 
 
 @pytest.mark.usefixtures("mocked_mkvmerge_table")

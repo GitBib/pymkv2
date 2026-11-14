@@ -40,7 +40,7 @@ def test_checking_file_path_invalid_type_none() -> None:
 
 def test_checking_file_path_invalid_type_int() -> None:
     with pytest.raises(TypeError, match="not of type str"):
-        checking_file_path(123)  # type: ignore[arg-type]
+        checking_file_path(123)  # ty: ignore[invalid-argument-type]
 
 
 def test_get_file_info_raw_check_path_false() -> None:
