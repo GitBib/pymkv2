@@ -19,6 +19,7 @@ classifiers = [
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
     "Programming Language :: Python :: 3.14",
+    "Programming Language :: Python :: 3.15",
     "Topic :: Multimedia :: Video :: Conversion",
     "Topic :: Utilities",
 ]
@@ -47,7 +48,7 @@ requires-python = "<4.0,>=3.10"
 dependencies = [
     "bitmath<3.0.0,>=2.0.0",
     "python-iso639<2027.0.0,>=2026.4.20",
-    "msgspec>=0.21.0",
+    "msgspec>=0.22.0",
     "typing-extensions>=4.15.0 ; python_full_version < '3.11'",
 ]
 
@@ -58,6 +59,8 @@ dev = [
     "pytest-cov>=7.0.0,<8.0.0",
     "pytest-ruff<1.0.0,>=0.5",
     "ruff>=0.17.5",
+    "prek>=0.5.10",
+    "ty>=0.0.104",
     "sphinx-immaterial<0.14.0,>=0.13.0; python_version == \"3.14\"",
     "pyinstrument>=5.1.2",
     "sphinx-llms-txt>=0.7.1",
