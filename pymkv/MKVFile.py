@@ -66,7 +66,7 @@ import tempfile
 import xml.etree.ElementTree as ET
 from collections.abc import Callable, Iterable, Sequence
 from pathlib import Path
-from typing import Any, ClassVar, TypeVar, cast
+from typing import Any, ClassVar, Final, TypeVar, cast
 
 import bitmath
 import msgspec
@@ -108,6 +108,8 @@ from pymkv.Verifications import (
 )
 
 T = TypeVar("T")
+
+NANOSECONDS_PER_SECOND: Final[int] = 1_000_000_000
 
 
 class MKVFile:
@@ -361,6 +363,20 @@ class MKVFile:
         self._chapter_language = iso_code
 
     @property
+    def duration(self) -> float | None:
+        """
+        Gets the container's duration in seconds, as reported by mkvmerge.
+
+        Returns:
+            float | None: The duration in seconds, or ``None`` if this MKVFile wasn't opened
+                from an existing file, or mkvmerge didn't report a duration for it.
+        """
+        if self._info_json is None:
+            return None
+        duration_ns = self._info_json.container.properties.duration
+        return duration_ns / NANOSECONDS_PER_SECOND if duration_ns is not None else None
+
+    @property
     def global_tag_entries(self) -> int:
         """
         Gets the number of global tag entries in the MKVFile object.
@@ -504,48 +520,47 @@ class MKVFile:
         output_path = str(Path(output_path).expanduser())
         args = self.command(output_path, subprocess=True, ui_language=ui_language)
 
-        if progress_handler:
-            stdout_target = sp.PIPE
-            text_mode = True
-        elif silent:
-            stdout_target = sp.DEVNULL
-            text_mode = False
-        else:
-            stdout_target = None  # Inherit stdout (print to console)
-            text_mode = False
-
-        stderr_target = sp.PIPE  # Always capture stderr for error reporting
-
+        # mkvmerge writes its warning text to stdout, not stderr, so stderr is merged into
+        # stdout and that single stream is always piped and captured here (even when silent
+        # or inherited to the console) so that warnings can still be logged when
+        # ignore_warning is True. Merging into one pipe also avoids a deadlock that reading
+        # stdout and stderr from two separate pipes sequentially would risk if one of them
+        # filled up its OS buffer while the other was being drained.
         proc = sp.Popen(  # noqa: S603
             args,
-            stdout=stdout_target,
-            stderr=stderr_target,
-            text=text_mode,
-            bufsize=1 if text_mode else -1,
+            stdout=sp.PIPE,
+            stderr=sp.STDOUT,
+            text=True,
+            encoding="utf-8",
+            bufsize=1,
         )
 
-        # Process stdout if handling progress
-        if progress_handler and proc.stdout:
+        output_lines: list[str] = []
+        if proc.stdout:
             progress_re = re.compile(r"Progress:\s*(\d+)%")
             for line in proc.stdout:
-                if match := progress_re.search(line):
-                    percent = int(match.group(1))
-                    progress_handler(percent)
+                if progress_handler and (match := progress_re.search(line)):
+                    progress_handler(int(match.group(1)))
+                if not silent:
+                    sys.stdout.write(line)
+                output_lines.append(line)
 
-        # Wait for completion and get stderr
-        _, err = proc.communicate()
+        proc.wait()
+        out = "".join(output_lines)
 
         if proc.returncode != 0:
             # Handle warnings (exit code 1) if ignore_warning is True
             if proc.returncode == 1 and ignore_warning:
-                logging.warning("Process completed with warnings, but ignored as per the setting.")
+                if out:
+                    logging.warning("Process completed with warnings, but ignored as per the setting:\n%s", out)
+                else:
+                    logging.warning("Process completed with warnings, but ignored as per the setting.")
             else:
                 # For other non-zero exit codes, raise an exception
                 error_message = f"Command failed with non-zero exit status {proc.returncode}"
-                if err:
-                    error_details = err.decode() if isinstance(err, bytes) else err
-                    error_message += f"\nError Output:\n{error_details}"
-                    logging.error(error_details)
+                if out:
+                    error_message += f"\nError Output:\n{out}"
+                    logging.error(out)
                 logging.error(
                     "Non-zero exit status when running %s (%s)",
                     args,
