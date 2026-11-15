@@ -56,6 +56,7 @@ Combine two MKVs. This example takes two existing MKVs and combines their tracks
 from __future__ import annotations
 
 import copy
+import io
 import itertools
 import logging
 import os
@@ -66,7 +67,7 @@ import tempfile
 import xml.etree.ElementTree as ET
 from collections.abc import Callable, Iterable, Sequence
 from pathlib import Path
-from typing import Any, ClassVar, Final, TypeVar, cast
+from typing import Any, ClassVar, TypeVar, cast
 
 import bitmath
 import msgspec
@@ -108,8 +109,6 @@ from pymkv.Verifications import (
 )
 
 T = TypeVar("T")
-
-NANOSECONDS_PER_SECOND: Final[int] = 1_000_000_000
 
 
 class MKVFile:
@@ -374,7 +373,7 @@ class MKVFile:
         if self._info_json is None:
             return None
         duration_ns = self._info_json.container.properties.duration
-        return duration_ns / NANOSECONDS_PER_SECOND if duration_ns is not None else None
+        return duration_ns / 1_000_000_000 if duration_ns is not None else None
 
     @property
     def global_tag_entries(self) -> int:
@@ -526,23 +525,28 @@ class MKVFile:
         # ignore_warning is True. Merging into one pipe also avoids a deadlock that reading
         # stdout and stderr from two separate pipes sequentially would risk if one of them
         # filled up its OS buffer while the other was being drained.
-        proc = sp.Popen(  # noqa: S603
-            args,
-            stdout=sp.PIPE,
-            stderr=sp.STDOUT,
-            text=True,
-            encoding="utf-8",
-            bufsize=1,
-        )
+        proc = sp.Popen(args, stdout=sp.PIPE, stderr=sp.STDOUT)  # noqa: S603
 
+        echo = None if silent or progress_handler else sys.stdout
+        echo_buffer = getattr(echo, "buffer", None)
         output_lines: list[str] = []
         if proc.stdout:
             progress_re = re.compile(r"Progress:\s*(\d+)%")
-            for line in proc.stdout:
-                if progress_handler and (match := progress_re.search(line)):
-                    progress_handler(int(match.group(1)))
-                if not silent:
-                    sys.stdout.write(line)
+            for raw_line in io.TextIOWrapper(proc.stdout, encoding="latin-1", newline=""):
+                raw = raw_line.encode("latin-1")
+                line = raw.decode("utf-8", errors="replace")
+                if echo is not None:
+                    echo.flush()
+                    if echo_buffer is not None:
+                        echo_buffer.write(raw)
+                        echo_buffer.flush()
+                    else:
+                        echo.write(line)
+                        echo.flush()
+                if match := progress_re.search(line):
+                    if progress_handler:
+                        progress_handler(int(match.group(1)))
+                    continue
                 output_lines.append(line)
 
         proc.wait()
