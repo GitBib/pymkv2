@@ -340,11 +340,14 @@ def test_mux_echoes_non_utf8_output_bytes_unchanged(
     source = tmp_path / "straße.mkv"
     shutil.copyfile(get_path_test_file, source)
     mkv = _mkv_with_extra_args(monkeypatch, source, ["--output-charset", "ISO-8859-1"])
+    output = tmp_path / "out.mkv"
+    direct = sp.run(mkv.command(str(output), subprocess=True), capture_output=True, check=True).stdout  # noqa: S603
+    source_line = next(line for line in direct.splitlines() if b"stra" in line)
     console = io.TextIOWrapper(io.BytesIO(), encoding="iso8859-1", errors="strict")
     monkeypatch.setattr(sys, "stdout", console)
 
-    assert mkv.mux(tmp_path / "out.mkv") == 0
-    assert b"stra\xdfe.mkv" in console.buffer.getvalue()
+    assert mkv.mux(output) == 0
+    assert source_line in console.buffer.getvalue()
 
 
 def test_mux_echoes_to_stdout_without_buffer(
