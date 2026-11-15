@@ -1,3 +1,4 @@
+import io
 import subprocess as sp
 import sys
 from pathlib import Path
@@ -20,15 +21,7 @@ def test_mux_progress_handler() -> None:
     process_mock.__exit__.return_value = None
 
     # Configure stdout to be an iterator yielding progress lines
-    process_mock.stdout = iter(
-        [
-            "mkvmerge v1.0.0",
-            "Progress: 10%",
-            "Something else",
-            "Progress: 50%",
-            "Progress: 100%",
-        ]
-    )
+    process_mock.stdout = io.BytesIO(b"mkvmerge v1.0.0\nProgress: 10%\rSomething else\nProgress: 50%\rProgress: 100%\r")
     process_mock.communicate.return_value = (None, None)
     process_mock.returncode = 0
 
@@ -51,10 +44,9 @@ def test_mux_progress_handler() -> None:
         # Verify
         assert progress_values == [10, 50, 100]
 
-        # Verify Popen was called with text=True and stdout=PIPE
         _, kwargs = mock_popen.call_args
-        assert kwargs["text"] is True
         assert kwargs["stdout"] == sp.PIPE
+        assert kwargs["stderr"] == sp.STDOUT
 
 
 def test_mux_progress_handler_no_progress() -> None:
@@ -64,7 +56,7 @@ def test_mux_progress_handler_no_progress() -> None:
     process_mock.__enter__.return_value = process_mock
     process_mock.__exit__.return_value = None
 
-    process_mock.stdout = iter(["No progress here", "Just logs"])
+    process_mock.stdout = io.BytesIO(b"No progress here\nJust logs\n")
     process_mock.communicate.return_value = (None, None)
     process_mock.returncode = 0
 

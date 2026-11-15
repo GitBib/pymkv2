@@ -1,3 +1,5 @@
+import io
+import shutil
 import subprocess as sp
 import sys
 from pathlib import Path
@@ -244,8 +246,7 @@ def test_mux_error_raises() -> None:
     ):
         proc = MagicMock()
         proc.returncode = 2
-        proc.stdout = None
-        proc.communicate.return_value = (None, b"some error output")
+        proc.stdout = io.BytesIO(b"some error output\n")
         mock_popen.return_value = proc
         with pytest.raises(ValueError, match="Command failed"):
             mkv.mux("output.mkv")
@@ -258,11 +259,138 @@ def test_mux_warning_ignored() -> None:
     ):
         proc = MagicMock()
         proc.returncode = 1
-        proc.stdout = None
-        proc.communicate.return_value = (None, b"warning output")
+        proc.stdout = io.BytesIO(b"warning output\n")
         mock_popen.return_value = proc
         ret = mkv.mux("output.mkv", ignore_warning=True)
         assert ret == 1
+
+
+def test_mux_warning_ignored_logs_mkvmerge_warning_text(caplog: pytest.LogCaptureFixture) -> None:
+    # mkvmerge prints warnings to stdout, not stderr.
+    mkv = MKVFile()
+    with patch("subprocess.Popen") as mock_popen:
+        proc = MagicMock()
+        proc.returncode = 1
+        proc.stdout = io.BytesIO(b"Warning: resyncing past damaged cluster\n")
+        mock_popen.return_value = proc
+        mkv.mux("output.mkv", ignore_warning=True, silent=True)
+
+    assert "resyncing past damaged cluster" in caplog.text
+
+
+def test_mux_warning_ignored_logs_generic_message_without_output(caplog: pytest.LogCaptureFixture) -> None:
+    mkv = MKVFile()
+    with patch("subprocess.Popen") as mock_popen:
+        proc = MagicMock()
+        proc.returncode = 1
+        proc.stdout = io.BytesIO(b"")
+        mock_popen.return_value = proc
+        mkv.mux("output.mkv", ignore_warning=True)
+
+    assert "Process completed with warnings, but ignored as per the setting." in caplog.text
+
+
+def _mkv_with_extra_args(monkeypatch: pytest.MonkeyPatch, path: Path, extra: list[str]) -> MKVFile:
+    mkv = MKVFile(path)
+    command = mkv.command
+
+    def command_with_extra(output_path: str, *, subprocess: bool = False, ui_language: str | None = None) -> list[str]:
+        cmd = command(output_path, subprocess=subprocess, ui_language=ui_language)
+        assert isinstance(cmd, list)
+        return [cmd[0], *extra, *cmd[1:]]
+
+    monkeypatch.setattr(mkv, "command", command_with_extra)
+    return mkv
+
+
+def test_mux_real_warning_is_logged_without_progress_lines(
+    monkeypatch: pytest.MonkeyPatch,
+    caplog: pytest.LogCaptureFixture,
+    capsys: pytest.CaptureFixture[str],
+    get_path_test_file: Path,
+    tmp_path: Path,
+) -> None:
+    mkv = _mkv_with_extra_args(monkeypatch, get_path_test_file, ["--language", "9:eng"])
+
+    assert mkv.mux(tmp_path / "out.mkv", ignore_warning=True, silent=True) == 1
+    assert "requested but not found" in caplog.text
+    assert "Progress:" not in caplog.text
+    assert capsys.readouterr().out == ""
+
+
+def test_mux_non_utf8_output_does_not_crash(
+    monkeypatch: pytest.MonkeyPatch,
+    caplog: pytest.LogCaptureFixture,
+    get_path_test_file: Path,
+    tmp_path: Path,
+) -> None:
+    source = tmp_path / "straße.mkv"
+    shutil.copyfile(get_path_test_file, source)
+    mkv = _mkv_with_extra_args(monkeypatch, source, ["--output-charset", "ISO-8859-1", "--language", "9:eng"])
+
+    assert mkv.mux(tmp_path / "out.mkv", ignore_warning=True, silent=True) == 1
+    assert "requested but not found" in caplog.text
+
+
+def test_mux_echoes_non_utf8_output_bytes_unchanged(
+    monkeypatch: pytest.MonkeyPatch,
+    get_path_test_file: Path,
+    tmp_path: Path,
+) -> None:
+    source = tmp_path / "straße.mkv"
+    shutil.copyfile(get_path_test_file, source)
+    mkv = _mkv_with_extra_args(monkeypatch, source, ["--output-charset", "ISO-8859-1"])
+    output = tmp_path / "out.mkv"
+    direct = sp.run(mkv.command(str(output), subprocess=True), capture_output=True, check=True).stdout  # noqa: S603
+    source_line = next(line for line in direct.splitlines() if b"stra" in line)
+    console = io.TextIOWrapper(io.BytesIO(), encoding="iso8859-1", errors="strict")
+    monkeypatch.setattr(sys, "stdout", console)
+
+    assert mkv.mux(output) == 0
+    assert source_line in console.buffer.getvalue()
+
+
+def test_mux_echoes_to_stdout_without_buffer(
+    monkeypatch: pytest.MonkeyPatch,
+    get_path_test_file: Path,
+    tmp_path: Path,
+) -> None:
+    console = io.StringIO()
+    monkeypatch.setattr(sys, "stdout", console)
+
+    assert MKVFile(get_path_test_file).mux(tmp_path / "out.mkv") == 0
+    assert "Progress: 100%\r" in console.getvalue()
+
+
+def test_mux_progress_handler_does_not_echo_output(
+    capsys: pytest.CaptureFixture[str],
+    get_path_test_file: Path,
+    tmp_path: Path,
+) -> None:
+    percents: list[int] = []
+
+    assert MKVFile(get_path_test_file).mux(tmp_path / "out.mkv", progress_handler=percents.append) == 0
+    assert percents[-1] == 100  # noqa: PLR2004
+    assert capsys.readouterr().out == ""
+
+
+def test_mux_echo_keeps_progress_on_one_line(
+    capsys: pytest.CaptureFixture[str],
+    get_path_test_file: Path,
+    tmp_path: Path,
+) -> None:
+    assert MKVFile(get_path_test_file).mux(tmp_path / "out.mkv") == 0
+    assert "Progress: 100%\r" in capsys.readouterr().out
+
+
+def test_mux_without_sys_stdout(
+    monkeypatch: pytest.MonkeyPatch,
+    get_path_test_file: Path,
+    tmp_path: Path,
+) -> None:
+    monkeypatch.setattr(sys, "stdout", None)
+
+    assert MKVFile(get_path_test_file).mux(tmp_path / "out.mkv") == 0
 
 
 def test_cleanup_removes_temp_chapters() -> None:
